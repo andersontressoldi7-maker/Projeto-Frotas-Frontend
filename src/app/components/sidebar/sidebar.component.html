@@ -1,0 +1,31 @@
+<div class="sidebar d-flex flex-column p-3 text-white" [class.is-mini]="isCollapsed">
+  <div class="brand d-flex align-items-center justify-content-between mb-4 px-2">
+    <div class="d-flex align-items-center logo-area" *ngIf="!isCollapsed">
+      <i class="bi bi-truck-flatbed me-2 fs-4 text-success"></i>
+      <span class="fs-4 fw-bold">FrotaCheck</span>
+    </div>
+    <button class="btn text-white p-0 toggle-btn mx-auto" (click)="toggleSidebar()">
+      <i class="bi" [class.bi-list]="!isCollapsed" [class.bi-arrow-right-short]="isCollapsed" style="font-size: 1.25rem;"></i>
+    </button>
+  </div>
+  
+  <small class="text-muted px-2 mb-2 text-uppercase fw-bold text-xs" *ngIf="!isCollapsed">Menu</small>
+  
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item mb-1" *ngFor="let item of menuItems">
+      <a [routerLink]="item.route" routerLinkActive="active" class="nav-link text-white d-flex align-items-center" [title]="item.label">
+        <i class="bi {{ item.icon }}" [class.me-3]="!isCollapsed"></i>
+        <span *ngIf="!isCollapsed">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="theme-toggle-container d-flex justify-content-center pt-3 border-top">
+    <button class="btn btn-link text-white p-2 d-flex align-items-center justify-content-center theme-btn w-100" (click)="themeService.toggleTheme()">
+      <i class="bi" [class.bi-sun-fill]="themeService.isDark()" [class.bi-moon-fill]="!themeService.isDark()" style="font-size: 1.15rem;"></i>
+      <span class="ms-2 small fw-medium" *ngIf="!isCollapsed">
+        {{ themeService.isDark() ? 'Modo Claro' : 'Modo Escuro' }}
+      </span>
+    </button>
+  </div>
+</div>

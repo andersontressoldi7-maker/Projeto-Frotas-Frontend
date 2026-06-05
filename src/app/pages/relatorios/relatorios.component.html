@@ -1,0 +1,52 @@
+<app-sidebar></app-sidebar>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      
+      <div class="mb-4">
+        <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
+        <p class="text-muted small mb-0">{{ subtitle }}</p>
+      </div>
+
+      <div class="accordion d-flex flex-column gap-3" id="accordionRelatorios">
+        <div class="accordion-item report-accordion-item border-0 shadow-sm" *ngFor="let cat of categorias">
+          
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed p-4 bg-transparent shadow-none" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#' + cat.id">
+              <div class="d-flex align-items-center gap-3">
+                <div class="icon-box rounded-3 p-2 d-flex align-items-center justify-content-center bg-body-tertiary">
+                  <i class="bi {{ cat.icon }} fs-5"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-0 text-body fs-6">{{ cat.titulo }}</h6>
+                  <span class="text-muted small fw-normal">{{ cat.descricao }}</span>
+                </div>
+              </div>
+            </button>
+          </h2>
+
+          <div [id]="cat.id" class="accordion-collapse collapse" data-bs-parent="#accordionRelatorios">
+            <div class="accordion-body px-4 pb-4 pt-0 border-top mt-2">
+              <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 pt-3">
+                <div class="col" *ngFor="let item of cat.itens">
+                  <div class="card card-report-sub p-3 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                      <h6 class="fw-bold text-body small mb-1">{{ item.nome }}</h6>
+                      <p class="text-muted text-xs mb-3">{{ item.desc }}</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-success border-0 d-flex align-items-center gap-1 mt-auto p-0 small fw-semibold">
+                      <i class="bi bi-file-earmark-bar-graph"></i> Gerar Relatório
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

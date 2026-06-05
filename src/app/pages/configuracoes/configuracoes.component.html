@@ -1,0 +1,62 @@
+<app-sidebar></app-sidebar>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      
+      <div class="mb-4">
+        <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
+        <p class="text-muted small mb-0">{{ subtitle }}</p>
+      </div>
+
+      <div class="accordion d-flex flex-column gap-3" id="accordionConfig">
+        <div class="accordion-item config-accordion-item border-0 shadow-sm" *ngFor="let config of configuracoes">
+          
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed p-4 bg-transparent shadow-none" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#' + config.id">
+              <div class="d-flex align-items-center gap-3">
+                <div class="icon-box rounded-3 p-2 d-flex align-items-center justify-content-center bg-body-tertiary">
+                  <i class="bi {{ config.icon }} fs-5"></i>
+                </div>
+                <h6 class="fw-bold mb-0 text-body fs-6">{{ config.titulo }}</h6>
+              </div>
+            </button>
+          </h2>
+
+          <div [id]="config.id" class="accordion-collapse collapse" data-bs-parent="#accordionConfig">
+            <div class="accordion-body px-4 pb-4 pt-0 border-top mt-2">
+              <div class="row row-cols-1 row-cols-md-2 g-4 pt-4">
+                <div class="col" *ngFor="let campo of config.campos">
+                  
+                  <div *ngIf="campo.tipo === 'text' || campo.tipo === 'number'" class="mb-2">
+                    <label class="form-label small fw-medium text-muted mb-1">{{ campo.label }}</label>
+                    <input [type]="campo.tipo" class="form-control" [placeholder]="campo.placeholder || ''"/>
+                  </div>
+
+                  <div *ngIf="campo.tipo === 'select'" class="mb-2">
+                    <label class="form-label small fw-medium text-muted mb-1">{{ campo.label }}</label>
+                    <select class="form-select">
+                      <option *ngFor="let opt of campo.options" [value]="opt">{{ opt }}</option>
+                    </select>
+                  </div>
+
+                  <div *ngIf="campo.tipo === 'switch'" class="form-check form-switch pt-3 d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input config-switch me-2" [checked]="campo.value || false"/>
+                    <label class="form-check-label small fw-medium text-muted">{{ campo.label }}</label>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-success px-4 fw-medium shadow-sm">Salvar Todas as Configurações</button>
+      </div>
+
+    </div>
+  </main>
+</div>

@@ -11,7 +11,9 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "scss",
+          "displayBlock": true,
+          "type": "component"
         }
       },
       "root": "",
@@ -33,6 +35,9 @@
             "styles": [
               "src/styles.scss"
             ],
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
@@ -49,7 +54,7 @@
                   "type": "initial",
                   "maximumWarning": "500kB",
                   "maximumError": "1MB"
-                },
+                }
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",

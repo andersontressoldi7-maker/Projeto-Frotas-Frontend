@@ -1,0 +1,96 @@
+<app-sidebar></app-sidebar>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      
+      <div class="mb-4">
+        <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
+        <p class="text-muted small mb-0">{{ subtitle }}</p>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4 filter-section">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center p-3" (click)="toggleFilters()" style="cursor: pointer;">
+          <div class="d-flex align-items-center gap-2 fw-semibold text-body">
+            <i class="bi bi-filter-left fs-5 text-success"></i>
+            <span>Filtros</span>
+            <span *ngIf="activeFilters.length > 0" class="badge bg-success-subtle text-success rounded-pill font-monospace">{{ activeFilters.length }}</span>
+          </div>
+          <i class="bi text-muted" [class.bi-chevron-down]="!isFilterExpanded" [class.bi-chevron-up]="isFilterExpanded"></i>
+        </div>
+
+        <div class="card-body pt-0 px-3 pb-3" *ngIf="isFilterExpanded">
+          <div class="d-flex align-items-center gap-2 mb-3 flex-wrap border-top pt-3">
+            <span class="small text-muted fw-medium">Filtrar por:</span>
+            <div class="dropdown" *ngIf="getAvailableFilters().length > 0">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-plus"></i> Adicionar campo
+              </button>
+              <ul class="dropdown-menu shadow-sm">
+                <li *ngFor="let opt of getAvailableFilters()">
+                  <a class="dropdown-item small" (click)="addFilter(opt)">{{ opt.label }}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="row g-3 align-items-end" *ngIf="activeFilters.length > 0">
+            <div class="col-12 col-md-4 col-lg-3" *ngFor="let filter of activeFilters; let i = index">
+              <div class="filter-field-box p-2 rounded position-relative">
+                <label class="form-label small text-muted mb-1 d-flex justify-content-between align-items-center">
+                  <span>{{ filter.label }}</span>
+                  <button type="button" class="btn-close small-close" (click)="removeFilter(i, filter.key)"></button>
+                </label>
+                <input *ngIf="filter.type === 'text'" type="text" class="form-control form-control-sm" [(ngModel)]="filterModel[filter.key]"/>
+                <select *ngIf="filter.type === 'select'" class="form-select form-select-sm" [(ngModel)]="filterModel[filter.key]">
+                  <option value="">Todos</option>
+                  <option *ngFor="let opt of filter.options" [value]="opt">{{ opt }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mb-4 nav-tabs-custom p-1 rounded bg-body-tertiary">
+        <button class="btn btn-tab small px-3 py-2" [class.active]="activeTab === 'pendentes'" (click)="activeTab = 'pendentes'">
+          Pendentes (2)
+        </button>
+        <button class="btn btn-tab small px-3 py-2" [class.active]="activeTab === 'criticos'" (click)="activeTab = 'criticos'">
+          Críticos (2)
+        </button>
+        <button class="btn btn-tab small px-3 py-2" [class.active]="activeTab === 'datas'" (click)="activeTab = 'datas'">
+          Datas próximas (0)
+        </button>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        <div class="card alert-item-card border-0 shadow-sm p-3" *ngFor="let item of getFilteredAlertas()">
+          <div class="d-flex align-items-start gap-3">
+            <div class="alert-icon-wrapper rounded-3 p-2.5 d-flex align-items-center justify-content-center {{ item.iconColor }}">
+              <i class="bi {{ item.icon }} fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h6 class="fw-bold mb-1 text-body fs-6">{{ item.titulo }}</h6>
+                  <p class="text-muted small mb-2">{{ item.detalhe }}</p>
+                </div>
+                <span class="badge bg-danger-subtle text-danger rounded-pill px-3 fw-normal small">{{ item.tag }}</span>
+              </div>
+              <div class="d-flex align-items-center text-muted small mt-1 font-monospace">
+                <i class="bi bi-calendar3 me-1.5"></i>
+                <span>{{ item.data }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="getFilteredAlertas().length === 0" class="text-center py-5 text-muted small">
+          Nenhum alerta nesta categoria.
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

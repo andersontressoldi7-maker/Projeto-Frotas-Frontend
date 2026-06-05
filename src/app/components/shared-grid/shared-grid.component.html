@@ -1,0 +1,120 @@
+<div class="container-fluid p-4">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
+      <p class="text-muted small mb-0">{{ subtitle }}</p>
+    </div>
+    <button *ngIf="primaryBtnLabel" class="btn btn-success d-flex align-items-center gap-2 px-3 fw-medium" (click)="primaryBtnClick.emit()">
+      <i class="bi bi-plus-lg"></i>
+      {{ primaryBtnLabel }}
+    </button>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4 filter-section">
+    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center p-3" (click)="toggleFilters()" style="cursor: pointer;">
+      <div class="d-flex align-items-center gap-2 fw-semibold text-body">
+        <i class="bi bi-filter-left fs-5 text-success"></i>
+        <span>Filtros</span>
+        <span *ngIf="activeFilters.length > 0" class="badge bg-success-subtle text-success rounded-pill font-monospace">{{ activeFilters.length }}</span>
+      </div>
+      <i class="bi text-muted" [class.bi-chevron-down]="!isFilterExpanded" [class.bi-chevron-up]="isFilterExpanded"></i>
+    </div>
+
+    <div class="card-body pt-0 px-3 pb-3" *ngIf="isFilterExpanded">
+      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap border-top pt-3">
+        <span class="small text-muted fw-medium">Filtrar por:</span>
+        <div class="dropdown" *ngIf="getAvailableFilters().length > 0">
+          <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1" type="button" id="addFilterDrop" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-plus"></i> Adicionar campo
+          </button>
+          <ul class="dropdown-menu shadow-sm" aria-labelledby="addFilterDrop">
+            <li *ngFor="let opt of getAvailableFilters()">
+              <a class="dropdown-menu-item dropdown-item small" (click)="addFilter(opt)">{{ opt.label }}</a>
+            </li>
+          </ul>
+        </div>
+        <button *ngIf="activeFilters.length > 0" class="btn btn-sm btn-link text-danger text-decoration-none ms-auto p-0 small" (click)="clearAllFilters()">
+          Limpar tudo
+        </button>
+      </div>
+
+      <div class="row g-3 align-items-end" *ngIf="activeFilters.length > 0">
+        <div class="col-12 col-md-4 col-lg-3" *ngFor="let filter of activeFilters; let i = index">
+          <div class="filter-field-box p-2 rounded position-relative">
+            <label class="form-label small text-muted mb-1 d-flex justify-content-between align-items-center">
+              <span>{{ filter.option.label }}</span>
+              <button type="button" class="btn-close ms-auto small-close" (click)="removeFilter(i, filter.option.key)"></button>
+            </label>
+
+            <ng-container [ngSwitch]="filter.option.type">
+              <input *ngSwitchCase="'text'" type="text" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()"/>
+              <input *ngSwitchCase="'number'" type="number" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()"/>
+              <input *ngSwitchCase="'date'" type="date" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()"/>
+              
+              <select *ngSwitchCase="'select'" class="form-select form-select-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()">
+                <option value="">Todos</option>
+                <option *ngFor="let opt of filter.option.options" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <div *ngSwitchCase="'multi-select'" class="dropdown w-100">
+                <button class="btn btn-sm btn-light w-100 text-start border d-flex justify-content-between align-items-center" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                  <span class="text-truncate small">
+                    {{ currentFiltersModel[filter.option.key]?.length ? currentFiltersModel[filter.option.key].join(', ') : 'Selecionar' }}
+                  </span>
+                  <i class="bi bi-chevron-down text-muted text-xs"></i>
+                </button>
+                <ul class="dropdown-menu p-2 shadow-sm w-100" style="max-height: 200px; overflow-y: auto;">
+                  <li *ngFor="let opt of filter.option.options" class="form-check mb-1">
+                    <input type="checkbox" class="form-check-input ms-0 me-2" [id]="filter.option.key + '-' + opt" [checked]="isMultiSelectChecked(filter.option.key, opt)" (change)="toggleMultiSelectValue(filter.option.key, opt)"/>
+                    <label class="form-check-label small text-body" [for]="filter.option.key + '-' + opt">{{ opt }}</label>
+                  </li>
+                </ul>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th *ngFor="let col of columns" class="text-muted small fw-semibold py-3 px-4" [class.text-end]="col.key === 'acoes'">
+              {{ col.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of data">
+            <td *ngFor="let col of columns" class="px-4 py-3 text-body fs-6" [class.text-end]="col.key === 'acoes'">
+              <ng-container [ngSwitch]="col.type || col.key">
+                <span *ngSwitchCase="'badge'" class="badge bg-danger-subtle text-danger rounded-pill px-3 fw-normal">
+                  {{ row[col.key] }}
+                </span>
+                <div *ngSwitchCase="'acoes'" class="d-flex justify-content-end gap-2">
+                  <button class="btn btn-link text-secondary p-1 hover-success" type="button" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-link text-danger p-1 hover-danger-dark" type="button" title="Excluir">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+                <span *ngSwitchDefault>{{ row[col.key] }}</span>
+              </ng-container>
+            </td>
+          </tr>
+          <tr *ngIf="data.length === 0">
+            <td [attr.colspan]="columns.length" class="text-center py-5 text-muted small">
+              {{ emptyMessage }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

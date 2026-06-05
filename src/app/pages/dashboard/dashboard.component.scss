@@ -1,0 +1,78 @@
+.dashboard-wrapper {
+  padding-left: 260px;
+  background-color: var(--bs-body-bg);
+  min-height: 100vh;
+  transition: padding-left 0.25s ease-in-out;
+
+  &.collapsed {
+    padding-left: 70px;
+  }
+
+  .header-dashboard {
+    left: 260px;
+    height: 60px;
+    z-index: 1030;
+    background-color: var(--bs-card-bg) !important;
+    border-color: var(--bs-border-color) !important;
+    transition: left 0.25s ease-in-out;
+
+    &.collapsed {
+      left: 70px;
+    }
+  }
+
+  .content-layout {
+    margin-top: 60px;
+  }
+
+  .search-bar {
+    max-width: 400px;
+    input, span {
+      border: 1px solid var(--bs-border-color);
+      background-color: var(--bs-tertiary-bg) !important;
+      color: var(--bs-body-color);
+    }
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+  }
+
+  .card {
+    border-radius: 12px;
+    background-color: var(--bs-card-bg);
+    border: 1px solid var(--bs-border-color) !important;
+  }
+
+  .icon-shape {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bg-success-subtle { background-color: rgba(0, 207, 128, 0.15) !important; }
+  .text-success { color: #00cf80 !important; }
+
+  .bg-warning-subtle { background-color: rgba(255, 176, 32, 0.15) !important; }
+  .text-warning { color: #ffb020 !important; }
+
+  .bg-info-subtle { background-color: rgba(33, 150, 243, 0.15) !important; }
+  .text-info { color: #2196f3 !important; }
+
+  .bg-danger-subtle { background-color: rgba(244, 67, 54, 0.15) !important; }
+  .text-danger { color: #f44336 !important; }
+
+  .bg-secondary-subtle { background-color: var(--bs-secondary-bg) !important; }
+  .text-secondary { color: var(--bs-secondary-color) !important; }
+
+  .bg-danger-light-subtle { background-color: rgba(255, 92, 92, 0.15) !important; }
+  .text-danger-light { color: #ff5c5c !important; }
+
+  .bg-primary-subtle { background-color: rgba(79, 70, 229, 0.15) !important; }
+  .text-primary { color: #4f46e5 !important; }
+}

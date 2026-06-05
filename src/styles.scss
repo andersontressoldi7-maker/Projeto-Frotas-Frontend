@@ -1,1 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
+@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+
+body {
+  margin: 0;
+  font-family: var(--bs-body-font-family);
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+.dashboard-wrapper {
+  padding-left: 260px;
+  min-height: 100vh;
+  transition: padding-left 0.25s ease-in-out;
+
+  &.collapsed {
+    padding-left: 70px;
+  }
+
+  .content-layout {
+    padding-top: 20px;
+  }
+}
+
+.header-dashboard {
+  left: 260px;
+  height: 60px;
+  z-index: 1030;
+  background-color: var(--bs-card-bg) !important;
+  border-color: var(--bs-border-color) !important;
+  transition: left 0.25s ease-in-out;
+
+  &.collapsed {
+    left: 70px;
+  }
+}

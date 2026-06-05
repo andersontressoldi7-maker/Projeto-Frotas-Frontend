@@ -1,0 +1,107 @@
+<app-sidebar></app-sidebar>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      
+      <div class="mb-4">
+        <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
+        <p class="text-muted small mb-0">{{ subtitle }}</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-lg-4">
+          <div class="card border-0 shadow-sm p-4 h-100">
+            <h5 class="fw-bold card-title mb-3 fs-6">Usuários do Sistema</h5>
+            
+            <div class="list-group list-group-flush user-list">
+              <button 
+                *ngFor="let user of usuarios" 
+                type="button"
+                class="list-group-item list-group-item-action border-0 rounded-3 mb-2 p-3 d-flex align-items-center justify-content-between"
+                [class.active-user]="usuarioSelecionado?.id === user.id"
+                (click)="selecionarUsuario(user)">
+                <div>
+                  <h6 class="fw-bold mb-0 text-truncate fs-6">{{ user.nome }}</h6>
+                  <span class="text-muted small">{{ user.email }}</span>
+                </div>
+                <span class="badge rounded-pill fw-normal px-2.5 py-1"
+                      [class.bg-success-subtle]="user.perfil === 'Admin'" 
+                      [class.text-success]="user.perfil === 'Admin'"
+                      [class.bg-secondary-subtle]="user.perfil === 'Customizado'"
+                      [class.text-secondary]="user.perfil === 'Customizado'">
+                  {{ user.perfil }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+          <div class="card border-0 shadow-sm p-4 h-100 d-flex flex-column justify-content-between">
+            
+            <div *ngIf="!usuarioSelecionado" class="d-flex flex-column align-items-center justify-content-center h-100 py-5 text-muted">
+              <i class="bi bi-shield-lock fs-1 mb-2 text-secondary"></i>
+              <p class="small mb-0">Selecione um usuário para configurar os privilégios de acesso.</p>
+            </div>
+
+            <div *ngIf="usuarioSelecionado" class="h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4 flex-wrap gap-2">
+                  <div>
+                    <h5 class="fw-bold mb-0 text-body fs-6">Acessos de: {{ usuarioSelecionado.nome }}</h5>
+                    <span class="text-muted small">{{ usuarioSelecionado.email }}</span>
+                  </div>
+                  
+                  <div class="btn-group rounded-3 p-1 bg-body-tertiary border">
+                    <button type="button" class="btn btn-sm btn-profile px-3" [class.active]="usuarioSelecionado.perfil === 'Admin'" (click)="alterarPerfil('Admin')">Admin</button>
+                    <button type="button" class="btn btn-sm btn-profile px-3" [class.active]="usuarioSelecionado.perfil === 'Customizado'" (click)="alterarPerfil('Customizado')">Customizado</button>
+                  </div>
+                </div>
+
+                <div *ngIf="usuarioSelecionado.perfil === 'Admin'" class="alert alert-success d-flex align-items-center gap-2 border-0 rounded-3 mb-4">
+                  <i class="bi bi-check-circle-fill"></i>
+                  <span class="small">Perfil Administrador possui acesso total irrestrito para ver, editar e excluir em todos os módulos.</span>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table align-middle">
+                    <thead>
+                      <tr>
+                        <th class="text-muted small fw-semibold py-2 px-0">Módulo / Tela</th>
+                        <th class="text-muted small fw-semibold py-2 text-center" style="width: 100px;">Ver</th>
+                        <th class="text-muted small fw-semibold py-2 text-center" style="width: 100px;">Editar</th>
+                        <th class="text-muted small fw-semibold py-2 text-center" style="width: 100px;">Excluir</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let tela of telasPermissoes">
+                        <td class="fw-medium text-body px-0 py-3">{{ tela.modulo }}</td>
+                        <td class="text-center py-3">
+                          <input type="checkbox" class="form-check-input acl-checkbox" [(ngModel)]="tela.ver" [disabled]="usuarioSelecionado.perfil === 'Admin'"/>
+                        </td>
+                        <td class="text-center py-3">
+                          <input type="checkbox" class="form-check-input acl-checkbox" [(ngModel)]="tela.editar" [disabled]="usuarioSelecionado.perfil === 'Admin'"/>
+                        </td>
+                        <td class="text-center py-3">
+                          <input type="checkbox" class="form-check-input acl-checkbox" [(ngModel)]="tela.excluir" [disabled]="usuarioSelecionado.perfil === 'Admin'"/>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                <button type="button" class="btn btn-light px-4 small fw-medium" (click)="usuarioSelecionado = null">Cancelar</button>
+                <button type="button" class="btn btn-success px-4 small fw-medium" (click)="salvarPermissoes()">Salvar Alterações</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

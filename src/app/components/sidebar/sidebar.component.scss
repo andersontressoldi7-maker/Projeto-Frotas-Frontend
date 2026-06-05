@@ -1,0 +1,63 @@
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #0b1a24;
+  font-size: 0.9rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1040;
+  transition: width 0.25s ease-in-out;
+
+  &.is-mini {
+    width: 70px;
+    padding: 15px 8px !important;
+
+    .nav-link {
+      justify-content: center;
+      padding: 10px 0;
+      border-radius: 6px;
+      
+      &.active {
+        border-left: none;
+        background-color: #00cf80 !important;
+        color: #0b1a24 !important;
+      }
+    }
+  }
+
+  .text-xs {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-link {
+    color: #a3b1cc;
+    border-radius: 6px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    &.active {
+      background-color: #162a3d;
+      color: #fff;
+      font-weight: 600;
+      border-left: 4px solid #00cf80;
+      border-radius: 0 6px 6px 0;
+    }
+  }
+
+  .theme-btn {
+    text-decoration: none;
+    color: #a3b1cc;
+    &:hover {
+      color: #fff;
+    }
+  }
+}
