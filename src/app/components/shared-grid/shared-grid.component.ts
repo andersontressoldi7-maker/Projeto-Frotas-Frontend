@@ -20,6 +20,8 @@ export class SharedGridComponent implements OnInit {
 
   @Output() primaryBtnClick = new EventEmitter<void>();
   @Output() filterApplied = new EventEmitter<any>();
+  @Output() editClick = new EventEmitter<any>();
+  @Output() deleteClick = new EventEmitter<any>();
 
   filterOptions: GridFilterOption[] = [];
   activeFilters: { option: GridFilterOption }[] = [];

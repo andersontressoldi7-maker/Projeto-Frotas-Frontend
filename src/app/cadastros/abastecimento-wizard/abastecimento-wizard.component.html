@@ -1,0 +1,271 @@
+<app-sidebar></app-sidebar>
+<app-toasts></app-toasts>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <div class="wizard-header mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
+          <div>
+            <h2 class="h4 fw-bold mb-1">{{ modoEdicao ? 'Editar Abastecimento' : 'Novo Abastecimento de Veículo' }}</h2>
+            <p class="text-muted small mb-0">Passo {{ passoAtual }} de {{ totalPassos }}</p>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" (click)="cancelar()">
+            <i class="bi bi-x-lg"></i> Cancelar
+          </button>
+        </div>
+
+        <div class="progress-bar-wizard">
+          <div class="progress-item" [class.ativo]="passoAtual >= 1" [class.completo]="passoAtual > 1" (click)="irParaPasso(1)">
+            <div class="progress-circle">
+              <span *ngIf="passoAtual <= 1">1</span>
+              <i *ngIf="passoAtual > 1" class="bi bi-check"></i>
+            </div>
+            <span class="progress-label">Veículo e Motorista</span>
+          </div>
+
+          <div class="progress-connector" [class.ativo]="passoAtual > 1"></div>
+
+          <div class="progress-item" [class.ativo]="passoAtual >= 2" [class.completo]="passoAtual > 2" (click)="irParaPasso(2)">
+            <div class="progress-circle">
+              <span *ngIf="passoAtual <= 2">2</span>
+              <i *ngIf="passoAtual > 2" class="bi bi-check"></i>
+            </div>
+            <span class="progress-label">Combustível</span>
+          </div>
+
+          <div class="progress-connector" [class.ativo]="passoAtual > 2"></div>
+
+          <div class="progress-item" [class.ativo]="passoAtual >= 3">
+            <div class="progress-circle">3</div>
+            <span class="progress-label">Complementares</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wizard-content">
+        <div *ngIf="passoAtual === 1" class="passo-container">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-4">Dados do Abastecimento</h5>
+
+              <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                  <label class="form-label required d-flex justify-content-between align-items-center">
+                    <span>Veículo</span>
+                    <span class="atalhos-cadastro">
+                      <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'novo', $event)">
+                        <i class="bi bi-plus-circle"></i> Novo (F9)
+                      </button>
+                      <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'editar', $event)">
+                        <i class="bi bi-pencil"></i> Editar (F8)
+                      </button>
+                    </span>
+                  </label>
+                  <select
+                    class="form-control"
+                    [(ngModel)]="formulario.veiculo"
+                    (keydown.F9)="irParaCadastro('veiculo', 'novo', $event)"
+                    (keydown.F8)="irParaCadastro('veiculo', 'editar', $event)"
+                    required>
+                    <option value="">Selecione um veículo</option>
+                    <option *ngFor="let v of veiculos" [value]="v.id">
+                      {{ v.placa }} - {{ v.modelo }}
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 form-group mb-3">
+                  <label class="form-label">Nro Frota</label>
+                  <div class="form-control bg-light" style="cursor: not-allowed;">
+                    {{ veiculoSelecionado?.nroFrota || '-' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label class="form-label required d-flex justify-content-between align-items-center">
+                  <span>Motorista</span>
+                  <span class="atalhos-cadastro">
+                    <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('motorista', 'novo', $event)">
+                      <i class="bi bi-plus-circle"></i> Novo (F9)
+                    </button>
+                    <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('motorista', 'editar', $event)">
+                      <i class="bi bi-pencil"></i> Editar (F8)
+                    </button>
+                  </span>
+                </label>
+                <select
+                  class="form-control"
+                  [(ngModel)]="formulario.motorista"
+                  (keydown.F9)="irParaCadastro('motorista', 'novo', $event)"
+                  (keydown.F8)="irParaCadastro('motorista', 'editar', $event)"
+                  required>
+                  <option value="">Selecione um motorista</option>
+                  <option *ngFor="let m of motoristas" [value]="m.id">
+                    {{ m.nome }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 form-group mb-3">
+                  <label class="form-label required">Data do Abastecimento</label>
+                  <input type="date" class="form-control" [(ngModel)]="formulario.dataAbastecimento" required>
+                </div>
+
+                <div class="col-md-4 form-group mb-3">
+                  <label class="form-label required">Tipo de Abastecimento</label>
+                  <select class="form-control" [(ngModel)]="formulario.tipoAbastecimento" required>
+                    <option value="">Selecione</option>
+                    <option *ngFor="let tipo of tiposAbastecimento" [value]="tipo">{{ tipo }}</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 form-group mb-0">
+                  <label class="form-label required">KM</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="formulario.km"
+                    placeholder="Quilometragem atual"
+                    required>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions mt-4">
+            <button class="btn btn-light border" disabled>
+              <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button
+              class="btn btn-success"
+              (click)="proximoPasso()"
+              [disabled]="!validarPasso()">
+              Próximo <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="passoAtual === 2" class="passo-container">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-4">Combustível</h5>
+
+              <div class="form-group mb-3">
+                <label class="form-label required">Combustível</label>
+                <select class="form-control" [(ngModel)]="formulario.combustivel" required>
+                  <option value="">Selecione</option>
+                  <option *ngFor="let c of combustiveis" [value]="c">{{ c }}</option>
+                </select>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 form-group mb-3">
+                  <label class="form-label required">Valor do Litro (R$)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    [(ngModel)]="formulario.valorLitro"
+                    placeholder="0,00"
+                    required>
+                </div>
+
+                <div class="col-md-4 form-group mb-3">
+                  <label class="form-label required">Qt. Litros</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    [(ngModel)]="formulario.qtLitros"
+                    placeholder="0,00"
+                    required>
+                </div>
+
+                <div class="col-md-4 form-group mb-0">
+                  <label class="form-label">Total (R$)</label>
+                  <div class="form-control bg-light fw-semibold" style="cursor: not-allowed;">
+                    {{ valorTotalCombustivel | number: '1.2-2' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions mt-4">
+            <button class="btn btn-light border" (click)="passoAnterior()">
+              <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button
+              class="btn btn-success"
+              (click)="proximoPasso()"
+              [disabled]="!validarPasso()">
+              Próximo <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="passoAtual === 3" class="passo-container">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-4">Dados Complementares</h5>
+
+              <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                  <label class="form-label">Nota Fiscal</label>
+                  <input type="text" class="form-control" [(ngModel)]="formulario.notaFiscal" placeholder="Número da nota fiscal">
+                </div>
+
+                <div class="col-md-6 form-group mb-3">
+                  <label class="form-label">Fornecedor</label>
+                  <input type="text" class="form-control" [(ngModel)]="formulario.fornecedor" placeholder="Nome do posto/fornecedor">
+                </div>
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="form-label">Observação</label>
+                <textarea
+                  class="form-control"
+                  [(ngModel)]="formulario.observacao"
+                  rows="3"
+                  placeholder="Observações adicionais..."></textarea>
+              </div>
+
+              <div class="resumo-box">
+                <h6 class="mb-3">Resumo do Abastecimento</h6>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <small class="text-muted d-block">Veículo</small>
+                    <strong>{{ veiculoSelecionado?.placa || '-' }} ({{ veiculoSelecionado?.nroFrota || '-' }})</strong>
+                  </div>
+                  <div class="col-md-4">
+                    <small class="text-muted d-block">Combustível</small>
+                    <strong>{{ formulario.combustivel || '-' }}</strong>
+                  </div>
+                  <div class="col-md-4">
+                    <small class="text-muted d-block">Valor Total</small>
+                    <strong>R$ {{ valorTotalCombustivel | number: '1.2-2' }}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions mt-4">
+            <button class="btn btn-light border" (click)="passoAnterior()">
+              <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <button
+              class="btn btn-success"
+              (click)="finalizar()"
+              [disabled]="!validarPasso()">
+              <i class="bi bi-check-lg"></i> {{ modoEdicao ? 'Salvar Alterações' : 'Finalizar Abastecimento' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

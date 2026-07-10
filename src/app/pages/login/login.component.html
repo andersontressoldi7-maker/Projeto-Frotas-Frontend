@@ -1,87 +1,52 @@
-<div class="login-universe">
-  <div class="page-container d-flex align-items-center justify-content-center position-relative w-100 vh-100 overflow-hidden" (mousemove)="onMouseMove($event)">
-    <div class="orbs">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-    </div>
+<div class="login-page d-flex align-items-center justify-content-center">
+  <button class="btn theme-toggle-btn rounded-circle d-flex align-items-center justify-content-center" (click)="themeService.toggleTheme()">
+    <i class="bi" [class.bi-sun-fill]="themeService.isDark()" [class.bi-moon-fill]="!themeService.isDark()"></i>
+  </button>
 
-    <div class="position-absolute top-0 end-0 m-4 z-3">
-      <button class="btn theme-toggle-btn rounded-circle d-flex align-items-center justify-content-center" (click)="themeService.toggleTheme()">
-        <i class="bi" [class.bi-sun-fill]="themeService.isDark()" [class.bi-moon-fill]="!themeService.isDark()"></i>
-      </button>
-    </div>
-
-    <div class="login-card position-relative z-2">
+  <div class="card border-0 shadow-sm login-card">
+    <div class="card-body p-4 p-md-5">
       <div class="brand d-flex align-items-center mb-4">
         <div class="brand-icon me-2">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="44" height="44" rx="11" fill="#40916C"/>
-            <rect x="7" y="15" width="18" height="13" rx="2" fill="white"/>
-            <path d="M25 18.5h6.2l3.8 5V28H25V18.5z" fill="white"/>
-            <rect x="26.5" y="20" width="4" height="3" rx="0.8" fill="#40916C" opacity="0.4"/>
-            <rect x="33" y="24" width="2" height="2.5" rx="0.5" fill="#FFD166"/>
-            <rect x="7" y="26" width="28" height="2" rx="0" fill="white" opacity="0.15"/>
-            <circle cx="13" cy="29.5" r="3" fill="#1B4332"/>
-            <circle cx="13" cy="29.5" r="1.5" fill="white"/>
-            <circle cx="31" cy="29.5" r="3" fill="#1B4332"/>
-            <circle cx="31" cy="29.5" r="1.5" fill="white"/>
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="14" fill="#40916c"/>
+            <path d="M24 10C18.477 10 14 14.477 14 20C14 27.5 24 38 24 38C24 38 34 27.5 34 20C34 14.477 29.523 10 24 10Z" fill="#ffffff" fill-opacity="0.15"/>
+            <path d="M19 20.5L22.5 24L29 17" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
         <span class="brand-name">FrotaCheck</span>
       </div>
 
-      <h1 class="title">Acessar sua conta</h1>
-      <p class="subtitle">Entre com seu email e senha.</p>
+      <h2 class="h4 fw-bold mb-1">Acessar sua conta</h2>
+      <p class="text-muted small mb-4">Entre com seu email e senha.</p>
 
       <form (ngSubmit)="onLogin()">
         <div class="form-group mb-3">
-          <label for="email">Email</label>
-          <div class="input-wrapper">
-            <input id="email" type="email" name="email" [(ngModel)]="email" placeholder=" " autocomplete="email" required/>
-            <span class="focus-bar"></span>
-          </div>
+          <label class="form-label" for="email">Email</label>
+          <input id="email" type="email" name="email" class="form-control" [(ngModel)]="email" placeholder="voce@empresa.com" autocomplete="email" required>
         </div>
 
         <div class="form-group mb-3">
-          <div class="label-row d-flex justify-content-between align-items-center mb-1">
-            <label for="password" class="mb-0">Senha</label>
-            <a href="#" class="forgot text-decoration-none">Esqueceu a senha?</a>
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label mb-0" for="password">Senha</label>
+            <a href="#" class="small forgot text-decoration-none">Esqueceu a senha?</a>
           </div>
-          <div class="input-wrapper">
-            <input id="password" [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="password" placeholder=" " autocomplete="current-password" required/>
-            <span class="focus-bar"></span>
-            <button class="eye-btn px-2" type="button" (click)="togglePassword()">
-              <svg *ngIf="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg *ngIf="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
+          <div class="input-group">
+            <input id="password" [type]="showPassword ? 'text' : 'password'" name="password" class="form-control" [(ngModel)]="password" placeholder="••••••••" autocomplete="current-password" required>
+            <button class="btn btn-outline-secondary" type="button" (click)="togglePassword()">
+              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
             </button>
           </div>
         </div>
 
-        <div class="remember-row mb-4">
-          <label class="checkbox-label d-flex align-items-center user-select-none">
-            <input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe"/>
-            <span class="custom-check me-2">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2">
-                <polyline points="2,6 5,9 10,3"/>
-              </svg>
-            </span>
-            Lembrar de mim
-          </label>
+        <div class="form-check mb-4">
+          <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" [(ngModel)]="rememberMe">
+          <label class="form-check-label small" for="rememberMe">Lembrar de mim</label>
         </div>
 
-        <button type="submit" class="btn-login w-100 d-flex align-items-center justify-content-center" [class.loading]="isLoading" [disabled]="isLoading">
+        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" [disabled]="isLoading">
           <span *ngIf="!isLoading">Entrar</span>
-          <svg *ngIf="isLoading" class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-          </svg>
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status"></span>
+          <span *ngIf="isLoading">Entrando...</span>
         </button>
 
         <p class="register text-center small mb-0 mt-3">Não tem conta? <a routerLink="/register" class="text-decoration-none">Criar conta</a></p>

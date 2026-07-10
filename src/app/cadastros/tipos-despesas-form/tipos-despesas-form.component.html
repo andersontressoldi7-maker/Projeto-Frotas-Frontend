@@ -1,0 +1,37 @@
+<app-sidebar></app-sidebar>
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <div class="form-header mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h2 class="h4 fw-bold mb-1">{{ modoEdicao ? 'Editar' : 'Novo' }} tipo de despesa</h2>
+            <p class="text-muted small mb-0">Cadastro simples para organizar as despesas da viagem</p>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" (click)="onCancelar()">
+            <i class="bi bi-x-lg"></i> Cancelar
+          </button>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label class="form-label required">Nome da despesa</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="nome"
+              placeholder="Ex.: Alimentação"
+              required>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-light" (click)="onCancelar()">Cancelar</button>
+            <button type="button" class="btn btn-success" (click)="onSalvar()">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

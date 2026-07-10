@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { GridColumn } from '../../interfaces/grid.interface';
@@ -10,7 +11,8 @@ import { GridColumn } from '../../interfaces/grid.interface';
   imports: [CommonModule, SharedGridComponent, SidebarComponent],
   templateUrl: './viagens.component.html'
 })
-export class ViagensComponent {
+export class ViagensComponent implements OnInit {
+  constructor(private router: Router, private route: ActivatedRoute) {}
   title = 'Viagens';
   subtitle = 'Controle de viagens simplificadas';
   primaryBtnLabel = 'Novo';
@@ -23,10 +25,28 @@ export class ViagensComponent {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  data: any[] = [
-    { origem: 'SP', destino: 'JC', saida: '21/05/2026', status: 'Em andamento' }
+  allData: any[] = [
+    { origem: 'SP', destino: 'JC', saida: '21/05/2026', status: 'Em andamento' },
+    { origem: 'RS', destino: 'PR', saida: '22/05/2026', status: 'Concluída' }
   ];
 
-  onPrimaryAction(): void {}
+  data: any[] = [];
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const status = params['status'];
+      if (status) {
+        this.data = this.allData.filter(item => item.status.toLowerCase() === String(status).toLowerCase());
+        this.subtitle = `Filtrando por: ${status}`;
+      } else {
+        this.data = [...this.allData];
+        this.subtitle = 'Controle de viagens simplificadas';
+      }
+    });
+  }
+
+  onPrimaryAction(): void {
+    this.router.navigate(['/viagens/novo']);
+  }
   onFilterApplied(filters: any): void {}
 }

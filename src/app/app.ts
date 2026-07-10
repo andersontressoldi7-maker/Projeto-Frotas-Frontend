@@ -9,4 +9,10 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   protected readonly title = signal('Projeto-Frotas-Frontend');
+  toggleMobileSidebar(): void {
+    try {
+      const ev = new CustomEvent('toggle-mobile-sidebar');
+      document.dispatchEvent(ev);
+    } catch {}
+  }
 }

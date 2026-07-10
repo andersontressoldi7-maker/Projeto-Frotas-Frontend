@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -29,6 +30,8 @@ export class TiposManutencaoComponent {
     { nome: 'troca oleo', descricao: 'data da troca chegando!' }
   ];
 
-  onPrimaryAction(): void {}
+  constructor(private router: Router) {}
+
+  onPrimaryAction(): void { this.router.navigate(['/tipos-manutencao/novo']); }
   onFilterApplied(filters: any): void {}
 }

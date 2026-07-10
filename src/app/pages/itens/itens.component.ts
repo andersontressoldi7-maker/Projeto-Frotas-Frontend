@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -37,6 +38,8 @@ export class ItensComponent {
     { nome: 'item 1', categoria: 'pneu', tipo: 'Bom / Regular / Ruim', geraManutencao: 'Sim', ativo: 'Sim' }
   ];
 
-  onPrimaryAction(): void {}
+  constructor(private router: Router) {}
+
+  onPrimaryAction(): void { this.router.navigate(['/itens/novo']); }
   onFilterApplied(filters: any): void {}
 }

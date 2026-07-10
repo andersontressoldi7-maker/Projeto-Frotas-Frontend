@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -12,7 +13,7 @@ import { GridColumn } from '../../interfaces/grid.interface';
 })
 export class MotoristasComponent {
   title = 'Motoristas';
-  subtitle = 'Cadastro e controle de CNH';
+  subtitle = 'Cadastro e controle de documentos';
   primaryBtnLabel = 'Novo';
 
   columns: GridColumn[] = [
@@ -28,6 +29,8 @@ export class MotoristasComponent {
     { nome: 'fred', cnh: '000000000', validade: '20/05/2026', telefone: '61999647075', status: 'Ativo' }
   ];
 
-  onPrimaryAction(): void {}
+  constructor(private router: Router) {}
+
+  onPrimaryAction(): void { this.router.navigate(['/motoristas/novo']); }
   onFilterApplied(filters: any): void {}
 }

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -25,6 +26,8 @@ export class ModelosComponent {
     { nome: 'Checklist Diário', ativo: 'Sim' }
   ];
 
-  onPrimaryAction(): void {}
+  constructor(private router: Router) {}
+
+  onPrimaryAction(): void { this.router.navigate(['/modelos/novo']); }
   onFilterApplied(filters: any): void {}
 }

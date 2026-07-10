@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ChecklistsComponent } from './pages/checklists/checklists.component';
+import { ChecklistWizardComponent } from './cadastros/checklist-wizard/checklist-wizard.component';
 import { ModelosComponent } from './pages/modelos/modelos.component';
 import { ItensComponent } from './pages/itens/itens.component';
 import { VeiculosComponent } from './pages/veiculos/veiculos.component';
@@ -9,27 +10,66 @@ import { TiposVeiculosComponent } from './pages/tipos-veiculos/tipos-veiculos.co
 import { MotoristasComponent } from './pages/motoristas/motoristas.component';
 import { EmpresasComponent } from './pages/empresas/empresas.component';
 import { ViagensComponent } from './pages/viagens/viagens.component';
+import { ViagensFormComponent } from './cadastros/viagens-form/viagens-form.component';
 import { ManutencoesComponent } from './pages/manutencoes/manutencoes.component';
+import { ManutencoesFormComponent } from './cadastros/manutencoes-form/manutencoes-form.component';
+import { ModelosFormComponent } from './cadastros/modelos-form/modelos-form.component';
+import { VeiculosFormComponent } from './cadastros/veiculos-form/veiculos-form.component';
+import { MotoristasFormComponent } from './cadastros/motoristas-form/motoristas-form.component';
+import { EmpresasFormComponent } from './cadastros/empresas-form/empresas-form.component';
+import { TiposVeiculosFormComponent } from './cadastros/tipos-veiculos-form/tipos-veiculos-form.component';
+import { TiposManutencaoFormComponent } from './cadastros/tipos-manutencao-form/tipos-manutencao-form.component';
+import { ItensFormComponent } from './cadastros/itens-form/itens-form.component';
 import { TiposManutencaoComponent } from './pages/tipos-manutencao/tipos-manutencao.component';
 import { AlertasComponent } from './pages/alertas/alertas.component';
 import { PermissoesComponent } from './pages/permissoes/permissoes.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { ConfiguracoesComponent } from './pages/configuracoes/configuracoes.component';
+import { TiposDespesasComponent } from './pages/tipos-despesas/tipos-despesas.component';
+import { TiposDespesasFormComponent } from './cadastros/tipos-despesas-form/tipos-despesas-form.component';
+import { AbastecimentosComponent } from './pages/abastecimentos/abastecimentos.component';
+import { AbastecimentoWizardComponent } from './cadastros/abastecimento-wizard/abastecimento-wizard.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'checklists', component: ChecklistsComponent },
+  { path: 'checklists/novo', component: ChecklistWizardComponent },
+  { path: 'checklists/:id/editar', component: ChecklistWizardComponent },
   { path: 'modelos', component: ModelosComponent },
+  { path: 'modelos/novo', component: ModelosFormComponent },
+  { path: 'modelos/:id/editar', component: ModelosFormComponent },
   { path: 'itens', component: ItensComponent },
+  { path: 'itens/novo', component: ItensFormComponent },
+  { path: 'itens/:id/editar', component: ItensFormComponent },
   { path: 'veiculos', component: VeiculosComponent },
+  { path: 'veiculos/novo', component: VeiculosFormComponent },
+  { path: 'veiculos/:id/editar', component: VeiculosFormComponent },
   { path: 'tipos-veiculos', component: TiposVeiculosComponent },
+  { path: 'tipos-veiculos/novo', component: TiposVeiculosFormComponent },
+  { path: 'tipos-veiculos/:id/editar', component: TiposVeiculosFormComponent },
   { path: 'motoristas', component: MotoristasComponent },
+  { path: 'motoristas/novo', component: MotoristasFormComponent },
+  { path: 'motoristas/:id/editar', component: MotoristasFormComponent },
   { path: 'empresas', component: EmpresasComponent },
+  { path: 'empresas/novo', component: EmpresasFormComponent },
+  { path: 'empresas/:id/editar', component: EmpresasFormComponent },
   { path: 'viagens', component: ViagensComponent },
+  { path: 'viagens/novo', component: ViagensFormComponent },
+  { path: 'viagens/:id/editar', component: ViagensFormComponent },
+  { path: 'abastecimentos', component: AbastecimentosComponent },
+  { path: 'abastecimentos/novo', component: AbastecimentoWizardComponent },
+  { path: 'abastecimentos/:id/editar', component: AbastecimentoWizardComponent },
   { path: 'manutencoes', component: ManutencoesComponent },
+  { path: 'manutencoes/novo', component: ManutencoesFormComponent },
+  { path: 'manutencoes/:id/editar', component: ManutencoesFormComponent },
   { path: 'tipos-manutencao', component: TiposManutencaoComponent },
+  { path: 'tipos-manutencao/novo', component: TiposManutencaoFormComponent },
+  { path: 'tipos-manutencao/:id/editar', component: TiposManutencaoFormComponent },
+  { path: 'tipos-despesas', component: TiposDespesasComponent },
+  { path: 'tipos-despesas/novo', component: TiposDespesasFormComponent },
+  { path: 'tipos-despesas/:id/editar', component: TiposDespesasFormComponent },
   { path: 'alertas', component: AlertasComponent },
   { path: 'permissoes', component: PermissoesComponent },
   { path: 'relatorios', component: RelatoriosComponent },

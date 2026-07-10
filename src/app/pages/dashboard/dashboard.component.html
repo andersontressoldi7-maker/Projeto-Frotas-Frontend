@@ -15,9 +15,9 @@
       </button>
       <div class="d-flex align-items-center gap-2">
         <div class="avatar bg-success text-white fw-bold d-flex align-items-center justify-content-center">
-          {{ userInitials }}
+          {{ iniciaisUsuario }}
         </div>
-        <span class="text-muted small fw-medium">{{ userEmail }}</span>
+        <span class="text-muted small fw-medium">{{ emailUsuario }}</span>
       </div>
     </div>
   </header>
@@ -30,15 +30,15 @@
       </div>
 
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 mb-4">
-        <div class="col" *ngFor="let card of cards">
-          <div class="card h-100 border-0 shadow-sm p-3">
+        <div class="col" *ngFor="let cartao of cartoes">
+          <div class="card cartao-animado h-100 border-0 shadow-sm p-3" (click)="aoClicarNoCartao(cartao)">
             <div class="d-flex justify-content-between align-items-start">
               <div>
-                <p class="text-muted small mb-1 fw-medium">{{ card.title }}</p>
-                <h3 class="fw-bold mb-0">{{ card.value }}</h3>
+                <p class="text-muted small mb-1 fw-medium">{{ cartao.titulo }}</p>
+                <h3 class="fw-bold mb-0">{{ cartao.valor }}</h3>
               </div>
-              <div class="icon-shape bg-{{ card.color }}-subtle text-{{ card.color }} rounded p-2">
-                <i class="bi {{ card.icon }} fs-5"></i>
+              <div class="icon-shape bg-{{ cartao.cor }}-subtle text-{{ cartao.cor }} rounded p-2">
+                <i class="bi {{ cartao.icone }} fs-5"></i>
               </div>
             </div>
           </div>
@@ -49,8 +49,17 @@
         <div class="col-12 col-lg-6">
           <div class="card border-0 shadow-sm p-4 h-100">
             <h5 class="fw-bold card-title mb-3">Últimos checklists preenchidos</h5>
-            <div class="d-flex align-items-center justify-content-center h-75 py-5">
+            <div class="d-flex align-items-center justify-content-center h-75 py-5" *ngIf="checklistsFinalizados.length === 0">
               <p class="text-muted small mb-0">Nenhum checklist registrado ainda.</p>
+            </div>
+            <div class="list-group list-group-flush" *ngIf="checklistsFinalizados.length > 0">
+              <div class="list-group-item border-0 px-0 d-flex justify-content-between align-items-center" *ngFor="let item of checklistsFinalizados">
+                <div>
+                  <h6 class="fw-bold mb-1 text-dark">Veículo: {{ item.veiculo }}</h6>
+                  <span class="text-muted small">Motorista: {{ item.motorista }} - {{ item.data }}</span>
+                </div>
+                <span class="badge bg-success-subtle text-success rounded-pill px-3 fw-normal">{{ item.status }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -75,26 +84,78 @@
 
         <div class="col-12 col-lg-6">
           <div class="card border-0 shadow-sm p-4 h-100">
-            <h5 class="fw-bold card-title mb-3">Alertas recentes</h5>
-            <div class="d-flex align-items-center justify-content-center h-75 py-5">
-              <p class="text-muted small mb-0">Sem alertas no momento.</p>
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <h5 class="fw-bold card-title mb-0">Viagens finalizadas</h5>
+              <span class="small text-muted">{{ filtroData === '7d' ? 'Últimos 7 dias' : filtroData === '90d' ? 'Últimos 90 dias' : 'Últimos 30 dias' }}</span>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center py-5" *ngIf="viagensFinalizadas.length === 0">
+              <p class="text-muted small mb-0">Nenhuma viagem finalizada no período selecionado.</p>
+            </div>
+
+            <div class="list-group list-group-flush" *ngIf="viagensFinalizadas.length > 0">
+              <button class="list-group-item list-group-item-action border-0 px-0 py-3 text-start" *ngFor="let viagem of viagensFinalizadas" (click)="abrirDetalheViagem(viagem)">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                  <div>
+                    <h6 class="fw-bold mb-1 text-dark">{{ viagem.origem }} → {{ viagem.destino }}</h6>
+                    <p class="text-muted small mb-1">{{ viagem.veiculo }} · {{ viagem.motorista }}</p>
+                    <p class="text-muted small mb-0">{{ formatarData(viagem.data) }}</p>
+                  </div>
+                  <span class="badge bg-success-subtle text-success rounded-pill px-3 fw-normal">{{ viagem.status }}</span>
+                </div>
+              </button>
             </div>
           </div>
         </div>
 
         <div class="col-12 col-lg-6">
-  <div class="card border-0 shadow-sm p-4 h-100">
-    <h5 class="fw-bold card-title mb-3">Resumo por status</h5>
-    <div class="row g-3">
-      <div class="col-6" *ngFor="let status of statusResumo">
-        <div class="card-status rounded p-3">
-          <p class="text-status-label small mb-1 fw-medium">{{ status.label }}</p>
-          <h4 class="fw-bold mb-0 {{ status.color }}">{{ status.value }}</h4>
+          <div class="card border-0 shadow-sm p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <h5 class="fw-bold card-title mb-0">Resumo financeiro das viagens</h5>
+              <select class="form-select form-select-sm w-auto" [(ngModel)]="filtroData" (change)="aplicarFiltroData()">
+                <option *ngFor="let filtro of opcoesFiltroData" [value]="filtro.valor">{{ filtro.label }}</option>
+              </select>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <div class="rounded p-3 border bg-success-subtle">
+                  <p class="small text-muted mb-1">Receita total</p>
+                  <h4 class="fw-bold mb-0 text-success">{{ resumoFinanceiroFormatado.totalReceita }}</h4>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="rounded p-3 border bg-danger-subtle">
+                  <p class="small text-muted mb-1">Despesas total</p>
+                  <h4 class="fw-bold mb-0 text-danger">{{ resumoFinanceiroFormatado.totalDespesa }}</h4>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="rounded p-3 border bg-primary-subtle">
+                  <p class="small text-muted mb-1">Lucro líquido</p>
+                  <h4 class="fw-bold mb-0 text-primary">{{ resumoFinanceiroFormatado.lucro }}</h4>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="rounded p-3 border bg-warning-subtle">
+                  <p class="small text-muted mb-1">Ticket médio</p>
+                  <h4 class="fw-bold mb-0 text-warning">{{ resumoFinanceiroFormatado.ticketMedio }}</h4>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 p-3 rounded border bg-light">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span class="small text-muted">Viagens no período</span>
+                <span class="fw-bold">{{ resumoFinanceiro.viagens }}</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+                <span class="small text-muted">Margem líquida</span>
+                <span class="fw-bold text-success">{{ resumoFinanceiroFormatado.margem }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
       </div>
     </div>
   </main>

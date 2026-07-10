@@ -1,0 +1,388 @@
+<app-sidebar></app-sidebar>
+<app-toasts></app-toasts>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <div class="wizard-header mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
+          <div>
+            <h2 class="h4 fw-bold mb-1">{{ faseAtual === 'saida' ? 'Nova Vistoria (Saída)' : 'Finalizar Vistoria (Retorno)' }}</h2>
+            <p class="text-muted small mb-0">{{ motorista.nome }} - Passo {{ passoAtual }} de {{ faseAtual === 'saida' ? 2 : 1 }}</p>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="btn-group me-2">
+              <button class="btn btn-sm" [class.btn-primary]="faseAtual === 'saida'" [class.btn-outline-primary]="faseAtual !== 'saida'" (click)="mudarFase('saida')">Simular Criação (Saída)</button>
+              <button class="btn btn-sm" [class.btn-primary]="faseAtual === 'retorno'" [class.btn-outline-primary]="faseAtual !== 'retorno'" (click)="mudarFase('retorno')">Simular Fechamento (Retorno)</button>
+            </div>
+            <button class="btn btn-outline-secondary btn-sm" (click)="cancelar()">
+              <i class="bi bi-x-lg"></i> Cancelar
+            </button>
+          </div>
+        </div>
+
+        <div class="progress-bar-wizard">
+          <ng-container *ngIf="faseAtual === 'saida'">
+            <div class="progress-item" [class.ativo]="passoAtual >= 1" [class.completo]="passoAtual > 1">
+              <div class="progress-circle">
+                <span *ngIf="passoAtual <= 1">1</span>
+                <i *ngIf="passoAtual > 1" class="bi bi-check"></i>
+              </div>
+              <span class="progress-label">Abertura</span>
+            </div>
+
+            <div class="progress-connector" [class.ativo]="passoAtual > 1"></div>
+
+            <div class="progress-item" [class.ativo]="passoAtual >= 2">
+              <div class="progress-circle">2</div>
+              <span class="progress-label">Itens</span>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="faseAtual === 'retorno'">
+            <div class="progress-item ativo">
+              <div class="progress-circle"><i class="bi bi-flag-fill"></i></div>
+              <span class="progress-label">Fechamento</span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="tabs-container mb-4">
+        <div class="nav-tabs-custom">
+          <button
+            class="nav-tab-item"
+            [class.ativo]="abaAtiva === 'preenchimento'"
+            (click)="abaAtiva = 'preenchimento'">
+            <i class="bi bi-list-check"></i> Preenchimento
+          </button>
+          <button
+            class="nav-tab-item"
+            [class.ativo]="abaAtiva === 'tempo'"
+            (click)="abaAtiva = 'tempo'">
+            <i class="bi bi-clock-history"></i> Tempo de Preenchimento
+          </button>
+        </div>
+      </div>
+
+      <div class="wizard-content">
+        <ng-container *ngIf="abaAtiva === 'preenchimento'">
+          <ng-container *ngIf="faseAtual === 'saida'">
+            <div *ngIf="passoAtual === 1" class="passo-container">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                  <h5 class="card-title mb-4">Contexto da Saída</h5>
+
+                  <div class="form-group mb-3">
+                    <label class="form-label">Motorista</label>
+                    <div class="form-control bg-light" style="cursor: not-allowed;">
+                      {{ motorista.nome }}
+                    </div>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label class="form-label required d-flex justify-content-between align-items-center">
+                      <span>Modelo de Checklist</span>
+                      <span class="atalhos-cadastro">
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('modelo', 'novo', $event)">
+                          <i class="bi bi-plus-circle"></i> Novo (F9)
+                        </button>
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('modelo', 'editar', $event)">
+                          <i class="bi bi-pencil"></i> Editar (F8)
+                        </button>
+                      </span>
+                    </label>
+                    <select
+                      class="form-control"
+                      [(ngModel)]="formulario.modelo"
+                      (keydown.F9)="irParaCadastro('modelo', 'novo', $event)"
+                      (keydown.F8)="irParaCadastro('modelo', 'editar', $event)"
+                      required>
+                      <option value="">Selecione um modelo</option>
+                      <option *ngFor="let m of modelos" [value]="m.id">
+                        {{ m.nome }} ({{ m.tipo }})
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label class="form-label required d-flex justify-content-between align-items-center">
+                      <span>Veículo</span>
+                      <span class="atalhos-cadastro">
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'novo', $event)">
+                          <i class="bi bi-plus-circle"></i> Novo (F9)
+                        </button>
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'editar', $event)">
+                          <i class="bi bi-pencil"></i> Editar (F8)
+                        </button>
+                      </span>
+                    </label>
+                    <select
+                      class="form-control"
+                      [(ngModel)]="formulario.veiculo"
+                      (keydown.F9)="irParaCadastro('veiculo', 'novo', $event)"
+                      (keydown.F8)="irParaCadastro('veiculo', 'editar', $event)"
+                      required>
+                      <option value="">Selecione um veículo</option>
+                      <option *ngFor="let v of veiculos" [value]="v.id">
+                        {{ v.placa }} - {{ v.modelo }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label class="form-label required">KM Atual</label>
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.kmAtual" 
+                      placeholder="Digite a quilometragem de saída"
+                      required>
+                  </div>
+
+                  <div class="form-group mb-0">
+                    <label class="form-label">Observação de Saída</label>
+                    <textarea 
+                      class="form-control" 
+                      [(ngModel)]="formulario.observacaoSaida"
+                      rows="3"
+                      placeholder="Observações adicionais..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wizard-actions mt-4">
+                <button class="btn btn-light border" (click)="passoAnterior()" disabled>
+                  <i class="bi bi-chevron-left"></i> Anterior
+                </button>
+                <button 
+                  class="btn btn-success" 
+                  (click)="proximoPasso()"
+                  [disabled]="!validarPasso()">
+                  Próximo <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="passoAtual === 2" class="passo-container">
+              <div class="items-container">
+                <div class="item-card" *ngFor="let item of itensChecklistSaida">
+                  <div class="item-header">
+                    <div>
+                      <h6 class="item-title">{{ item.nome }}</h6>
+                      <span *ngIf="item.obrigatoriaFoto" class="badge bg-warning text-dark small">Foto obrigatória</span>
+                    </div>
+                    <span *ngIf="item.valor" class="badge bg-success">{{ item.valor }}</span>
+                  </div>
+
+                  <div class="item-pills">
+                    <button 
+                      *ngFor="let resposta of item.respostas"
+                      class="pill-btn" 
+                      [class.ativo]="item.valor === resposta"
+                      [class.ruim]="item.valor === 'Ruim'"
+                      (click)="selecionarResposta(item, resposta)">
+                      {{ resposta }}
+                    </button>
+                  </div>
+
+                  <div class="item-actions">
+                    <button 
+                      class="btn-icon-action" 
+                      [class.sem-foto]="item.obrigatoriaFoto && !item.temFoto"
+                      (click)="abrirFotoItem(item)">
+                      <i class="bi bi-camera"></i>
+                      <span class="icon-label">Foto</span>
+                    </button>
+                    <button 
+                      class="btn-icon-action"
+                      (click)="abrirObservacaoItem(item)">
+                      <i class="bi bi-pencil"></i>
+                      <span class="icon-label">Obs.</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wizard-actions mt-4">
+                <button class="btn btn-light border" (click)="passoAnterior()">
+                  <i class="bi bi-chevron-left"></i> Anterior
+                </button>
+                <button 
+                  class="btn btn-success" 
+                  (click)="finalizarSaida()"
+                  [disabled]="!validarPasso()">
+                  <i class="bi bi-check-lg"></i> Finalizar Saída
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="faseAtual === 'retorno'">
+            <div *ngIf="passoAtual === 1" class="passo-container">
+              <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                  <h5 class="card-title mb-4">Finalização do Checklist</h5>
+
+                  <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                      <div class="p-3 bg-light rounded border">
+                        <small class="text-muted d-block mb-1">Veículo</small>
+                        <strong class="d-block mb-2">ABC-1234 (Volvo FH)</strong>
+                        <small class="text-muted d-block mb-1">KM Registrado na Saída</small>
+                        <strong>125.400 km</strong>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="p-3 bg-light rounded border h-100">
+                        <small class="text-muted d-block mb-1">Modelo</small>
+                        <strong>Checklist Diário Completo</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label class="form-label required">KM de Retorno</label>
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.kmRetorno"
+                      placeholder="Digite a quilometragem atualizada"
+                      required>
+                  </div>
+
+                  <div class="form-group mb-0">
+                    <label class="form-label">Observação de Retorno</label>
+                    <textarea 
+                      class="form-control" 
+                      [(ngModel)]="formulario.observacaoRetorno"
+                      rows="3"
+                      placeholder="Observações do final da operação..."></textarea>
+                  </div>
+
+                  <div *ngIf="eModeloCompleto()" class="mt-4">
+                    <h6 class="mb-3">Itens de Retorno</h6>
+                    <div class="items-container">
+                      <div class="item-card" *ngFor="let item of itensChecklistRetorno">
+                        <div class="item-header">
+                          <div>
+                            <h6 class="item-title">{{ item.nome }}</h6>
+                            <span *ngIf="item.obrigatoriaFoto" class="badge bg-warning text-dark small">Foto obrigatória</span>
+                          </div>
+                          <span *ngIf="item.valor" class="badge bg-success">{{ item.valor }}</span>
+                        </div>
+
+                        <div class="item-pills">
+                          <button 
+                            *ngFor="let resposta of item.respostas"
+                            class="pill-btn" 
+                            [class.ativo]="item.valor === resposta"
+                            [class.ruim]="item.valor === 'Ruim'"
+                            (click)="selecionarResposta(item, resposta)">
+                            {{ resposta }}
+                          </button>
+                        </div>
+
+                        <div class="item-actions">
+                          <button 
+                            class="btn-icon-action" 
+                            [class.sem-foto]="item.obrigatoriaFoto && !item.temFoto"
+                            (click)="abrirFotoItem(item)">
+                            <i class="bi bi-camera"></i>
+                            <span class="icon-label">Foto</span>
+                          </button>
+                          <button 
+                            class="btn-icon-action"
+                            (click)="abrirObservacaoItem(item)">
+                            <i class="bi bi-pencil"></i>
+                            <span class="icon-label">Obs.</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wizard-actions mt-4">
+                <button class="btn btn-danger" (click)="finalizarRetorno()" [disabled]="!validarPasso()">
+                  <i class="bi bi-check-circle"></i> Encerrar Vistoria
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="abaAtiva === 'tempo'">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                <div>
+                  <h5 class="card-title mb-1">Tempo de Preenchimento</h5>
+                  <p class="text-muted small mb-0">Estrutura pronta para ser substituída por dados reais do backend.</p>
+                </div>
+                <span class="badge bg-info-subtle text-info-emphasis">Dados mockados</span>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="p-3 bg-light rounded border h-100">
+                    <small class="text-muted d-block mb-2">Saída</small>
+                    <div class="mb-2"><strong>Abertura:</strong> {{ tempoPreenchimento.aberturaSaida }}</div>
+                    <div class="mb-2"><strong>Encerramento:</strong> {{ tempoPreenchimento.encerramentoSaida }}</div>
+                    <div><strong>Tempo total:</strong> {{ formatarTempo(tempoPreenchimento.tempoSaidaMinutos) }}</div>
+                  </div>
+                </div>
+
+                <div *ngIf="eModeloCompleto()" class="col-md-6">
+                  <div class="p-3 bg-light rounded border h-100">
+                    <small class="text-muted d-block mb-2">Retorno</small>
+                    <div class="mb-2"><strong>Abertura:</strong> {{ tempoPreenchimento.aberturaRetorno }}</div>
+                    <div class="mb-2"><strong>Encerramento:</strong> {{ tempoPreenchimento.encerramentoRetorno }}</div>
+                    <div><strong>Tempo total:</strong> {{ formatarTempo(tempoPreenchimento.tempoRetornoMinutos) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 p-3 border rounded">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <span class="fw-semibold">Tempo total do checklist</span>
+                  <span class="fs-5 fw-bold">{{ formatarTempo(tempoPreenchimento.tempoTotalMinutos) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <input 
+        type="file" 
+        id="foto-input" 
+        accept="image/*" 
+        style="display: none;"
+        (change)="aoSelecionarFoto($event)">
+    </div>
+  </main>
+</div>
+
+<div *ngIf="itemAberto" class="modal-overlay" (click)="itemAberto = null">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Observação - {{ itemAberto.nome }}</h5>
+        <button class="btn-close" (click)="itemAberto = null"></button>
+      </div>
+      <div class="modal-body">
+        <textarea 
+          class="form-control" 
+          [(ngModel)]="observacaoItem"
+          rows="4"
+          placeholder="Adicione uma observação..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="itemAberto = null">Cancelar</button>
+        <button class="btn btn-primary" (click)="salvarObservacao()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>

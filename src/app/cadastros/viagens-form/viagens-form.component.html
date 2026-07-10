@@ -1,0 +1,573 @@
+<app-sidebar></app-sidebar>
+<app-toasts></app-toasts>
+
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <div class="form-header mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h2 class="h4 fw-bold mb-1">{{ modoEdicao ? 'Editar' : 'Nova' }} Viagem</h2>
+            <p class="text-muted small mb-0">Controle simplificado de viagens e rotas</p>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" (click)="onCancelar()">
+            <i class="bi bi-x-lg"></i> Cancelar
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs-container">
+        <div class="nav-tabs-custom">
+          <button 
+            class="nav-tab-item" 
+            [class.ativo]="abaSelecionada === 'dados'"
+            (click)="selecionarAba('dados')">
+            <i class="bi bi-map"></i> Dados Principais
+          </button>
+          <button
+            class="nav-tab-item"
+            [class.ativo]="abaSelecionada === 'custos'"
+            (click)="selecionarAba('custos')">
+            <i class="bi bi-cash-coin"></i> Custos e Valores
+          </button>
+          <button
+            class="nav-tab-item"
+            [class.ativo]="abaSelecionada === 'abastecimentos'"
+            (click)="selecionarAba('abastecimentos')">
+            <i class="bi bi-fuel-pump"></i> Abastecimentos
+          </button>
+        </div>
+
+        <div class="tab-content">
+          <div *ngIf="abaSelecionada === 'dados'" class="tab-pane active">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="card-title mb-4">A Rota</h5>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label required d-flex justify-content-between align-items-center">
+                      <span>Veículo</span>
+                      <span class="atalhos-cadastro">
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'novo', $event)">
+                          <i class="bi bi-plus-circle"></i> Novo (F9)
+                        </button>
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'editar', $event)">
+                          <i class="bi bi-pencil"></i> Editar (F8)
+                        </button>
+                      </span>
+                    </label>
+                    <select
+                      class="form-control"
+                      [(ngModel)]="formulario.veiculo"
+                      (keydown.F9)="irParaCadastro('veiculo', 'novo', $event)"
+                      (keydown.F8)="irParaCadastro('veiculo', 'editar', $event)"
+                      required>
+                      <option value="">Selecione um veículo</option>
+                      <option *ngFor="let v of veiculos" [value]="v.id">
+                        {{ v.placa }} - {{ v.modelo }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label required d-flex justify-content-between align-items-center">
+                      <span>Motorista</span>
+                      <span class="atalhos-cadastro">
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('motorista', 'novo', $event)">
+                          <i class="bi bi-plus-circle"></i> Novo (F9)
+                        </button>
+                        <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('motorista', 'editar', $event)">
+                          <i class="bi bi-pencil"></i> Editar (F8)
+                        </button>
+                      </span>
+                    </label>
+                    <select
+                      class="form-control"
+                      [(ngModel)]="formulario.motorista"
+                      (keydown.F9)="irParaCadastro('motorista', 'novo', $event)"
+                      (keydown.F8)="irParaCadastro('motorista', 'editar', $event)"
+                      required>
+                      <option value="">Selecione um motorista</option>
+                      <option *ngFor="let m of motoristas" [value]="m.id">
+                        {{ m.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label required">Origem</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.origem"
+                      placeholder="Cidade ou local de saída"
+                      required>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label required">Destino</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.destino"
+                      placeholder="Cidade ou local de chegada"
+                      required>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label required">Data de Saída</label>
+                    <input 
+                      type="date" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.dataSaida"
+                      required>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label required">Hora de Saída</label>
+                    <input 
+                      type="time" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.horaSaida"
+                      required>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Previsão de Chegada</label>
+                    <input 
+                      type="datetime-local" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.previsaoChegada">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">KM Inicial</label>
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.kmInicial"
+                      placeholder="KM de partida (opcional)">
+                    <small class="text-muted">Pode ser preenchido do último checklist</small>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" [(ngModel)]="formulario.status">
+                      <option *ngFor="let s of status" [value]="s.id">
+                        {{ s.label }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">% Comissão</label>
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.percentualComissao"
+                      placeholder="0"
+                      step="0.01"
+                      min="0">
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Status da Comissão</label>
+                    <select class="form-control" [(ngModel)]="formulario.statusComissao">
+                      <option *ngFor="let status of statusComissao" [value]="status.id">
+                        {{ status.label }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="abaSelecionada === 'custos'" class="tab-pane active">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="card-title mb-4">Finanças da Viagem</h5>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Tipo de carga</label>
+                    <select class="form-control" [(ngModel)]="formulario.tipoCarga">
+                      <option value="">Selecione o tipo</option>
+                      <option *ngFor="let tipo of tiposCarga" [value]="tipo.id">
+                        {{ tipo.label }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Peso / volume</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.pesoVolume"
+                      placeholder="Ex.: 12.500 kg ou 40 m³">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Descrição da carga</label>
+                  <textarea 
+                    class="form-control" 
+                    [(ngModel)]="formulario.descricaoCarga"
+                    rows="2"
+                    placeholder="Detalhes relevantes da carga, referências e cuidados especiais"></textarea>
+                </div>
+
+                <div class="sub-nav-tabs mb-4">
+                  <button type="button" class="sub-nav-tab" [class.ativo]="abaCustosSelecionada === 'fretes'" (click)="selecionarAbaCustos('fretes')">
+                    Fretes
+                  </button>
+                  <button type="button" class="sub-nav-tab" [class.ativo]="abaCustosSelecionada === 'despesas'" (click)="selecionarAbaCustos('despesas')">
+                    Despesas
+                  </button>
+                </div>
+
+                <div *ngIf="abaCustosSelecionada === 'fretes'">
+                  <div class="subsection mb-4">
+                    <div class="subsection-header">
+                      <h6 class="mb-0">Fretes da viagem</h6>
+                    </div>
+
+                    <div class="row g-2 mt-3">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">Descrição do frete</label>
+                        <input 
+                          type="text"
+                          class="form-control"
+                          [(ngModel)]="freteAtual.descricao"
+                          placeholder="Ex.: Frete de ida, retorno, complementação">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label">Origem</label>
+                        <input type="text" class="form-control" [(ngModel)]="freteAtual.origem" placeholder="Cidade de saída">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label">Destino</label>
+                        <input type="text" class="form-control" [(ngModel)]="freteAtual.destino" placeholder="Cidade de chegada">
+                      </div>
+                    </div>
+
+                    <div class="row g-2">
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label">Data</label>
+                        <input type="date" class="form-control" [(ngModel)]="freteAtual.data">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label">Valor</label>
+                        <div class="input-group">
+                          <span class="input-group-text">R$</span>
+                          <input 
+                            type="number"
+                            class="form-control"
+                            [(ngModel)]="freteAtual.valor"
+                            placeholder="0,00"
+                            step="0.01"
+                            min="0">
+                        </div>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">Observação</label>
+                        <input type="text" class="form-control" [(ngModel)]="freteAtual.observacao" placeholder="Detalhes do frete">
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-2">
+                      <button type="button" class="btn btn-outline-success btn-sm" (click)="adicionarFrete()">
+                        <i class="bi bi-plus-lg"></i> Adicionar frete
+                      </button>
+                    </div>
+
+                    <div class="items-list mt-3" *ngIf="formulario.fretes.length > 0">
+                      <div class="items-list__item" *ngFor="let frete of formulario.fretes; let i = index">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                          <div>
+                            <div class="fw-semibold">{{ frete.descricao || 'Frete sem descrição' }}</div>
+                            <small class="text-muted">
+                              {{ frete.origem || 'Origem não informada' }} → {{ frete.destino || 'Destino não informado' }}
+                            </small>
+                            <div class="small text-muted">
+                              {{ frete.data ? ('Data: ' + frete.data) : 'Data não informada' }} · Valor: R$ {{ obterValorFormatado(frete.valor) }}
+                            </div>
+                            <div class="small text-muted" *ngIf="frete.observacao">{{ frete.observacao }}</div>
+                          </div>
+                          <button type="button" class="btn btn-outline-danger btn-sm" (click)="removerFrete(i)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="abaCustosSelecionada === 'despesas'">
+                  <div class="subsection mb-4">
+                    <div class="subsection-header">
+                      <h6 class="mb-0">Despesas da viagem</h6>
+                    </div>
+
+                    <div class="row g-2 mt-3">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">Tipo de despesa</label>
+                        <select class="form-control" [(ngModel)]="despesaAtual.tipo">
+                          <option value="">Selecione</option>
+                          <option *ngFor="let tipo of tiposDespesa" [value]="tipo">
+                            {{ tipo }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label">Valor</label>
+                        <div class="input-group">
+                          <span class="input-group-text">R$</span>
+                          <input 
+                            type="number"
+                            class="form-control"
+                            [(ngModel)]="despesaAtual.valor"
+                            placeholder="0,00"
+                            step="0.01"
+                            min="0">
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label class="form-label">Quem pagou</label>
+                        <div class="toggle-switch">
+                          <button type="button" class="toggle-option" [class.active]="despesaAtual.pagador === 'motorista'" (click)="despesaAtual.pagador = 'motorista'">
+                            Motorista
+                          </button>
+                          <button type="button" class="toggle-option" [class.active]="despesaAtual.pagador === 'empresa'" (click)="despesaAtual.pagador = 'empresa'">
+                            Empresa
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col-md-2 d-flex align-items-end mb-3">
+                        <button type="button" class="btn btn-outline-success btn-sm w-100" (click)="adicionarDespesa()">
+                          <i class="bi bi-plus-lg"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Observação da despesa</label>
+                      <input type="text" class="form-control" [(ngModel)]="despesaAtual.observacao" placeholder="Ex.: Almoço em rodovia">
+                    </div>
+
+                    <div class="items-list mt-3" *ngIf="formulario.despesas.length > 0">
+                      <div class="items-list__item" *ngFor="let despesa of formulario.despesas; let i = index">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                          <div>
+                            <div class="fw-semibold">{{ despesa.tipo || 'Despesa sem tipo' }}</div>
+                            <small class="text-muted">Valor: R$ {{ obterValorFormatado(despesa.valor) }} · {{ despesa.pagador === 'empresa' ? 'Empresa' : 'Motorista' }}</small>
+                            <div class="small text-muted" *ngIf="despesa.observacao">{{ despesa.observacao }}</div>
+                          </div>
+                          <button type="button" class="btn btn-outline-danger btn-sm" (click)="removerDespesa(i)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Adiantamento da viagem</label>
+                    <div class="input-group">
+                      <span class="input-group-text">R$</span>
+                      <input 
+                        type="number" 
+                        class="form-control" 
+                        [(ngModel)]="formulario.adiantamentoPago"
+                        placeholder="0,00"
+                        step="0.01"
+                        min="0">
+                    </div>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Forma de Pagamento</label>
+                    <select class="form-control" [(ngModel)]="formulario.formaPagamentoFrete">
+                      <option *ngFor="let forma of formasPagamento" [value]="forma.id">
+                        {{ forma.label }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">% Comissão</label>
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      [(ngModel)]="formulario.percentualComissao"
+                      placeholder="0"
+                      step="0.01"
+                      min="0">
+                  </div>
+                </div>
+
+                <div class="resumo-financeiro">
+                  <div class="resumo-item">
+                    <span class="resumo-label">Total dos fretes:</span>
+                    <span class="resumo-valor">R$ {{ obterValorFrete().toFixed(2) }}</span>
+                  </div>
+                  <div class="resumo-item">
+                    <span class="resumo-label">Adiantamento da viagem:</span>
+                    <span class="resumo-valor">- R$ {{ obterValorFormatado(formulario.adiantamentoPago) }}</span>
+                  </div>
+                  <div class="resumo-item">
+                    <span class="resumo-label">Despesas da viagem:</span>
+                    <span class="resumo-valor">- R$ {{ obterValorDespesas().toFixed(2) }}</span>
+                  </div>
+                  <div class="resumo-item">
+                    <span class="resumo-label">Comissão:</span>
+                    <span class="resumo-valor">- R$ {{ obterValorComissao().toFixed(2) }}</span>
+                  </div>
+                  <div class="resumo-item total">
+                    <span class="resumo-label">Saldo Líquido:</span>
+                    <span class="resumo-valor">R$ {{ obterValorTotal().toFixed(2) }}</span>
+                  </div>
+                </div>
+
+                <div class="mb-0">
+                  <label class="form-label">Observações Gerais</label>
+                  <textarea 
+                    class="form-control" 
+                    [(ngModel)]="formulario.observacoesGerais"
+                    rows="4"
+                    placeholder="Informações sobre a carga, condições especiais, observações da rota..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="abaSelecionada === 'abastecimentos'" class="tab-pane active">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body p-4">
+                <h5 class="card-title mb-4">Abastecimentos da Viagem</h5>
+                <p class="text-muted small mb-4">Registre os abastecimentos realizados durante esta viagem. Ficam vinculados automaticamente ao veículo e motorista selecionados nos Dados Principais.</p>
+
+                <div class="subsection mb-4">
+                  <div class="subsection-header">
+                    <h6 class="mb-0">Novo abastecimento</h6>
+                  </div>
+
+                  <div class="row g-2 mt-3">
+                    <div class="col-md-3 mb-3">
+                      <label class="form-label">Data</label>
+                      <input type="date" class="form-control" [(ngModel)]="abastecimentoAtual.data">
+                    </div>
+                    <div class="col-md-5 mb-3">
+                      <label class="form-label">Posto / Local</label>
+                      <input type="text" class="form-control" [(ngModel)]="abastecimentoAtual.local" placeholder="Ex.: Posto Ipiranga - BR-101">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Tipo</label>
+                      <div class="toggle-switch">
+                        <button type="button" class="toggle-option" [class.active]="abastecimentoAtual.tipo === 'Interno'" (click)="abastecimentoAtual.tipo = 'Interno'">
+                          Interno
+                        </button>
+                        <button type="button" class="toggle-option" [class.active]="abastecimentoAtual.tipo === 'Externo'" (click)="abastecimentoAtual.tipo = 'Externo'">
+                          Externo
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row g-2">
+                    <div class="col-md-3 mb-3">
+                      <label class="form-label">Combustível</label>
+                      <select class="form-control" [(ngModel)]="abastecimentoAtual.combustivel">
+                        <option value="">Selecione</option>
+                        <option *ngFor="let c of combustiveis" [value]="c">{{ c }}</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label class="form-label">Qt. Litros</label>
+                      <input type="number" class="form-control" [(ngModel)]="abastecimentoAtual.quantidadeLitros" placeholder="0,00" step="0.01" min="0">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label class="form-label">Valor</label>
+                      <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input
+                          type="number"
+                          class="form-control"
+                          [(ngModel)]="abastecimentoAtual.valor"
+                          placeholder="0,00"
+                          step="0.01"
+                          min="0">
+                      </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label class="form-label">Observação</label>
+                      <input type="text" class="form-control" [(ngModel)]="abastecimentoAtual.observacao" placeholder="Detalhes do abastecimento">
+                    </div>
+                  </div>
+
+                  <div class="d-flex justify-content-end mt-2">
+                    <button type="button" class="btn btn-outline-success btn-sm" (click)="adicionarAbastecimento()">
+                      <i class="bi bi-plus-lg"></i> Adicionar abastecimento
+                    </button>
+                  </div>
+
+                  <div class="items-list mt-3" *ngIf="formulario.abastecimentos.length > 0">
+                    <div class="items-list__item" *ngFor="let abastecimento of formulario.abastecimentos; let i = index">
+                      <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                          <div class="fw-semibold">
+                            {{ abastecimento.local || 'Local não informado' }}
+                            <span class="badge bg-secondary-subtle text-secondary ms-2">{{ abastecimento.tipo }}</span>
+                          </div>
+                          <small class="text-muted">
+                            {{ abastecimento.data ? ('Data: ' + abastecimento.data) : 'Data não informada' }} · {{ abastecimento.combustivel || 'Combustível não informado' }} · {{ abastecimento.quantidadeLitros || 0 }} L
+                          </small>
+                          <div class="small text-muted">Valor: R$ {{ obterValorFormatado(abastecimento.valor) }}</div>
+                          <div class="small text-muted" *ngIf="abastecimento.observacao">{{ abastecimento.observacao }}</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm" (click)="removerAbastecimento(i)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="resumo-financeiro">
+                  <div class="resumo-item total">
+                    <span class="resumo-label">Total de abastecimentos:</span>
+                    <span class="resumo-valor">R$ {{ obterValorAbastecimentos().toFixed(2) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions mt-4">
+        <button class="btn btn-light border" (click)="onCancelar()">
+          Cancelar
+        </button>
+        <button
+          class="btn btn-success"
+          (click)="onSalvar()"
+          [disabled]="!validarFormulario()">
+          <i class="bi bi-check-circle"></i> {{ modoEdicao ? 'Atualizar' : 'Criar' }} Viagem
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

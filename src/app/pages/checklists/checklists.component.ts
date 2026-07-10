@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
@@ -10,7 +11,8 @@ import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
   imports: [CommonModule, SharedGridComponent, SidebarComponent],
   templateUrl: './checklists.component.html'
 })
-export class ChecklistsComponent {
+export class ChecklistsComponent implements OnInit {
+  constructor(private router: Router, private route: ActivatedRoute) {}
   title = 'Checklists';
   subtitle = 'Histórico de checklists preenchidos';
   primaryBtnLabel = 'Preencher novo';
@@ -41,10 +43,28 @@ export class ChecklistsComponent {
     ]}
   ];
 
+  allData: any[] = [
+    { id: 1, modelo: 'Checklist Diário', empresa: 'Frota Norte', veiculo: 'ABC-1234', motorista: 'João', data: '09/07/2026', inconf: 0, status: 'Finalizado' },
+    { id: 2, modelo: 'Checklist Saída', empresa: 'Frota Norte', veiculo: 'XYZ-5678', motorista: 'Maria', data: '09/07/2026', inconf: 1, status: 'Pendente' }
+  ];
+
   data: any[] = [];
 
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const status = params['status'];
+      if (status) {
+        this.data = this.allData.filter(item => item.status.toLowerCase() === String(status).toLowerCase());
+        this.subtitle = `Filtrando por: ${status}`;
+      } else {
+        this.data = [...this.allData];
+        this.subtitle = 'Histórico de checklists preenchidos';
+      }
+    });
+  }
+
   onPrimaryAction(): void {
-    // Redirecionamento ou modal de cadastro
+    this.router.navigate(['/checklists/novo']);
   }
 
   onFilterApplied(filters: any): void {

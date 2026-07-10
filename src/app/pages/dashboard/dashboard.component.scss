@@ -41,6 +41,10 @@
     font-size: 0.85rem;
   }
 
+  .user-email {
+    color: #6c757d;
+  }
+
   .card {
     border-radius: 12px;
     background-color: var(--bs-card-bg);
@@ -53,6 +57,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .cartao-animado {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .cartao-animado:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
   }
 
   .bg-success-subtle { background-color: rgba(0, 207, 128, 0.15) !important; }
@@ -76,3 +90,26 @@
   .bg-primary-subtle { background-color: rgba(79, 70, 229, 0.15) !important; }
   .text-primary { color: #4f46e5 !important; }
 }
+
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    padding-left: 0 !important;
+    padding-top: 70px !important;
+  }
+
+  .dashboard-wrapper .header-dashboard {
+    left: 0 !important;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1045;
+    height: 60px;
+  }
+
+  .dashboard-wrapper .content-layout {
+    margin-top: 80px;
+    padding: 0.75rem;
+  }
+}
+
+.mobile-hamburger i { font-size: 1.05rem; }
