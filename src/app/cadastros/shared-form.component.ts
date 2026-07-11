@@ -193,16 +193,19 @@ export interface FormConfig {
     }
 
     .form-row {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
 
-      &.row-2col {
-        grid-template-columns: repeat(2, 1fr);
+      > * {
+        flex: 1 1 100%;
+        min-width: 0;
       }
 
-      &.row-3col {
-        grid-template-columns: repeat(3, 1fr);
+      @media (min-width: 768px) {
+        > .col-md-6 { flex: 1 1 calc(50% - 0.5rem); }
+        > .col-md-4 { flex: 1 1 calc(33.333% - 0.667rem); }
+        > .col-md-8 { flex: 1 1 calc(66.667% - 0.333rem); }
       }
     }
 
@@ -341,10 +344,6 @@ export interface FormConfig {
       .form-header {
         flex-direction: column;
         gap: 1rem;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr !important;
       }
     }
     @media (max-width: 576px) {

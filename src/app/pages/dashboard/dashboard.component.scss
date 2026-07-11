@@ -11,7 +11,7 @@
   .header-dashboard {
     left: 260px;
     height: 60px;
-    z-index: 1030;
+    z-index: 1020;
     background-color: var(--bs-card-bg) !important;
     border-color: var(--bs-border-color) !important;
     transition: left 0.25s ease-in-out;
@@ -91,6 +91,12 @@
   .text-primary { color: #4f46e5 !important; }
 }
 
+@media (min-width: 769px) {
+  .w-md-50 {
+    width: 50% !important;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-wrapper {
     padding-left: 0 !important;
@@ -102,8 +108,17 @@
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 1045;
+    z-index: 1010;
     height: 60px;
+    padding-left: 3.25rem !important;
+  }
+
+  .dashboard-wrapper .header-dashboard .header-search-row {
+    display: none !important;
+  }
+
+  .dashboard-wrapper .header-dashboard .header-actions-row {
+    margin-left: auto;
   }
 
   .dashboard-wrapper .content-layout {

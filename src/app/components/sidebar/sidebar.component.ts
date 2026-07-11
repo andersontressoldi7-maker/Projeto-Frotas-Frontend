@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -11,10 +11,9 @@ import { ThemeService } from '../../services/theme.service';
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent implements OnInit {
   isCollapsed = false;
   isMobileOpen = false;
-  private _mobileToggleHandler = () => this.toggleMobileOpen();
 
   menuItems = [
     { icon: 'bi-grid', label: 'Dashboard', route: '/dashboard', active: true },
@@ -63,10 +62,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       wrapper?.classList.remove('collapsed');
       header?.classList.remove('collapsed');
     }
-
-    try {
-      document.addEventListener('toggle-mobile-sidebar', this._mobileToggleHandler as EventListener);
-    } catch {}
   }
 
   logout(): void {
@@ -111,11 +106,5 @@ export class SidebarComponent implements OnInit, OnDestroy {
   closeMobile(): void {
     this.isMobileOpen = false;
     document.body.style.overflow = '';
-  }
-
-  ngOnDestroy(): void {
-    try {
-      document.removeEventListener('toggle-mobile-sidebar', this._mobileToggleHandler as EventListener);
-    } catch {}
   }
 }

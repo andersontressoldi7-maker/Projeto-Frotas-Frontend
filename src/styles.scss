@@ -25,7 +25,7 @@ body {
 .header-dashboard {
   left: 260px;
   height: 60px;
-  z-index: 1030;
+  z-index: 1020;
   background-color: var(--bs-card-bg) !important;
   border-color: var(--bs-border-color) !important;
   transition: left 0.25s ease-in-out;
@@ -68,8 +68,6 @@ body {
   .header-dashboard.collapsed {
     left: 0 !important;
     width: 100% !important;
-    flex-direction: column;
-    gap: 1rem;
   }
 
   .global-hamburger {
