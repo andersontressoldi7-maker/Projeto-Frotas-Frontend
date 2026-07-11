@@ -1,6 +1,8 @@
 {
-  "cleanUrls": true,
+  "framework": null,
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/Projeto-Frotas-Frontend/browser",
+  "cleanUrls": true,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
