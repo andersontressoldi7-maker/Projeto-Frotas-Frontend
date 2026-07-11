@@ -1,5 +1,6 @@
 {
   "cleanUrls": true,
+  "outputDirectory": "dist/Projeto-Frotas-Frontend/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
