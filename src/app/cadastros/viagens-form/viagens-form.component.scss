@@ -1,6 +1,6 @@
 .form-header {
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--bs-border-color);
 }
 
 .tabs-container {
@@ -19,7 +19,7 @@
       border: none;
       cursor: pointer;
       font-weight: 600;
-      color: #999;
+      color: var(--bs-secondary-color);
       transition: all 0.2s;
       position: relative;
       display: flex;
@@ -65,20 +65,20 @@
 .card {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e0e0e0 !important;
+  border: 1px solid var(--bs-border-color) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 
   .card-body {
     .card-title {
       font-weight: 600;
-      color: #333;
+      color: var(--bs-body-color);
     }
   }
 }
 
 .form-label {
   font-weight: 500;
-  color: #333;
+  color: var(--bs-body-color);
   margin-bottom: 0.5rem;
   font-size: 0.95rem;
 
@@ -110,7 +110,7 @@
 .form-control,
 .input-group-text {
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--bs-border-color);
   transition: all 0.2s;
 
   &:focus {
@@ -121,7 +121,8 @@
 
 .input-group {
   .input-group-text {
-    background: #f8f9fa;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
     border-right: none;
   }
 
@@ -136,9 +137,9 @@
 
 .subsection {
   padding: 1rem;
-  border: 1px solid #e7ecef;
+  border: 1px solid var(--bs-border-color);
   border-radius: 10px;
-  background: #fcfdfe;
+  background: var(--bs-tertiary-bg);
 
   .subsection-header {
     display: flex;
@@ -153,14 +154,14 @@
   display: inline-flex;
   gap: 0.5rem;
   padding: 0.25rem;
-  background: #f3f6f8;
+  background: var(--bs-tertiary-bg);
   border-radius: 999px;
   margin-bottom: 1rem;
 
   .sub-nav-tab {
     border: none;
     background: transparent;
-    color: #6c757d;
+    color: var(--bs-secondary-color);
     padding: 0.5rem 1rem;
     border-radius: 999px;
     font-weight: 600;
@@ -180,9 +181,9 @@
 
   .items-list__item {
     padding: 1rem;
-    border: 1px solid #e7ecef;
+    border: 1px solid var(--bs-border-color);
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--bs-tertiary-bg);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   }
 }
@@ -192,7 +193,7 @@
   gap: 0.35rem;
   padding: 0.25rem;
   border-radius: 999px;
-  background: #edf2f6;
+  background: var(--bs-tertiary-bg);
 
   .toggle-option {
     border: none;
@@ -200,7 +201,7 @@
     border-radius: 999px;
     padding: 0.45rem 0.8rem;
     font-size: 0.9rem;
-    color: #5f6b7a;
+    color: var(--bs-secondary-color);
     transition: all 0.2s ease;
 
     &.active {
@@ -212,7 +213,7 @@
 }
 
 .resumo-financeiro {
-  background: #f8f9fa;
+  background: var(--bs-tertiary-bg);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -226,16 +227,16 @@
     font-size: 0.95rem;
 
     &:not(:last-child) {
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--bs-border-color);
     }
 
     .resumo-label {
-      color: #666;
+      color: var(--bs-secondary-color);
       font-weight: 500;
     }
 
     .resumo-valor {
-      color: #333;
+      color: var(--bs-body-color);
       font-weight: 600;
     }
 

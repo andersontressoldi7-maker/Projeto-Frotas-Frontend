@@ -1,0 +1,107 @@
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bs-body-bg);
+  position: relative;
+  padding: 1.5rem;
+}
+
+.theme-toggle-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #40916c;
+    color: #40916c;
+  }
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+}
+
+.brand {
+  .brand-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-control,
+.input-group-text {
+  border-radius: 8px;
+  border: 1px solid var(--bs-border-color);
+  transition: all 0.2s;
+
+  &:focus {
+    border-color: #40916c;
+    box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.1);
+  }
+}
+
+.input-group {
+  .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .btn-outline-secondary {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+}
+
+.btn-success {
+  background: #40916c;
+  border-color: #40916c;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #2d6a52;
+    border-color: #2d6a52;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+  }
+}
+
+.register a,
+.back-link {
+  color: #40916c;
+  font-weight: 600;
+
+  &:hover {
+    color: #2d6a52;
+  }
+}
+
+@media (max-width: 576px) {
+  .theme-toggle-btn {
+    top: 1rem;
+    right: 1rem;
+  }
+}

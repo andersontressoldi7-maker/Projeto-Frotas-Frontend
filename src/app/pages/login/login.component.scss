@@ -13,7 +13,7 @@
   width: 42px;
   height: 42px;
   border: 1px solid var(--bs-border-color);
-  background: var(--bs-card-bg, #fff);
+  background: var(--bs-tertiary-bg);
   color: var(--bs-body-color);
   transition: all 0.2s;
 
@@ -50,7 +50,7 @@
 .form-control,
 .input-group-text {
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--bs-border-color);
   transition: all 0.2s;
 
   &:focus {

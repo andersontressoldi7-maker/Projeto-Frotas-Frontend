@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 
 @Component({
   selector: 'app-tipos-despesas-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
   templateUrl: './tipos-despesas-form.component.html',
   styleUrls: ['./tipos-despesas-form.component.scss']
 })

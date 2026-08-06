@@ -1,4 +1,5 @@
 <app-sidebar></app-sidebar>
+<app-header></app-header>
 
 <div class="dashboard-wrapper">
   <main class="content-layout">
@@ -10,6 +11,55 @@
       </div>
 
       <div class="accordion d-flex flex-column gap-3" id="accordionConfig">
+        <div class="accordion-item config-accordion-item border-0 shadow-sm">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed p-4 bg-transparent shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#config-cores-status">
+              <div class="d-flex align-items-center gap-3">
+                <div class="icon-box rounded-3 p-2 d-flex align-items-center justify-content-center bg-body-tertiary">
+                  <i class="bi bi-palette fs-5"></i>
+                </div>
+                <h6 class="fw-bold mb-0 text-body fs-6">Cores de Status e Prioridade</h6>
+              </div>
+            </button>
+          </h2>
+
+          <div id="config-cores-status" class="accordion-collapse collapse" data-bs-parent="#accordionConfig">
+            <div class="accordion-body px-4 pb-4 pt-0 border-top mt-2">
+              <div class="cores-grupo pt-4" *ngFor="let grupo of gruposCores">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold mb-0 text-body fs-6">{{ nomeGrupo(grupo) }}</h6>
+                  <button type="button" class="btn btn-sm btn-link text-decoration-none" (click)="restaurarPadraoGrupo(grupo)">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar padrão
+                  </button>
+                </div>
+
+                <div class="cores-valor-row d-flex align-items-center justify-content-between flex-wrap gap-2 py-2" *ngFor="let valor of valoresDoGrupo(grupo)">
+                  <span class="badge rounded-pill px-3 fw-normal" [class.bg-success-subtle]="corAtual(grupo, valor) === 'success'" [class.text-success]="corAtual(grupo, valor) === 'success'"
+                        [class.bg-info-subtle]="corAtual(grupo, valor) === 'info'" [class.text-info]="corAtual(grupo, valor) === 'info'"
+                        [class.bg-warning-subtle]="corAtual(grupo, valor) === 'warning'" [class.text-warning]="corAtual(grupo, valor) === 'warning'"
+                        [class.bg-laranja-subtle]="corAtual(grupo, valor) === 'laranja'" [class.text-laranja]="corAtual(grupo, valor) === 'laranja'"
+                        [class.bg-danger-subtle]="corAtual(grupo, valor) === 'danger'" [class.text-danger]="corAtual(grupo, valor) === 'danger'"
+                        [class.bg-secondary-subtle]="corAtual(grupo, valor) === 'secondary'" [class.text-secondary]="corAtual(grupo, valor) === 'secondary'">
+                    {{ valor }}
+                  </span>
+
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="small text-muted fst-italic" *ngIf="ehConclusaoForcada(grupo, valor)">Sempre verde (conclusão)</span>
+                    <div class="d-flex gap-2" *ngIf="!ehConclusaoForcada(grupo, valor)">
+                      <button type="button" class="swatch-cor" *ngFor="let cor of coresDisponiveis"
+                              [class.selecionada]="corAtual(grupo, valor) === cor.token"
+                              [class]="'swatch-' + cor.token"
+                              [title]="cor.label"
+                              (click)="selecionarCor(grupo, valor, cor.token)">
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="accordion-item config-accordion-item border-0 shadow-sm" *ngFor="let config of configuracoes">
           
           <h2 class="accordion-header">

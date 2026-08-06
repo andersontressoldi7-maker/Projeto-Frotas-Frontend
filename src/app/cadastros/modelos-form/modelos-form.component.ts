@@ -3,55 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
-import { ToastsComponent } from '../../components/toasts.component';
 import { ToastService } from '../../components/toast.service';
 import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
 
 @Component({
   selector: 'app-modelos-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, SharedFormComponent, ToastsComponent],
-  template: `
-    <app-sidebar></app-sidebar>
-    <app-toasts></app-toasts>
-    <div class="dashboard-wrapper">
-      <main class="content-layout">
-        <div class="container-fluid p-4">
-          <app-shared-form [config]="config" [formData]="formulario" [extraValidationFn]="podeSalvar" (salvar)="aoSalvar($event)" (cancelar)="aoCancelar()"></app-shared-form>
-
-          <div class="card mt-4">
-            <div class="card-body">
-              <h5 class="card-title">Itens do Modelo</h5>
-              <p class="text-muted">Adicione ao menos um item. Cada item só pode ser adicionado uma vez.</p>
-
-              <div *ngIf="mensagemErro" class="alert alert-danger">{{ mensagemErro }}</div>
-
-              <div class="d-flex gap-2 mb-3">
-                <select class="form-select" [(ngModel)]="idItemSelecionado">
-                  <option [ngValue]="null">Selecione o item...</option>
-                  <option *ngFor="let it of itensDisponiveis" [ngValue]="it.id">{{ it.nome }} ({{ it.categoria }})</option>
-                </select>
-                <button class="btn btn-success" (click)="adicionarItem()">Adicionar</button>
-              </div>
-
-              <ul class="list-group">
-                <li *ngFor="let it of itens; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>{{ it.nome }}</strong>
-                    <div class="text-muted small">{{ it.categoria }}</div>
-                  </div>
-                  <button class="btn btn-sm btn-outline-danger" (click)="removerItem(i)">Remover</button>
-                </li>
-                <li *ngIf="itens.length === 0" class="list-group-item text-muted">Nenhum item adicionado.</li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
-      </main>
-    </div>
-  `
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, SharedFormComponent],
+  templateUrl: './modelos-form.component.html'
 })
 export class ModelosFormComponent implements OnInit {
   modoEdicao = false;
@@ -124,7 +85,7 @@ export class ModelosFormComponent implements OnInit {
         const dadosSimulados = {
           nome: existente?.nome ?? 'Checklist Diário',
           tipo: existente?.tipo ?? 'Completo',
-          ativo: true,
+          ativo: existente?.ativo ?? true,
           itens: [ { id: 1, nome: 'Lampadas', categoria: 'Elétrica' }, { id: 2, nome: 'Pneus', categoria: 'Pneus' } ]
         };
 
@@ -144,10 +105,10 @@ export class ModelosFormComponent implements OnInit {
 
     let idSalvo: number;
     if (this.modoEdicao && this.idEmEdicao !== null) {
-      this.store.atualizarModelo(this.idEmEdicao, { nome: dados.nome, tipo: dados.tipo });
+      this.store.atualizarModelo(this.idEmEdicao, { nome: dados.nome, tipo: dados.tipo, ativo: dados.ativo });
       idSalvo = this.idEmEdicao;
     } else {
-      const novo = this.store.adicionarModelo({ nome: dados.nome, tipo: dados.tipo });
+      const novo = this.store.adicionarModelo({ nome: dados.nome, tipo: dados.tipo, ativo: dados.ativo, usosCount: 0 });
       idSalvo = novo.id;
     }
 

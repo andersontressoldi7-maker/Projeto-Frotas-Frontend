@@ -4,6 +4,7 @@ export interface GridColumn {
   type?: 'text' | 'number' | 'date' | 'badge' | 'acoes';
   filterType?: 'text' | 'number' | 'date' | 'select' | 'multi-select';
   filterOptions?: string[];
+  colorGroup?: string;
 }
 
 export interface GridFilterOption {

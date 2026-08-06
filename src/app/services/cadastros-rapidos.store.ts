@@ -16,6 +16,8 @@ export interface ModeloChecklistRef {
   id: number;
   nome: string;
   tipo: string;
+  ativo: boolean;
+  usosCount: number;
 }
 
 @Injectable({
@@ -35,8 +37,8 @@ export class CadastrosRapidosStore {
   ];
 
   modelos: ModeloChecklistRef[] = [
-    { id: 1, nome: 'Checklist Diário Completo', tipo: 'Completo' },
-    { id: 2, nome: 'Checklist Somente Saída', tipo: 'SomenteSaida' }
+    { id: 1, nome: 'Checklist Diário Completo', tipo: 'Completo', ativo: true, usosCount: 2 },
+    { id: 2, nome: 'Checklist Somente Saída', tipo: 'SomenteSaida', ativo: true, usosCount: 0 }
   ];
 
   obterVeiculo(id: number): VeiculoRef | undefined {
@@ -88,5 +90,17 @@ export class CadastrosRapidosStore {
     if (indice > -1) {
       this.modelos[indice] = { ...this.modelos[indice], ...dados, id };
     }
+  }
+
+  excluirModelo(id: number): void {
+    this.modelos = this.modelos.filter(m => m.id !== id);
+  }
+
+  modeloEstaEmUso(id: number): boolean {
+    return (this.obterModelo(id)?.usosCount || 0) > 0;
+  }
+
+  modelosAtivos(): ModeloChecklistRef[] {
+    return this.modelos.filter(m => m.ativo);
   }
 }

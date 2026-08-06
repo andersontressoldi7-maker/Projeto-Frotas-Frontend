@@ -1,7 +1,7 @@
 .config-accordion-item {
   border: 1px solid var(--bs-border-color) !important;
   border-radius: 16px !important;
-  background-color: var(--bs-card-bg);
+  background-color: var(--bs-tertiary-bg);
   overflow: hidden;
 
   .accordion-button::after {
@@ -27,6 +27,48 @@
     border-color: #00cf80;
     box-shadow: 0 0 0 4px rgba(0, 207, 128, 0.15);
   }
+}
+
+.bg-laranja-subtle { background-color: rgba(253, 126, 20, 0.15) !important; }
+.text-laranja { color: #fd7e14 !important; }
+
+:host-context([data-bs-theme="dark"]) {
+  .bg-laranja-subtle { background-color: rgba(253, 126, 20, 0.24) !important; }
+  .text-laranja { color: #ffa456 !important; }
+}
+
+.cores-grupo {
+  border-top: 1px solid var(--bs-border-color);
+
+  &:first-child {
+    border-top: 0;
+  }
+}
+
+.cores-valor-row {
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+}
+
+.swatch-cor {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+
+  &.selecionada {
+    border-color: var(--bs-body-color);
+  }
+
+  &.swatch-success { background-color: #00cf80; }
+  &.swatch-info { background-color: #2196f3; }
+  &.swatch-warning { background-color: #ffb020; }
+  &.swatch-laranja { background-color: #fd7e14; }
+  &.swatch-danger { background-color: #f44336; }
+  &.swatch-secondary { background-color: #6c757d; }
 }
 
 .config-switch {

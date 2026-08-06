@@ -34,9 +34,6 @@
             </li>
           </ul>
         </div>
-        <button *ngIf="activeFilters.length > 0" class="btn btn-sm btn-link text-danger text-decoration-none ms-auto p-0 small" (click)="clearAllFilters()">
-          Limpar tudo
-        </button>
       </div>
 
       <div class="row g-3 align-items-end" *ngIf="activeFilters.length > 0">
@@ -48,11 +45,11 @@
             </label>
 
             <ng-container [ngSwitch]="filter.option.type">
-              <input *ngSwitchCase="'text'" type="text" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()"/>
-              <input *ngSwitchCase="'number'" type="number" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()"/>
-              <input *ngSwitchCase="'date'" type="date" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()"/>
-              
-              <select *ngSwitchCase="'select'" class="form-select form-select-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (ngModelChange)="applyFilters()">
+              <input *ngSwitchCase="'text'" type="text" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (keydown.enter)="applyFilters()"/>
+              <input *ngSwitchCase="'number'" type="number" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]" (keydown.enter)="applyFilters()"/>
+              <input *ngSwitchCase="'date'" type="date" class="form-control form-control-sm" [(ngModel)]="currentFiltersModel[filter.option.key]"/>
+
+              <select *ngSwitchCase="'select'" class="form-select form-select-sm" [(ngModel)]="currentFiltersModel[filter.option.key]">
                 <option value="">Todos</option>
                 <option *ngFor="let opt of filter.option.options" [value]="opt">{{ opt }}</option>
               </select>
@@ -75,6 +72,15 @@
           </div>
         </div>
       </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-1" *ngIf="activeFilters.length > 0">
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearAllFilters()">
+          <i class="bi bi-x-lg me-1"></i> Limpar Filtros
+        </button>
+        <button type="button" class="btn btn-sm btn-success" (click)="applyFilters()">
+          <i class="bi bi-check-lg me-1"></i> Aplicar Filtros
+        </button>
+      </div>
     </div>
   </div>
 
@@ -89,10 +95,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let row of data">
+          <tr *ngFor="let row of filteredData">
             <td *ngFor="let col of columns" class="px-4 py-3 text-body fs-6" [class.text-end]="col.key === 'acoes'">
               <ng-container [ngSwitch]="col.type || col.key">
-                <span *ngSwitchCase="'badge'" class="badge bg-danger-subtle text-danger rounded-pill px-3 fw-normal">
+                <span *ngSwitchCase="'badge'" class="badge rounded-pill px-3 fw-normal" [ngClass]="obterClassesBadge(col, row[col.key])">
                   {{ row[col.key] }}
                 </span>
                 <div *ngSwitchCase="'acoes'" class="d-flex justify-content-end gap-2">
@@ -107,7 +113,7 @@
               </ng-container>
             </td>
           </tr>
-          <tr *ngIf="data.length === 0">
+          <tr *ngIf="filteredData.length === 0">
             <td [attr.colspan]="columns.length" class="text-center py-5 text-muted small">
               {{ emptyMessage }}
             </td>

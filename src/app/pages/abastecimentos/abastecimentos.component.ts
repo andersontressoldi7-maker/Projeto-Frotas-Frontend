@@ -3,12 +3,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn } from '../../interfaces/grid.interface';
+import { DialogService } from '../../components/dialog/dialog.service';
+import { ToastService } from '../../components/toast.service';
 
 @Component({
   selector: 'app-abastecimentos',
   standalone: true,
-  imports: [CommonModule, SharedGridComponent, SidebarComponent],
+  imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
   templateUrl: './abastecimentos.component.html',
   styleUrls: ['./abastecimentos.component.scss']
 })
@@ -25,7 +28,7 @@ export class AbastecimentosComponent implements OnInit {
     { key: 'combustivel', label: 'Combustível', type: 'text' },
     { key: 'qtLitros', label: 'Litros', type: 'number' },
     { key: 'valorTotal', label: 'Valor Total', type: 'number' },
-    { key: 'tipoAbastecimento', label: 'Tipo', type: 'badge' },
+    { key: 'tipoAbastecimento', label: 'Tipo', type: 'badge', colorGroup: 'tipoAbastecimento' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
@@ -36,7 +39,12 @@ export class AbastecimentosComponent implements OnInit {
 
   data: any[] = [];
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private dialogService: DialogService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -61,11 +69,14 @@ export class AbastecimentosComponent implements OnInit {
     this.router.navigate(['/abastecimentos', row.id, 'editar']);
   }
 
-  onDeleteClick(row: any): void {
-    const confirmado = confirm(`Excluir o abastecimento do veículo ${row.placa} em ${row.dataAbastecimento}?`);
-    if (confirmado) {
-      this.allData = this.allData.filter(item => item.id !== row.id);
-      this.data = this.data.filter(item => item.id !== row.id);
+  async onDeleteClick(row: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o abastecimento do veículo ${row.placa} em ${row.dataAbastecimento}?`, 'Excluir abastecimento');
+    if (!confirmado) {
+      return;
     }
+
+    this.allData = this.allData.filter(item => item.id !== row.id);
+    this.data = this.data.filter(item => item.id !== row.id);
+    this.toastService.success('Abastecimento excluído.', 'Sucesso');
   }
 }

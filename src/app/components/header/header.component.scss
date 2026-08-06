@@ -1,0 +1,137 @@
+.header-dashboard {
+  left: 260px;
+  height: 60px;
+  z-index: 1020;
+  background-color: var(--bs-body-bg) !important;
+  border-color: var(--bs-border-color) !important;
+  transition: left 0.25s ease-in-out;
+
+  &.collapsed {
+    left: 70px;
+  }
+
+  .notif-dot {
+    border: 2px solid var(--bs-body-bg);
+  }
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+}
+
+.user-email {
+  color: #6c757d;
+}
+
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-body-color);
+
+  &:hover {
+    background-color: var(--bs-tertiary-bg);
+  }
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 10px;
+  z-index: 1050;
+  overflow: hidden;
+}
+
+.notif-panel {
+  width: 340px;
+  max-width: 90vw;
+
+  .notif-categorias {
+    background-color: var(--bs-body-bg);
+  }
+
+  .categoria-chip {
+    border: 1px solid var(--bs-border-color);
+    background: transparent;
+    color: var(--bs-secondary-color);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: var(--bs-tertiary-bg);
+    }
+
+    &.ativa {
+      background-color: #40916c;
+      border-color: #40916c;
+      color: #fff;
+    }
+  }
+
+  .notif-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .notif-item {
+    border-bottom: 1px solid var(--bs-border-color);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &.nao-lida {
+      background-color: rgba(79, 70, 229, 0.08);
+    }
+  }
+}
+
+.user-panel {
+  width: 200px;
+  padding: 0.4rem;
+}
+
+.dropdown-panel-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  color: var(--bs-body-color);
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-dashboard {
+    left: 0 !important;
+    width: 100% !important;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1010;
+    height: 60px;
+    padding-left: 3.25rem !important;
+  }
+
+  .header-actions-row {
+    margin-left: auto;
+  }
+}

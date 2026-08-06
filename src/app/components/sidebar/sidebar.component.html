@@ -17,26 +17,31 @@
   
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item mb-1" *ngFor="let item of menuItems">
-      <a [routerLink]="item.route" routerLinkActive="active" class="nav-link d-flex align-items-center" [title]="item.label" (click)="closeMobile()">
-        <i class="bi {{ item.icon }}" [class.me-3]="!isCollapsed"></i>
-        <span class="nav-text">{{ item.label }}</span>
-        <span class="shortcut-badge ms-auto" *ngIf="item.shortcut">{{ item.shortcut }}</span>
-      </a>
+      <ng-container *ngIf="!item.children; else grupoTpl">
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-link d-flex align-items-center" [title]="item.label" (click)="closeMobile()">
+          <i class="bi {{ item.icon }}" [class.me-3]="!isCollapsed"></i>
+          <span class="nav-text">{{ item.label }}</span>
+        </a>
+      </ng-container>
+
+      <ng-template #grupoTpl>
+        <a class="nav-link d-flex align-items-center grupo-toggle" [class.active]="grupoAtivo(item)" [title]="item.label" (click)="navegarParaGrupo(item)">
+          <i class="bi {{ item.icon }}" [class.me-3]="!isCollapsed"></i>
+          <span class="nav-text flex-grow-1">{{ item.label }}</span>
+          <i class="bi bi-chevron-down nav-text chevron-grupo" *ngIf="!isCollapsed" [class.rotacionado]="grupoExpandido === item.label"></i>
+        </a>
+
+        <ul class="nav flex-column submenu" *ngIf="!isCollapsed && grupoExpandido === item.label">
+          <li *ngFor="let filho of item.children">
+            <a [routerLink]="filho.route" routerLinkActive="active" class="nav-link sub-link d-flex align-items-center" (click)="closeMobile()">
+              <i class="bi {{ filho.icon }} me-2"></i>
+              <span class="nav-text">{{ filho.label }}</span>
+            </a>
+          </li>
+        </ul>
+      </ng-template>
     </li>
   </ul>
-
-  <div class="theme-toggle-container d-flex justify-content-center pt-3 border-top">
-    <button class="btn btn-link p-2 d-flex align-items-center justify-content-center theme-btn w-100" (click)="themeService.toggleTheme()">
-      <i class="bi" [class.bi-sun-fill]="themeService.isDark()" [class.bi-moon-fill]="!themeService.isDark()" style="font-size: 1.15rem;"></i>
-      <span class="ms-2 small fw-medium nav-text">
-        {{ themeService.isDark() ? 'Modo Claro' : 'Modo Escuro' }}
-      </span>
-    </button>
-    <button class="btn btn-link p-2 d-flex align-items-center justify-content-center logout-btn w-100" (click)="logout()" title="Sair" aria-label="Sair" [attr.data-title]="'Sair'">
-      <i class="bi bi-box-arrow-right text-danger" style="font-size: 1.15rem;"></i>
-      <span class="ms-2 small fw-medium text-danger nav-text">Sair</span>
-    </button>
-  </div>
 </div>
 
 <div class="sidebar-backdrop" *ngIf="isMobileOpen" (click)="closeMobile()"></div>

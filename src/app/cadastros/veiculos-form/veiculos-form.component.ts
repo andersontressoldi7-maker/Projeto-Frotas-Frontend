@@ -3,26 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
-import { ToastsComponent } from '../../components/toasts.component';
 import { ToastService } from '../../components/toast.service';
 import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
 
 @Component({
   selector: 'app-veiculos-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, SharedFormComponent, ToastsComponent],
-  template: `
-    <app-sidebar></app-sidebar>
-    <app-toasts></app-toasts>
-    <div class="dashboard-wrapper">
-      <main class="content-layout">
-        <div class="container-fluid p-4">
-          <app-shared-form [config]="config" [formData]="formulario" [extraValidationFn]="canSave" (salvar)="onSalvar($event)" (cancelar)="onCancelar()"></app-shared-form>
-        </div>
-      </main>
-    </div>
-  `
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, SharedFormComponent],
+  templateUrl: './veiculos-form.component.html'
 })
 export class VeiculosFormComponent implements OnInit {
   modoEdicao = false;

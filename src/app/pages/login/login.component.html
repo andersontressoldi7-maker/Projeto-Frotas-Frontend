@@ -28,7 +28,7 @@
         <div class="form-group mb-3">
           <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="form-label mb-0" for="password">Senha</label>
-            <a href="#" class="small forgot text-decoration-none">Esqueceu a senha?</a>
+            <a routerLink="/forgot-password" class="small forgot text-decoration-none">Esqueceu a senha?</a>
           </div>
           <div class="input-group">
             <input id="password" [type]="showPassword ? 'text' : 'password'" name="password" class="form-control" [(ngModel)]="password" placeholder="••••••••" autocomplete="current-password" required>

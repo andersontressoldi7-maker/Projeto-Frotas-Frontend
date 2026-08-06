@@ -3,26 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent {
-  emailUsuario = 'andersontressoldi7@gmail.com';
-  iniciaisUsuario = 'AN';
-
   constructor(private router: Router) {}
-
-  alternarMenuMobile(): void {
-    try {
-      const evento = new CustomEvent('toggle-mobile-sidebar');
-      document.dispatchEvent(evento);
-    } catch {}
-  }
 
   cartoes = [
     { titulo: 'Checklists hoje', valor: 0, icone: 'bi-check2-square', cor: 'success', rota: '' },

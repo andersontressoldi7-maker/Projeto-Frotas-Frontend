@@ -1,5 +1,5 @@
 <app-sidebar></app-sidebar>
-<app-toasts></app-toasts>
+<app-header></app-header>
 
 <div class="dashboard-wrapper">
   <main class="content-layout">
@@ -75,13 +75,13 @@
 
                   <div class="form-group mb-3">
                     <label class="form-label">Motorista</label>
-                    <div class="form-control bg-light" style="cursor: not-allowed;">
+                    <div class="form-control bg-body-tertiary" style="cursor: not-allowed;">
                       {{ motorista.nome }}
                     </div>
                   </div>
 
                   <div class="form-group mb-3">
-                    <label class="form-label required d-flex justify-content-between align-items-center">
+                    <label class="form-label required d-flex align-items-center gap-2">
                       <span>Modelo de Checklist</span>
                       <span class="atalhos-cadastro">
                         <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('modelo', 'novo', $event)">
@@ -106,7 +106,7 @@
                   </div>
 
                   <div class="form-group mb-3">
-                    <label class="form-label required d-flex justify-content-between align-items-center">
+                    <label class="form-label required d-flex align-items-center gap-2">
                       <span>Veículo</span>
                       <span class="atalhos-cadastro">
                         <button type="button" class="btn-atalho-cadastro" (click)="irParaCadastro('veiculo', 'novo', $event)">
@@ -226,7 +226,7 @@
 
                   <div class="row mb-4">
                     <div class="col-md-6 mb-3 mb-md-0">
-                      <div class="p-3 bg-light rounded border">
+                      <div class="p-3 bg-body-tertiary rounded border">
                         <small class="text-muted d-block mb-1">Veículo</small>
                         <strong class="d-block mb-2">ABC-1234 (Volvo FH)</strong>
                         <small class="text-muted d-block mb-1">KM Registrado na Saída</small>
@@ -234,7 +234,7 @@
                       </div>
                     </div>
                     <div class="col-md-6">
-                      <div class="p-3 bg-light rounded border h-100">
+                      <div class="p-3 bg-body-tertiary rounded border h-100">
                         <small class="text-muted d-block mb-1">Modelo</small>
                         <strong>Checklist Diário Completo</strong>
                       </div>
@@ -326,7 +326,7 @@
 
               <div class="row g-3">
                 <div class="col-md-6">
-                  <div class="p-3 bg-light rounded border h-100">
+                  <div class="p-3 bg-body-tertiary rounded border h-100">
                     <small class="text-muted d-block mb-2">Saída</small>
                     <div class="mb-2"><strong>Abertura:</strong> {{ tempoPreenchimento.aberturaSaida }}</div>
                     <div class="mb-2"><strong>Encerramento:</strong> {{ tempoPreenchimento.encerramentoSaida }}</div>
@@ -335,7 +335,7 @@
                 </div>
 
                 <div *ngIf="eModeloCompleto()" class="col-md-6">
-                  <div class="p-3 bg-light rounded border h-100">
+                  <div class="p-3 bg-body-tertiary rounded border h-100">
                     <small class="text-muted d-block mb-2">Retorno</small>
                     <div class="mb-2"><strong>Abertura:</strong> {{ tempoPreenchimento.aberturaRetorno }}</div>
                     <div class="mb-2"><strong>Encerramento:</strong> {{ tempoPreenchimento.encerramentoRetorno }}</div>

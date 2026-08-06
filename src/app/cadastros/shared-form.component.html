@@ -1,0 +1,126 @@
+<div class="form-wrapper">
+  <div class="form-header">
+    <div>
+      <h2 class="h4 fw-bold mb-1">{{ config.titulo }}</h2>
+      <p *ngIf="config.subtitulo" class="text-muted small mb-0">{{ config.subtitulo }}</p>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="onCancelar()">
+      <i class="bi bi-x-lg"></i> Cancelar
+    </button>
+  </div>
+
+  <div class="form-container">
+    <div *ngFor="let secao of config.secoes" class="card border-0 shadow-sm mb-3">
+      <div class="card-body p-4">
+        <h5 class="card-title mb-4">{{ secao.titulo }}</h5>
+
+        <div class="form-row">
+          <div *ngFor="let campo of secao.campos" [ngClass]="obterClasseTamanho(campo)">
+            <div class="form-group">
+              <label class="form-label" [class.required]="campo.obrigatorio">
+                {{ campo.label }}
+              </label>
+
+              <input
+                *ngIf="['text', 'email', 'tel', 'number', 'date', 'time', 'datetime-local'].includes(campo.tipo)"
+                [type]="campo.tipo"
+                class="form-control"
+                [(ngModel)]="formData[campo.nome]"
+                [placeholder]="campo.placeholder || ''"
+                [readOnly]="campo.readOnly || false"
+                [required]="campo.obrigatorio || false">
+
+              <div *ngIf="campo.obrigatorio && !isCampoValido(campo)" class="text-danger small mt-1">
+                {{ campo.mensagemErro || (campo.label + ' é obrigatório.') }}
+              </div>
+
+              <textarea
+                *ngIf="campo.tipo === 'textarea'"
+                class="form-control"
+                [(ngModel)]="formData[campo.nome]"
+                [placeholder]="campo.placeholder || ''"
+                rows="4"
+                [required]="campo.obrigatorio || false"></textarea>
+
+              <div *ngIf="campo.obrigatorio && !isCampoValido(campo) && campo.tipo === 'textarea'" class="text-danger small mt-1">
+                {{ campo.mensagemErro || (campo.label + ' é obrigatório.') }}
+              </div>
+
+              <select
+                *ngIf="campo.tipo === 'select'"
+                class="form-control"
+                [(ngModel)]="formData[campo.nome]"
+                [required]="campo.obrigatorio || false">
+                <option value="">Selecione...</option>
+                <option *ngFor="let opt of campo.opcoes" [value]="opt.id">{{ opt.label }}</option>
+              </select>
+              <div *ngIf="campo.obrigatorio && !isCampoValido(campo) && campo.tipo === 'select'" class="text-danger small mt-1">
+                {{ campo.mensagemErro || (campo.label + ' é obrigatório.') }}
+              </div>
+
+              <div
+                *ngIf="campo.tipo === 'pills'"
+                class="pills-container">
+                <button
+                  *ngFor="let opt of campo.opcoes"
+                  type="button"
+                  class="pill-btn"
+                  [class.ativo]="formData[campo.nome] === opt.id"
+                  (click)="formData[campo.nome] = opt.id">
+                  {{ opt.label }}
+                </button>
+              </div>
+
+              <div
+                *ngIf="campo.tipo === 'currency'"
+                class="input-group">
+                <span class="input-group-text">R$</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="formData[campo.nome]"
+                  [placeholder]="campo.placeholder || '0,00'"
+                  step="0.01"
+                  min="0"
+                  [required]="campo.obrigatorio || false">
+              </div>
+
+              <label
+                *ngIf="campo.tipo === 'checkbox'"
+                class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="formData[campo.nome]">
+                <span>{{ campo.label }}</span>
+              </label>
+
+              <div *ngIf="campo.tipo === 'toggle'" class="toggle-wrapper">
+                <button type="button" class="toggle-switch" [class.active]="!!formData[campo.nome]" (click)="alternarToggle(campo.nome)">
+                  <span class="toggle-knob"></span>
+                </button>
+                <span class="toggle-label">{{ campo.label }}</span>
+              </div>
+
+              <small *ngIf="campo.helpText" class="text-muted d-block mt-2">
+                {{ campo.helpText }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-light border" (click)="onCancelar()">
+      {{ config.botaoCancelLabel || 'Cancelar' }}
+    </button>
+    <button
+      class="btn btn-success"
+      (click)="onSalvar()"
+      [disabled]="!validarFormulario()">
+      <i class="bi bi-check-circle"></i>
+      {{ config.botaoPrincipalLabel || (config.modoEdicao ? 'Atualizar' : 'Criar') }}
+    </button>
+  </div>
+</div>

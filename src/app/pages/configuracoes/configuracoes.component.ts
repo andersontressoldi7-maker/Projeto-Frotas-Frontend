@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
+import { StatusColorService, CORES_DISPONIVEIS, TokenCor } from '../../services/status-color.service';
+import { ToastService } from '../../components/toast.service';
 
 interface CampoConfig {
   label: string;
@@ -20,13 +23,62 @@ interface GrupoConfig {
 @Component({
   selector: 'app-configuracoes',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, SidebarComponent, HeaderComponent],
   templateUrl: './configuracoes.component.html',
   styleUrls: ['./configuracoes.component.scss']
 })
 export class ConfiguracoesComponent {
   title = 'Configurações Globais';
   subtitle = 'Gerencie as diretrizes de funcionamento e integrações da plataforma';
+
+  coresDisponiveis = CORES_DISPONIVEIS;
+
+  nomesGruposCores: Record<string, string> = {
+    prioridadeManutencao: 'Prioridade de Manutenção',
+    statusManutencao: 'Status de Manutenção',
+    statusVeiculo: 'Status de Veículo',
+    statusChecklist: 'Status de Checklist',
+    statusGenerico: 'Status Genérico (Ativo/Inativo)',
+    tipoAbastecimento: 'Tipo de Abastecimento'
+  };
+
+  constructor(
+    private statusColorService: StatusColorService,
+    private toastService: ToastService
+  ) {}
+
+  get gruposCores(): string[] {
+    return this.statusColorService.obterGrupos();
+  }
+
+  nomeGrupo(grupo: string): string {
+    return this.nomesGruposCores[grupo] || grupo;
+  }
+
+  valoresDoGrupo(grupo: string): string[] {
+    return this.statusColorService.obterValoresDoGrupo(grupo);
+  }
+
+  corAtual(grupo: string, valor: string): TokenCor {
+    return this.statusColorService.obterCor(grupo, valor);
+  }
+
+  ehConclusaoForcada(grupo: string, valor: string): boolean {
+    return /conclu|finaliz/i.test(valor);
+  }
+
+  selecionarCor(grupo: string, valor: string, token: TokenCor): void {
+    if (this.ehConclusaoForcada(grupo, valor)) {
+      return;
+    }
+    this.statusColorService.definirCor(grupo, valor, token);
+    this.toastService.success(`Cor de "${valor}" atualizada.`, 'Sucesso');
+  }
+
+  restaurarPadraoGrupo(grupo: string): void {
+    this.statusColorService.restaurarPadrao(grupo);
+    this.toastService.info(`Cores de "${this.nomeGrupo(grupo)}" restauradas ao padrão.`, 'Restaurado');
+  }
 
   configuracoes: GrupoConfig[] = [
     {

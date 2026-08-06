@@ -1,0 +1,16 @@
+.dashboard-wrapper {
+  margin-top: 0;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.nav-tabs .nav-link {
+  color: var(--bs-body-color);
+}
+
+.nav-tabs .nav-link.active {
+  font-weight: bold;
+  color: #0ea5a4;
+}

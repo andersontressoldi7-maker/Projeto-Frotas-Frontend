@@ -1,0 +1,23 @@
+<div class="dialog-backdrop" *ngIf="dialogService.estado() as estado">
+  <div class="dialog-box shadow">
+    <div class="dialog-icon" [ngSwitch]="estado.tipo">
+      <i *ngSwitchCase="'erro'" class="bi bi-x-circle-fill text-danger"></i>
+      <i *ngSwitchCase="'confirmar'" class="bi bi-question-circle-fill text-primary"></i>
+      <i *ngSwitchDefault class="bi bi-exclamation-triangle-fill text-warning"></i>
+    </div>
+
+    <h5 class="fw-bold mb-2">{{ estado.titulo }}</h5>
+    <p class="text-muted mb-4">{{ estado.mensagem }}</p>
+
+    <div class="d-flex justify-content-center gap-2" *ngIf="estado.tipo === 'confirmar'; else somenteOk">
+      <button type="button" class="btn btn-outline-secondary px-4" (click)="responder(false)">Cancelar</button>
+      <button type="button" class="btn btn-success px-4" (click)="responder(true)">Confirmar</button>
+    </div>
+
+    <ng-template #somenteOk>
+      <div class="d-flex justify-content-center">
+        <button type="button" class="btn btn-success px-4" (click)="responder(true)">OK</button>
+      </div>
+    </ng-template>
+  </div>
+</div>

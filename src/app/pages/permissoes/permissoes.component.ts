@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
+import { ToastService } from '../../components/toast.service';
 
 interface Usuario {
   id: number;
@@ -20,7 +22,7 @@ interface TelaPermissao {
 @Component({
   selector: 'app-permissoes',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
   templateUrl: './permissoes.component.html',
   styleUrls: ['./permissoes.component.scss']
 })
@@ -44,6 +46,41 @@ export class PermissoesComponent {
     { modulo: 'Motoristas', ver: true, editar: false, excluir: false },
     { modulo: 'Manutenções', ver: true, editar: true, excluir: false }
   ];
+
+  mostrarFormNovoUsuario = false;
+  novoUsuario: { nome: string; email: string; perfil: 'Admin' | 'Customizado' } = {
+    nome: '',
+    email: '',
+    perfil: 'Customizado'
+  };
+
+  constructor(private toastService: ToastService) {}
+
+  toggleFormNovoUsuario(): void {
+    this.mostrarFormNovoUsuario = !this.mostrarFormNovoUsuario;
+    if (this.mostrarFormNovoUsuario) {
+      this.novoUsuario = { nome: '', email: '', perfil: 'Customizado' };
+    }
+  }
+
+  cadastrarUsuario(): void {
+    if (!this.novoUsuario.nome.trim() || !this.novoUsuario.email.trim()) {
+      this.toastService.error('Preencha nome e email do usuário.', 'Erro');
+      return;
+    }
+
+    const novo: Usuario = {
+      id: Math.max(0, ...this.usuarios.map(u => u.id)) + 1,
+      nome: this.novoUsuario.nome.trim(),
+      email: this.novoUsuario.email.trim(),
+      perfil: this.novoUsuario.perfil
+    };
+
+    this.usuarios.push(novo);
+    this.mostrarFormNovoUsuario = false;
+    this.toastService.success('Usuário cadastrado com sucesso.', 'Sucesso');
+    this.selecionarUsuario(novo);
+  }
 
   selecionarUsuario(usuario: Usuario): void {
     this.usuarioSelecionado = usuario;

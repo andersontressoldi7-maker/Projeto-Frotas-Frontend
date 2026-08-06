@@ -8,6 +8,21 @@ body {
   color: var(--bs-body-color);
 }
 
+[data-bs-theme="dark"] {
+  --bs-body-bg: #0b1622;
+  --bs-body-bg-rgb: 11, 22, 34;
+  --bs-body-color: #dce7ea;
+  --bs-body-color-rgb: 220, 231, 234;
+  --bs-emphasis-color: #ffffff;
+  --bs-secondary-bg: #1b3349;
+  --bs-secondary-bg-rgb: 27, 51, 73;
+  --bs-tertiary-bg: #132436;
+  --bs-tertiary-bg-rgb: 19, 36, 54;
+  --bs-secondary-color: #9fb4bf;
+  --bs-border-color: #23384a;
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.12);
+}
+
 .dashboard-wrapper {
   padding-left: 260px;
   min-height: 100vh;
@@ -20,19 +35,7 @@ body {
 
 .dashboard-wrapper .content-layout {
   padding-top: 20px;
-}
-
-.header-dashboard {
-  left: 260px;
-  height: 60px;
-  z-index: 1020;
-  background-color: var(--bs-card-bg) !important;
-  border-color: var(--bs-border-color) !important;
-  transition: left 0.25s ease-in-out;
-}
-
-.header-dashboard.collapsed {
-  left: 70px;
+  margin-top: 60px;
 }
 
 .global-hamburger {
@@ -64,10 +67,9 @@ body {
     padding-top: 70px;
   }
 
-  .header-dashboard,
-  .header-dashboard.collapsed {
-    left: 0 !important;
-    width: 100% !important;
+  .dashboard-wrapper .content-layout {
+    margin-top: 80px;
+    padding: 0.75rem;
   }
 
   .global-hamburger {

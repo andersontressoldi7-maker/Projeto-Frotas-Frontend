@@ -1,4 +1,5 @@
 <app-sidebar></app-sidebar>
+<app-header></app-header>
 <div class="dashboard-wrapper">
   <main class="content-layout">
     <app-shared-grid
@@ -8,7 +9,9 @@
       [data]="data"
       [primaryBtnLabel]="primaryBtnLabel"
       (primaryBtnClick)="onPrimaryAction()"
-      (filterApplied)="onFilterApplied($event)">
+      (filterApplied)="onFilterApplied($event)"
+      (editClick)="onEditClick($event)"
+      (deleteClick)="onDeleteClick($event)">
     </app-shared-grid>
   </main>
 </div>

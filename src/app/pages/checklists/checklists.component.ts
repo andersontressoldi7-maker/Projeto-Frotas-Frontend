@@ -3,16 +3,24 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
+import { DialogService } from '../../components/dialog/dialog.service';
+import { ToastService } from '../../components/toast.service';
 
 @Component({
   selector: 'app-checklists',
   standalone: true,
-  imports: [CommonModule, SharedGridComponent, SidebarComponent],
+  imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
   templateUrl: './checklists.component.html'
 })
 export class ChecklistsComponent implements OnInit {
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private dialogService: DialogService,
+    private toastService: ToastService
+  ) {}
   title = 'Checklists';
   subtitle = 'Histórico de checklists preenchidos';
   primaryBtnLabel = 'Preencher novo';
@@ -26,8 +34,8 @@ export class ChecklistsComponent implements OnInit {
     { key: 'motorista', label: 'Motorista', type: 'text' },
     { key: 'data', label: 'Data', type: 'date' },
     { key: 'inconf', label: 'Inconf.', type: 'number' },
-    { key: 'status', label: 'Status', type: 'badge' },
-    { key: 'acoes', label: 'Ações', type: 'text' }
+    { key: 'status', label: 'Status', type: 'badge', colorGroup: 'statusChecklist' },
+    { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
   filterOptions: GridFilterOption[] = [
@@ -68,7 +76,20 @@ export class ChecklistsComponent implements OnInit {
   }
 
   onFilterApplied(filters: any): void {
-    // Aqui chegam as propriedades ativas ex: { id: 12, modelo: 'Checklist Diário' }
-    // Pronto para aplicar no mock ou fazer o request para o backend
+  }
+
+  onEditClick(row: any): void {
+    this.router.navigate(['/checklists', row.id, 'editar']);
+  }
+
+  async onDeleteClick(row: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o checklist #${row.id}?`, 'Excluir checklist');
+    if (!confirmado) {
+      return;
+    }
+
+    this.allData = this.allData.filter(item => item.id !== row.id);
+    this.data = this.data.filter(item => item.id !== row.id);
+    this.toastService.success('Checklist excluído.', 'Sucesso');
   }
 }

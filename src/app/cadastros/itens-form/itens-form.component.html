@@ -1,0 +1,9 @@
+<app-sidebar></app-sidebar>
+<app-header></app-header>
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <app-shared-form [config]="config" [formData]="formulario" [extraValidationFn]="canSave" (salvar)="onSalvar($event)" (cancelar)="onCancelar()"></app-shared-form>
+    </div>
+  </main>
+</div>

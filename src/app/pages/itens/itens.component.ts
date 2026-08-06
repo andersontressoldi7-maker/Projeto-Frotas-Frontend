@@ -3,12 +3,15 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
+import { DialogService } from '../../components/dialog/dialog.service';
+import { ToastService } from '../../components/toast.service';
 
 @Component({
   selector: 'app-itens',
   standalone: true,
-  imports: [CommonModule, SharedGridComponent, SidebarComponent],
+  imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
   templateUrl: './itens.component.html'
 })
 export class ItensComponent {
@@ -35,11 +38,29 @@ export class ItensComponent {
   ];
 
   data: any[] = [
-    { nome: 'item 1', categoria: 'pneu', tipo: 'Bom / Regular / Ruim', geraManutencao: 'Sim', ativo: 'Sim' }
+    { id: 1, nome: 'item 1', categoria: 'pneu', tipo: 'Bom / Regular / Ruim', geraManutencao: 'Sim', ativo: 'Sim' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private dialogService: DialogService,
+    private toastService: ToastService
+  ) {}
 
   onPrimaryAction(): void { this.router.navigate(['/itens/novo']); }
   onFilterApplied(filters: any): void {}
+
+  onEditClick(row: any): void {
+    this.router.navigate(['/itens', row.id, 'editar']);
+  }
+
+  async onDeleteClick(row: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o item ${row.nome}?`, 'Excluir item');
+    if (!confirmado) {
+      return;
+    }
+
+    this.data = this.data.filter(item => item.id !== row.id);
+    this.toastService.success('Item excluído.', 'Sucesso');
+  }
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
-import { ToastsComponent } from '../../components/toasts.component';
+import { HeaderComponent } from '../../components/header/header.component';
 import { ToastService } from '../../components/toast.service';
 import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
 import { RascunhoService } from '../../services/rascunho.service';
@@ -21,7 +21,7 @@ import {
 @Component({
   selector: 'app-viagens-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, ToastsComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
   templateUrl: './viagens-form.component.html',
   styleUrls: ['./viagens-form.component.scss']
 })

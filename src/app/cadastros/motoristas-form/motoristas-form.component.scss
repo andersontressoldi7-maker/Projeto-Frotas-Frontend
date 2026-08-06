@@ -1,0 +1,30 @@
+.tabs-wrapper {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  border: 1px solid #d8e0dc;
+  background: #fff;
+  color: #3f4d4a;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: #40916c;
+  color: #fff;
+  border-color: #40916c;
+}
+
+.controle-docs .card {
+  border-radius: 14px;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
