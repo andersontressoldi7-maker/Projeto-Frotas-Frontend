@@ -6,6 +6,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
+import { TiposManutencaoService } from '../../services/tipos-manutencao.service';
 
 @Component({
   selector: 'app-tipos-manutencao-form',
@@ -15,6 +16,7 @@ import { ToastService } from '../../components/toast.service';
 })
 export class TiposManutencaoFormComponent implements OnInit {
   modoEdicao = false;
+  idEmEdicao: number | null = null;
 
   formulario: any = {
     nome: '',
@@ -35,15 +37,24 @@ export class TiposManutencaoFormComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private tiposManutencaoService: TiposManutencaoService
+  ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
+        this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Tipo de Manutenção';
-        const mock = { id: params['id'], nome: 'Manut Mock', descricao: 'Descrição mock' };
-        this.formulario = { nome: mock.nome, descricao: mock.descricao };
+
+        this.tiposManutencaoService.obter(this.idEmEdicao).subscribe({
+          next: (tipo) => this.formulario = { nome: tipo.nome, descricao: tipo.descricao },
+          error: () => this.toastService.error('Não foi possível carregar o tipo de manutenção.', 'Erro')
+        });
       }
     });
   }
@@ -54,9 +65,17 @@ export class TiposManutencaoFormComponent implements OnInit {
       return;
     }
 
-    console.log('Salvar tipo manutencao', dados);
-    this.toastService.success('Tipo de manutenção salvo (mock).', 'Sucesso');
-    setTimeout(() => this.router.navigate(['/tipos-manutencao']), 300);
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.tiposManutencaoService.atualizar(this.idEmEdicao, dados)
+      : this.tiposManutencaoService.criar(dados);
+
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Tipo de manutenção salvo com sucesso.', 'Sucesso');
+        this.router.navigate(['/tipos-manutencao']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o tipo de manutenção.', 'Erro')
+    });
   }
 
   onCancelar(): void {

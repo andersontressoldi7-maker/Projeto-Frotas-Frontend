@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { ItensService } from '../../services/itens.service';
 
 @Component({
   selector: 'app-itens',
@@ -14,7 +15,7 @@ import { ToastService } from '../../components/toast.service';
   imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
   templateUrl: './itens.component.html'
 })
-export class ItensComponent {
+export class ItensComponent implements OnInit {
   title = 'Itens de Checklist';
   subtitle = 'Perguntas reutilizáveis nos modelos de checklist';
   primaryBtnLabel = 'Novo';
@@ -23,7 +24,7 @@ export class ItensComponent {
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'categoria', label: 'Categoria', type: 'text' },
     { key: 'tipo', label: 'Tipo', type: 'text' },
-    { key: 'geraManutencao', label: 'Gera manutenção', type: 'text' },
+    { key: 'gera_manutencao', label: 'Gera manutenção', type: 'text' },
     { key: 'ativo', label: 'Ativo', type: 'text' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
@@ -31,21 +32,35 @@ export class ItensComponent {
   filterOptions: GridFilterOption[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'categoria', label: 'Categoria', type: 'text' },
-    { key: 'geraManutencao', label: 'Gera manutenção', type: 'select', options: [
+    { key: 'gera_manutencao', label: 'Gera manutenção', type: 'select', options: [
       { label: 'Sim', value: 'Sim' },
       { label: 'Não', value: 'Não' }
     ]}
   ];
 
-  data: any[] = [
-    { id: 1, nome: 'item 1', categoria: 'pneu', tipo: 'Bom / Regular / Ruim', geraManutencao: 'Sim', ativo: 'Sim' }
-  ];
+  data: any[] = [];
 
   constructor(
     private router: Router,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private itensService: ItensService
   ) {}
+
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
+  private carregarDados(): void {
+    this.itensService.listar().subscribe({
+      next: (dados) => this.data = dados.map(item => ({
+        ...item,
+        gera_manutencao: item.gera_manutencao ? 'Sim' : 'Não',
+        ativo: item.ativo ? 'Sim' : 'Não'
+      })),
+      error: () => this.toastService.error('Não foi possível carregar os itens.', 'Erro')
+    });
+  }
 
   onPrimaryAction(): void { this.router.navigate(['/itens/novo']); }
   onFilterApplied(filters: any): void {}
@@ -60,7 +75,12 @@ export class ItensComponent {
       return;
     }
 
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Item excluído.', 'Sucesso');
+    this.itensService.excluir(row.id).subscribe({
+      next: () => {
+        this.carregarDados();
+        this.toastService.success('Item excluído.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir o item.', 'Erro')
+    });
   }
 }

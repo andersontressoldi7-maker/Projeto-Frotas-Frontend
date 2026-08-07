@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
+import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../components/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +20,12 @@ export class LoginComponent {
   showPassword = false;
   isLoading = false;
 
-  constructor(private router: Router, public themeService: ThemeService) {}
+  constructor(
+    private router: Router,
+    public themeService: ThemeService,
+    private authService: AuthService,
+    private toastService: ToastService
+  ) {}
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -26,9 +33,15 @@ export class LoginComponent {
 
   onLogin(): void {
     this.isLoading = true;
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/dashboard']);
-    }, 2000);
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.router.navigate(['/dashboard']);
+      },
+      error: (erro) => {
+        this.isLoading = false;
+        this.toastService.error(erro?.error?.message || 'Usuário ou senha inválidos.', 'Erro');
+      }
+    });
   }
 }

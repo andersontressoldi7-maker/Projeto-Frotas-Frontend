@@ -7,12 +7,10 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
 import { DialogService } from '../../components/dialog/dialog.service';
-import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
-import { calcularStatusDocumento } from './documentos.utils';
+import { MotoristasService } from '../../services/motoristas.service';
 
 export interface DocumentoMotorista {
   id: number;
-  motoristaId: string;
   tipo: 'CNH' | 'Curso' | 'Exame';
   titulo: string;
   descricao: string;
@@ -22,6 +20,7 @@ export interface DocumentoMotorista {
   membros: string;
   anexo: string;
   anexoUrl?: string;
+  status: string;
 }
 
 export interface NovoDocumentoMotorista {
@@ -71,9 +70,6 @@ export class MotoristasFormComponent implements OnInit {
   };
 
   documentos: DocumentoMotorista[] = [];
-  documentoEmEdicaoId: number | null = null;
-  motoristasDisponiveis: Array<{ id: string; nome: string }> = [];
-  filtroMotorista = '';
   filtroStatus = '';
 
   config: FormConfig = {
@@ -97,7 +93,7 @@ export class MotoristasFormComponent implements OnInit {
     private route: ActivatedRoute,
     private toastService: ToastService,
     private dialogService: DialogService,
-    private store: CadastrosRapidosStore
+    private motoristasService: MotoristasService
   ) {}
 
   ngOnInit(): void {
@@ -106,66 +102,25 @@ export class MotoristasFormComponent implements OnInit {
       this.retornoCampo = params['campo'] || null;
     });
 
-    this.motoristasDisponiveis = [
-      { id: '1', nome: 'Fulano Mock' },
-      { id: '2', nome: 'Maria Souza' }
-    ];
-
-    this.documentos = [
-      {
-        id: 1,
-        motoristaId: '1',
-        tipo: 'CNH',
-        titulo: 'CNH',
-        descricao: 'Validade da habilitação principal',
-        dataEmissao: '2024-01-15',
-        dataVencimento: '2026-12-20',
-        obrigatorio: true,
-        membros: 'Operação',
-        anexo: 'cnh.pdf'
-      },
-      {
-        id: 2,
-        motoristaId: '1',
-        tipo: 'Curso',
-        titulo: 'Curso de transporte seguro',
-        descricao: 'Reciclagem anual obrigatória',
-        dataEmissao: '2025-02-10',
-        dataVencimento: '2026-08-12',
-        obrigatorio: true,
-        membros: 'Treinamento',
-        anexo: 'curso-seguro.pdf'
-      },
-      {
-        id: 3,
-        motoristaId: '2',
-        tipo: 'Exame',
-        titulo: 'Exame toxicológico',
-        descricao: 'Vencimento trimestral',
-        dataEmissao: '2026-06-01',
-        dataVencimento: '2026-07-20',
-        obrigatorio: true,
-        membros: 'Saúde',
-        anexo: 'exame-toxico.pdf'
-      }
-    ];
-
     this.route.params.subscribe(params => {
-      const motoristaId = params['id'] || '1';
-      this.filtroMotorista = motoristaId;
-
       if (params['id']) {
         this.modoEdicao = true;
         this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Motorista';
-        const existente = this.store.obterMotorista(this.idEmEdicao);
-        const mock = existente || this.motoristasDisponiveis.find(item => item.id === motoristaId) || { id: motoristaId, nome: 'Fulano Mock' };
-        this.formulario = {
-          nome: mock.nome,
-          cnh: '123456',
-          validade: '2027-01-01',
-          telefone: '61999999999'
-        };
+
+        this.motoristasService.obter(this.idEmEdicao).subscribe({
+          next: (motorista) => {
+            this.formulario = {
+              nome: motorista.nome,
+              cnh: motorista.cnh,
+              validade: motorista.validade_cnh,
+              telefone: motorista.telefone
+            };
+          },
+          error: () => this.toastService.error('Não foi possível carregar o motorista.', 'Erro')
+        });
+
+        this.carregarDocumentos();
       } else {
         this.modoEdicao = false;
         this.config.titulo = 'Novo Motorista';
@@ -174,12 +129,35 @@ export class MotoristasFormComponent implements OnInit {
     });
   }
 
-  get documentosFiltrados(): DocumentoMotorista[] {
-    return this.documentos.filter(item => {
-      const motoristasOk = !this.filtroMotorista || item.motoristaId === this.filtroMotorista;
-      const statusOk = !this.filtroStatus || this.obterStatusDocumento(item) === this.filtroStatus;
-      return motoristasOk && statusOk;
+  private carregarDocumentos(): void {
+    if (this.idEmEdicao === null) {
+      return;
+    }
+
+    this.motoristasService.listarDocumentos(this.idEmEdicao).subscribe({
+      next: (documentos) => this.documentos = documentos.map(doc => this.mapearDocumento(doc)),
+      error: () => this.toastService.error('Não foi possível carregar os documentos.', 'Erro')
     });
+  }
+
+  private mapearDocumento(doc: any): DocumentoMotorista {
+    return {
+      id: doc.id,
+      tipo: doc.tipo,
+      titulo: doc.titulo,
+      descricao: doc.descricao,
+      dataEmissao: doc.data_emissao,
+      dataVencimento: doc.data_vencimento,
+      obrigatorio: doc.obrigatorio,
+      membros: doc.membros,
+      anexo: doc.anexo,
+      anexoUrl: doc.anexo_url,
+      status: doc.status
+    };
+  }
+
+  get documentosFiltrados(): DocumentoMotorista[] {
+    return this.documentos.filter(item => !this.filtroStatus || item.status === this.filtroStatus);
   }
 
   documentosFiltradosPorTipo(tipo: DocumentoMotorista['tipo']): DocumentoMotorista[] {
@@ -187,11 +165,11 @@ export class MotoristasFormComponent implements OnInit {
   }
 
   get proximosVencimento(): number {
-    return this.documentos.filter(item => this.obterStatusDocumento(item) === 'Próximo do vencimento').length;
+    return this.documentos.filter(item => item.status === 'Próximo do vencimento').length;
   }
 
   get vencidos(): number {
-    return this.documentos.filter(item => this.obterStatusDocumento(item) === 'Vencido').length;
+    return this.documentos.filter(item => item.status === 'Vencido').length;
   }
 
   onSalvar(dados: any): void {
@@ -200,24 +178,31 @@ export class MotoristasFormComponent implements OnInit {
       return;
     }
 
-    this.formulario.controleDocumentos = this.documentos;
+    const payload = {
+      nome: dados.nome,
+      cnh: dados.cnh,
+      validade_cnh: dados.validade,
+      telefone: dados.telefone
+    };
 
-    let idSalvo: number;
-    if (this.modoEdicao && this.idEmEdicao !== null) {
-      this.store.atualizarMotorista(this.idEmEdicao, { nome: dados.nome });
-      idSalvo = this.idEmEdicao;
-    } else {
-      const novo = this.store.adicionarMotorista({ nome: dados.nome });
-      idSalvo = novo.id;
-    }
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.motoristasService.atualizar(this.idEmEdicao, payload)
+      : this.motoristasService.criar(payload);
 
-    this.toastService.success('Motorista salvo com sucesso.', 'Sucesso');
+    requisicao.subscribe({
+      next: (motorista) => {
+        this.toastService.success('Motorista salvo com sucesso.', 'Sucesso');
 
-    if (this.retornoUrl && this.retornoCampo) {
-      setTimeout(() => this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: idSalvo } }), 300);
-    } else {
-      setTimeout(() => this.router.navigate(['/motoristas']), 300);
-    }
+        if (this.retornoUrl && this.retornoCampo) {
+          this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: motorista.id } });
+        } else if (!this.modoEdicao) {
+          this.router.navigate(['/motoristas', motorista.id, 'editar']);
+        } else {
+          this.router.navigate(['/motoristas']);
+        }
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o motorista.', 'Erro')
+    });
   }
 
   onCancelar(): void {
@@ -245,64 +230,46 @@ export class MotoristasFormComponent implements OnInit {
   }
 
   salvarDocumento(): void {
+    if (this.idEmEdicao === null) {
+      this.toastService.error('Salve o motorista antes de adicionar documentos.', 'Erro');
+      return;
+    }
+
     if (!this.novoDocumento.titulo.trim() || !this.novoDocumento.dataVencimento) {
       this.toastService.error('Informe o título e a data de vencimento do documento.', 'Erro');
       return;
     }
 
-    const documento: DocumentoMotorista = {
-      id: this.documentoEmEdicaoId ?? Date.now(),
-      motoristaId: this.filtroMotorista || '1',
-      tipo: this.novoDocumento.tipo,
-      titulo: this.novoDocumento.titulo,
-      descricao: this.novoDocumento.descricao,
-      dataEmissao: this.novoDocumento.dataEmissao,
-      dataVencimento: this.novoDocumento.dataVencimento,
-      obrigatorio: this.novoDocumento.obrigatorio,
-      membros: this.novoDocumento.membros,
-      anexo: this.novoDocumento.anexo,
-      anexoUrl: this.novoDocumento.anexoUrl
-    };
-
-    if (this.documentoEmEdicaoId !== null) {
-      this.documentos = this.documentos.map(item => item.id === this.documentoEmEdicaoId ? documento : item);
-      this.toastService.success('Documento atualizado.', 'Sucesso');
-    } else {
-      this.documentos.unshift(documento);
-      this.toastService.success('Documento adicionado ao controle.', 'Sucesso');
-    }
-
-    this.cancelarEdicaoDocumento();
-  }
-
-  editarDocumento(documento: DocumentoMotorista): void {
-    this.documentoEmEdicaoId = documento.id;
-    this.novoDocumento = {
-      tipo: documento.tipo,
-      titulo: documento.titulo,
-      descricao: documento.descricao,
-      dataEmissao: documento.dataEmissao,
-      dataVencimento: documento.dataVencimento,
-      obrigatorio: documento.obrigatorio,
-      membros: documento.membros,
-      anexo: documento.anexo,
-      anexoUrl: documento.anexoUrl || ''
-    };
-    this.abaAtiva = 'controle';
+    this.motoristasService.salvarDocumento(this.idEmEdicao, this.novoDocumento).subscribe({
+      next: () => {
+        this.toastService.success('Documento adicionado ao controle.', 'Sucesso');
+        this.carregarDocumentos();
+        this.limparNovoDocumento();
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o documento.', 'Erro')
+    });
   }
 
   async excluirDocumento(id: number): Promise<void> {
+    if (this.idEmEdicao === null) {
+      return;
+    }
+
     const confirmado = await this.dialogService.confirmar('Deseja excluir este documento?', 'Excluir documento');
     if (!confirmado) {
       return;
     }
 
-    this.documentos = this.documentos.filter(item => item.id !== id);
-    this.toastService.success('Documento excluído.', 'Sucesso');
+    this.motoristasService.excluirDocumento(this.idEmEdicao, id).subscribe({
+      next: () => {
+        this.toastService.success('Documento excluído.', 'Sucesso');
+        this.carregarDocumentos();
+      },
+      error: () => this.toastService.error('Não foi possível excluir o documento.', 'Erro')
+    });
   }
 
-  cancelarEdicaoDocumento(): void {
-    this.documentoEmEdicaoId = null;
+  limparNovoDocumento(): void {
     this.novoDocumento = {
       tipo: 'CNH',
       titulo: '',
@@ -317,16 +284,15 @@ export class MotoristasFormComponent implements OnInit {
   }
 
   limparFiltros(): void {
-    this.filtroMotorista = this.route.snapshot.params['id'] || '';
     this.filtroStatus = '';
   }
 
   obterStatusDocumento(documento: DocumentoMotorista): string {
-    return calcularStatusDocumento(documento.dataVencimento);
+    return documento.status;
   }
 
   obterClasseStatus(documento: DocumentoMotorista): string {
-    const status = this.obterStatusDocumento(documento);
+    const status = documento.status;
 
     if (status === 'Vencido') {
       return 'bg-danger-subtle text-danger';

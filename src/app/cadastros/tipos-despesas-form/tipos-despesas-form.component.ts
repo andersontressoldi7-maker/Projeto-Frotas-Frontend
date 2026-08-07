@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { ToastService } from '../../components/toast.service';
+import { TiposDespesasService } from '../../services/tipos-despesas.service';
 
 @Component({
   selector: 'app-tipos-despesas-form',
@@ -15,61 +17,47 @@ import { HeaderComponent } from '../../components/header/header.component';
 export class TiposDespesasFormComponent implements OnInit {
   modoEdicao = false;
   nome = '';
-  tiposDespesa: Array<{ id: number; nome: string }> = [];
   itemId: number | null = null;
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private tiposDespesasService: TiposDespesasService
+  ) {}
 
   ngOnInit(): void {
-    this.carregarTipos();
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
         this.itemId = Number(params['id']);
-        const item = this.tiposDespesa.find(tipo => tipo.id === this.itemId);
-        if (item) {
-          this.nome = item.nome;
-        }
+
+        this.tiposDespesasService.obter(this.itemId).subscribe({
+          next: (tipo) => this.nome = tipo.nome,
+          error: () => this.toastService.error('Não foi possível carregar o tipo de despesa.', 'Erro')
+        });
       }
     });
-  }
-
-  carregarTipos(): void {
-    try {
-      const salvo = localStorage.getItem('tipos-despesas');
-      this.tiposDespesa = salvo ? JSON.parse(salvo) : [
-        { id: 1, nome: 'Alimentação' },
-        { id: 2, nome: 'Pedágio' },
-        { id: 3, nome: 'Hospedagem' }
-      ];
-    } catch {
-      this.tiposDespesa = [
-        { id: 1, nome: 'Alimentação' },
-        { id: 2, nome: 'Pedágio' },
-        { id: 3, nome: 'Hospedagem' }
-      ];
-    }
   }
 
   onSalvar(): void {
     const nomeLimpo = this.nome.trim();
     if (!nomeLimpo) {
+      this.toastService.error('Informe o nome da despesa.', 'Erro');
       return;
     }
 
-    if (this.modoEdicao && this.itemId) {
-      this.tiposDespesa = this.tiposDespesa.map(tipo =>
-        tipo.id === this.itemId ? { ...tipo, nome: nomeLimpo } : tipo
-      );
-    } else {
-      this.tiposDespesa = [
-        ...this.tiposDespesa,
-        { id: Date.now(), nome: nomeLimpo }
-      ];
-    }
+    const requisicao = this.modoEdicao && this.itemId !== null
+      ? this.tiposDespesasService.atualizar(this.itemId, { nome: nomeLimpo })
+      : this.tiposDespesasService.criar({ nome: nomeLimpo });
 
-    localStorage.setItem('tipos-despesas', JSON.stringify(this.tiposDespesa));
-    this.router.navigate(['/tipos-despesas']);
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Tipo de despesa salvo com sucesso.', 'Sucesso');
+        this.router.navigate(['/tipos-despesas']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o tipo de despesa.', 'Erro')
+    });
   }
 
   onCancelar(): void {

@@ -1,22 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { ToastService } from '../../components/toast.service';
+import { PermissoesService, UsuarioPermissao, TelaPermissao } from '../../services/permissoes.service';
 
 interface Usuario {
   id: number;
   nome: string;
   email: string;
   perfil: 'Admin' | 'Customizado';
-}
-
-interface TelaPermissao {
-  modulo: string;
-  ver: boolean;
-  editar: boolean;
-  excluir: boolean;
 }
 
 @Component({
@@ -26,26 +20,13 @@ interface TelaPermissao {
   templateUrl: './permissoes.component.html',
   styleUrls: ['./permissoes.component.scss']
 })
-export class PermissoesComponent {
+export class PermissoesComponent implements OnInit {
   title = 'Permissões';
   subtitle = 'Defina os perfis de acesso e privilégios de cada usuário';
 
-  usuarios: Usuario[] = [
-    { id: 1, nome: 'Anderson Tressoldi', email: 'andersontressoldi7@gmail.com', perfil: 'Admin' },
-    { id: 2, nome: 'Gustavo Testador', email: 'gustavo@frotacheck.com', perfil: 'Customizado' },
-    { id: 3, nome: 'Mauricio Dev', email: 'mauricio@frotacheck.com', perfil: 'Customizado' }
-  ];
-
+  usuarios: Usuario[] = [];
   usuarioSelecionado: Usuario | null = null;
-
-  telasPermissoes: TelaPermissao[] = [
-    { modulo: 'Dashboard', ver: true, editar: false, excluir: false },
-    { modulo: 'Checklists', ver: true, editar: true, excluir: false },
-    { modulo: 'Modelos de Checklist', ver: true, editar: true, excluir: true },
-    { modulo: 'Veículos', ver: true, editar: true, excluir: false },
-    { modulo: 'Motoristas', ver: true, editar: false, excluir: false },
-    { modulo: 'Manutenções', ver: true, editar: true, excluir: false }
-  ];
+  telasPermissoes: TelaPermissao[] = [];
 
   mostrarFormNovoUsuario = false;
   novoUsuario: { nome: string; email: string; perfil: 'Admin' | 'Customizado' } = {
@@ -54,7 +35,30 @@ export class PermissoesComponent {
     perfil: 'Customizado'
   };
 
-  constructor(private toastService: ToastService) {}
+  constructor(
+    private toastService: ToastService,
+    private permissoesService: PermissoesService
+  ) {}
+
+  ngOnInit(): void {
+    this.carregarUsuarios();
+  }
+
+  private carregarUsuarios(): void {
+    this.permissoesService.listarUsuarios().subscribe({
+      next: (dados) => this.usuarios = dados.map(u => this.mapearUsuario(u)),
+      error: () => this.toastService.error('Não foi possível carregar os usuários.', 'Erro')
+    });
+  }
+
+  private mapearUsuario(usuario: UsuarioPermissao): Usuario {
+    return {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+      perfil: usuario.perfil.toLowerCase() === 'admin' ? 'Admin' : 'Customizado'
+    };
+  }
 
   toggleFormNovoUsuario(): void {
     this.mostrarFormNovoUsuario = !this.mostrarFormNovoUsuario;
@@ -69,24 +73,23 @@ export class PermissoesComponent {
       return;
     }
 
-    const novo: Usuario = {
-      id: Math.max(0, ...this.usuarios.map(u => u.id)) + 1,
-      nome: this.novoUsuario.nome.trim(),
-      email: this.novoUsuario.email.trim(),
-      perfil: this.novoUsuario.perfil
-    };
-
-    this.usuarios.push(novo);
-    this.mostrarFormNovoUsuario = false;
-    this.toastService.success('Usuário cadastrado com sucesso.', 'Sucesso');
-    this.selecionarUsuario(novo);
+    this.permissoesService.cadastrarUsuario(this.novoUsuario).subscribe({
+      next: (usuario) => {
+        this.mostrarFormNovoUsuario = false;
+        this.toastService.success('Usuário cadastrado com sucesso.', 'Sucesso');
+        this.carregarUsuarios();
+        this.selecionarUsuario(this.mapearUsuario({ id: usuario.id, nome: usuario.name, email: usuario.email, perfil: usuario.perfil }));
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível cadastrar o usuário.', 'Erro')
+    });
   }
 
   selecionarUsuario(usuario: Usuario): void {
     this.usuarioSelecionado = usuario;
-    if (usuario.perfil === 'Admin') {
-      this.forcarPermissoesTotais();
-    }
+    this.permissoesService.obterPermissoes(usuario.id).subscribe({
+      next: (telas) => this.telasPermissoes = telas,
+      error: () => this.toastService.error('Não foi possível carregar as permissões do usuário.', 'Erro')
+    });
   }
 
   alterarPerfil(perfil: 'Admin' | 'Customizado'): void {
@@ -108,7 +111,16 @@ export class PermissoesComponent {
   }
 
   salvarPermissoes(): void {
-    
-    this.usuarioSelecionado = null;
+    if (!this.usuarioSelecionado) {
+      return;
+    }
+
+    this.permissoesService.salvarPermissoes(this.usuarioSelecionado.id, this.telasPermissoes).subscribe({
+      next: () => {
+        this.toastService.success('Permissões salvas com sucesso.', 'Sucesso');
+        this.usuarioSelecionado = null;
+      },
+      error: () => this.toastService.error('Não foi possível salvar as permissões.', 'Erro')
+    });
   }
 }

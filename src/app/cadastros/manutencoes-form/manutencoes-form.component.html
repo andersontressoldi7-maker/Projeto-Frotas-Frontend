@@ -121,10 +121,8 @@
           <div class="row mb-4">
             <div class="col-md-10">
               <select class="form-select" [(ngModel)]="novoChecklist">
-                <option value="" disabled selected>Selecione um checklist existente</option>
-                <option value="Checklist de Pneus #098">Checklist de Pneus #098</option>
-                <option value="Checklist Motor #105">Checklist Motor #105</option>
-                <option value="Checklist Preventivo #220">Checklist Preventivo #220</option>
+                <option [ngValue]="null" disabled selected>Selecione um checklist existente</option>
+                <option *ngFor="let checklist of checklistsDisponiveis" [ngValue]="checklist.id">#{{ checklist.id }} - {{ checklist.modelo?.nome }}</option>
               </select>
             </div>
             <div class="col-md-2">
@@ -141,7 +139,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let check of listaChecklists; let i = index">
-                <td>{{ check.nome }}</td>
+                <td>#{{ check.id }} - {{ check.modelo?.nome }}</td>
                 <td>
                   <button class="btn btn-sm btn-danger" (click)="removerChecklist(i)">
                     <i class="bi bi-trash"></i>

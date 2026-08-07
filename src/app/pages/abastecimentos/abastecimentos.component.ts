@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { AbastecimentosService } from '../../services/abastecimentos.service';
 
 @Component({
   selector: 'app-abastecimentos',
@@ -32,31 +33,48 @@ export class AbastecimentosComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [
-    { id: 1, nroFrota: '001', placa: 'ABC-1234', motorista: 'João Silva', dataAbastecimento: '2026-07-01', combustivel: 'Diesel S10', qtLitros: 150, valorTotal: 897.00, tipoAbastecimento: 'Interno' },
-    { id: 2, nroFrota: '002', placa: 'XYZ-5678', motorista: 'Maria Souza', dataAbastecimento: '2026-07-05', combustivel: 'Diesel S500', qtLitros: 80, valorTotal: 456.80, tipoAbastecimento: 'Externo' }
-  ];
-
+  allData: any[] = [];
   data: any[] = [];
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private abastecimentosService: AbastecimentosService
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const tipo = params['tipo'];
-      if (tipo) {
-        this.data = this.allData.filter(item => item.tipoAbastecimento.toLowerCase() === String(tipo).toLowerCase());
-        this.subtitle = `Filtrando por: ${tipo}`;
-      } else {
-        this.data = [...this.allData];
-        this.subtitle = 'Controle de abastecimentos da frota';
-      }
+    this.abastecimentosService.listar().subscribe({
+      next: (dados) => {
+        this.allData = dados.map(abastecimento => ({
+          id: abastecimento.id,
+          nroFrota: abastecimento.veiculo?.nro_frota,
+          placa: abastecimento.veiculo?.placa,
+          motorista: abastecimento.motorista?.nome,
+          dataAbastecimento: abastecimento.data_abastecimento,
+          combustivel: abastecimento.combustivel,
+          qtLitros: abastecimento.qt_litros,
+          valorTotal: abastecimento.valor_total,
+          tipoAbastecimento: abastecimento.tipo_abastecimento
+        }));
+        this.aplicarFiltroDaRota();
+      },
+      error: () => this.toastService.error('Não foi possível carregar os abastecimentos.', 'Erro')
     });
+
+    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
+  }
+
+  private aplicarFiltroDaRota(): void {
+    const tipo = this.route.snapshot.queryParams['tipo'];
+    if (tipo) {
+      this.data = this.allData.filter(item => (item.tipoAbastecimento || '').toLowerCase() === String(tipo).toLowerCase());
+      this.subtitle = `Filtrando por: ${tipo}`;
+    } else {
+      this.data = [...this.allData];
+      this.subtitle = 'Controle de abastecimentos da frota';
+    }
   }
 
   onPrimaryAction(): void {
@@ -75,8 +93,13 @@ export class AbastecimentosComponent implements OnInit {
       return;
     }
 
-    this.allData = this.allData.filter(item => item.id !== row.id);
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Abastecimento excluído.', 'Sucesso');
+    this.abastecimentosService.excluir(row.id).subscribe({
+      next: () => {
+        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.aplicarFiltroDaRota();
+        this.toastService.success('Abastecimento excluído.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir o abastecimento.', 'Erro')
+    });
   }
 }

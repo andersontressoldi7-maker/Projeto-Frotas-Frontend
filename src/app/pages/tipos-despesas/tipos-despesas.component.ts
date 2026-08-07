@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { TiposDespesasService } from '../../services/tipos-despesas.service';
 
 @Component({
   selector: 'app-tipos-despesas',
@@ -14,7 +15,7 @@ import { ToastService } from '../../components/toast.service';
   imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
   templateUrl: './tipos-despesas.component.html'
 })
-export class TiposDespesasComponent {
+export class TiposDespesasComponent implements OnInit {
   title = 'Tipos de Despesas';
   subtitle = 'Cadastre os tipos de despesas usados nas viagens';
   primaryBtnLabel = 'Novo';
@@ -33,26 +34,19 @@ export class TiposDespesasComponent {
   constructor(
     private router: Router,
     private dialogService: DialogService,
-    private toastService: ToastService
-  ) {
+    private toastService: ToastService,
+    private tiposDespesasService: TiposDespesasService
+  ) {}
+
+  ngOnInit(): void {
     this.carregarDados();
   }
 
-  carregarDados(): void {
-    try {
-      const salvo = localStorage.getItem('tipos-despesas');
-      this.data = salvo ? JSON.parse(salvo) : [
-        { id: 1, nome: 'Alimentação' },
-        { id: 2, nome: 'Pedágio' },
-        { id: 3, nome: 'Hospedagem' }
-      ];
-    } catch {
-      this.data = [
-        { id: 1, nome: 'Alimentação' },
-        { id: 2, nome: 'Pedágio' },
-        { id: 3, nome: 'Hospedagem' }
-      ];
-    }
+  private carregarDados(): void {
+    this.tiposDespesasService.listar().subscribe({
+      next: (dados) => this.data = dados,
+      error: () => this.toastService.error('Não foi possível carregar os tipos de despesas.', 'Erro')
+    });
   }
 
   onPrimaryAction(): void {
@@ -71,10 +65,12 @@ export class TiposDespesasComponent {
       return;
     }
 
-    this.data = this.data.filter(item => item.id !== row.id);
-    try {
-      localStorage.setItem('tipos-despesas', JSON.stringify(this.data));
-    } catch {}
-    this.toastService.success('Tipo de despesa excluído.', 'Sucesso');
+    this.tiposDespesasService.excluir(row.id).subscribe({
+      next: () => {
+        this.carregarDados();
+        this.toastService.success('Tipo de despesa excluído.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir o tipo de despesa.', 'Erro')
+    });
   }
 }

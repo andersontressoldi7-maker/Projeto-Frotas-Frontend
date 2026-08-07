@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type CategoriaNotificacao = 'Manutenção' | 'Checklist' | 'Documento' | 'Viagem' | 'Sistema';
 
@@ -11,27 +12,43 @@ export interface Notificacao {
   data: string;
   lida: boolean;
   categoria: CategoriaNotificacao;
+  critico: boolean;
 }
 
 export const CATEGORIAS_NOTIFICACAO: CategoriaNotificacao[] = ['Manutenção', 'Checklist', 'Documento', 'Viagem', 'Sistema'];
+
+interface AlertaApi {
+  tipo: string;
+  titulo: string;
+  detalhe: string;
+  data: string;
+  tag: string;
+  categoria: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
-  private apiUrl = '/api/notificacoes';
+  private apiUrl = `${environment.apiBaseUrl}/alertas`;
 
   constructor(private http: HttpClient) {}
 
   listar(): Observable<Notificacao[]> {
-    return this.http.get<Notificacao[]>(this.apiUrl);
+    return this.http.get<AlertaApi[]>(this.apiUrl).pipe(
+      map(alertas => alertas.map((alerta, indice) => this.mapearAlerta(alerta, indice)))
+    );
   }
 
-  marcarComoLida(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/${id}/lida`, {});
-  }
-
-  marcarTodasComoLidas(): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/lidas`, {});
+  private mapearAlerta(alerta: AlertaApi, indice: number): Notificacao {
+    return {
+      id: indice + 1,
+      titulo: alerta.titulo,
+      mensagem: alerta.detalhe,
+      data: alerta.data,
+      lida: false,
+      categoria: alerta.tipo === 'manutencao' ? 'Manutenção' : 'Documento',
+      critico: alerta.tag === 'Crítico'
+    };
   }
 }

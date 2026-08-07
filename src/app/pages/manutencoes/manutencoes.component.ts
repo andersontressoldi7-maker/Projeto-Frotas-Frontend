@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { ManutencoesService } from '../../services/manutencoes.service';
 
 @Component({
   selector: 'app-manutencoes',
@@ -19,7 +20,8 @@ export class ManutencoesComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private manutencoesService: ManutencoesService
   ) {}
   title = 'Manutenções';
   subtitle = 'Gestão de manutenções e ocorrências';
@@ -33,32 +35,44 @@ export class ManutencoesComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [
-    { id: 1, descricao: 'Óleo Baixo', prioridade: 'Crítica', status: 'Aberta', abertura: '22/05/2026' },
-    { id: 2, descricao: 'Pneus desgastados', prioridade: 'Alta', status: 'Atrasada', abertura: '05/05/2026' }
-  ];
-
+  allData: any[] = [];
   data: any[] = [];
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const status = params['status'];
-      const prioridade = params['prioridade'];
-
-      if (status || prioridade) {
-        this.data = this.allData.filter(item => {
-          const matchStatus = !status || item.status.toLowerCase() === String(status).toLowerCase();
-          const matchPrioridade = !prioridade || item.prioridade.toLowerCase() === String(prioridade).toLowerCase();
-          return matchStatus && matchPrioridade;
-        });
-        this.subtitle = status
-          ? `Filtrando por: ${status}`
-          : `Filtrando por prioridade: ${prioridade}`;
-      } else {
-        this.data = [...this.allData];
-        this.subtitle = 'Gestão de manutenções e ocorrências';
-      }
+    this.manutencoesService.listar().subscribe({
+      next: (dados) => {
+        this.allData = dados.map(manutencao => ({
+          id: manutencao.id,
+          descricao: manutencao.descricao_problema,
+          prioridade: manutencao.prioridade,
+          status: manutencao.status,
+          abertura: manutencao.created_at
+        }));
+        this.aplicarFiltroDaRota();
+      },
+      error: () => this.toastService.error('Não foi possível carregar as manutenções.', 'Erro')
     });
+
+    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
+  }
+
+  private aplicarFiltroDaRota(): void {
+    const status = this.route.snapshot.queryParams['status'];
+    const prioridade = this.route.snapshot.queryParams['prioridade'];
+
+    if (status || prioridade) {
+      this.data = this.allData.filter(item => {
+        const matchStatus = !status || (item.status || '').toLowerCase() === String(status).toLowerCase();
+        const matchPrioridade = !prioridade || (item.prioridade || '').toLowerCase() === String(prioridade).toLowerCase();
+        return matchStatus && matchPrioridade;
+      });
+      this.subtitle = status
+        ? `Filtrando por: ${status}`
+        : `Filtrando por prioridade: ${prioridade}`;
+    } else {
+      this.data = [...this.allData];
+      this.subtitle = 'Gestão de manutenções e ocorrências';
+    }
   }
 
   onPrimaryAction(): void {
@@ -76,8 +90,13 @@ export class ManutencoesComponent implements OnInit {
       return;
     }
 
-    this.allData = this.allData.filter(item => item.id !== row.id);
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Manutenção excluída.', 'Sucesso');
+    this.manutencoesService.excluir(row.id).subscribe({
+      next: () => {
+        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.aplicarFiltroDaRota();
+        this.toastService.success('Manutenção excluída.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir a manutenção.', 'Erro')
+    });
   }
 }

@@ -5,8 +5,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { ToastService } from '../../components/toast.service';
-import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
 import { RascunhoService } from '../../services/rascunho.service';
+import { VeiculosService } from '../../services/veiculos.service';
+import { ModelosService } from '../../services/modelos.service';
+import { MotoristasService } from '../../services/motoristas.service';
+import { ChecklistService } from '../../services/checklist.service';
 
 @Component({
   selector: 'app-checklist-wizard',
@@ -20,31 +23,25 @@ export class ChecklistWizardComponent implements OnInit {
 
   faseAtual: 'saida' | 'retorno' = 'saida';
   passoAtual = 1;
-
-  motorista = {
-    nome: 'João Silva',
-    id: 'MOT-001'
-  };
+  checklistIdAtual: number | null = null;
+  checklistCarregado: any = null;
 
   formulario = {
     modelo: '',
     veiculo: '',
+    motorista: '',
     kmAtual: '',
     observacaoSaida: '',
     kmRetorno: '',
     observacaoRetorno: ''
   };
 
-  get veiculos() {
-    return this.store.veiculos;
-  }
+  veiculos: any[] = [];
+  modelos: any[] = [];
+  motoristas: any[] = [];
 
-  get modelos() {
-    return this.store.modelosAtivos();
-  }
-
-  itensChecklistSaida = this.criarItensChecklist();
-  itensChecklistRetorno = this.criarItensChecklist();
+  itensChecklistSaida: any[] = [];
+  itensChecklistRetorno: any[] = [];
 
   itemAberto: any = null;
   observacaoItem: string = '';
@@ -64,24 +61,81 @@ export class ChecklistWizardComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService,
-    private store: CadastrosRapidosStore,
-    private rascunhoService: RascunhoService
+    private rascunhoService: RascunhoService,
+    private veiculosService: VeiculosService,
+    private modelosService: ModelosService,
+    private motoristasService: MotoristasService,
+    private checklistService: ChecklistService
   ) {}
 
   ngOnInit(): void {
-    const rascunho = this.rascunhoService.obter<typeof this.formulario>(this.chaveRascunho);
-    if (rascunho) {
-      this.formulario = { ...this.formulario, ...rascunho };
-      this.rascunhoService.limpar(this.chaveRascunho);
-    } else if (!this.formulario.veiculo && this.veiculos[0]) {
-      this.formulario.veiculo = this.veiculos[0].id.toString();
-    }
+    this.veiculosService.listar().subscribe({
+      next: (dados) => this.veiculos = dados,
+      error: () => this.toastService.error('Não foi possível carregar os veículos.', 'Erro')
+    });
+
+    this.modelosService.listar().subscribe({
+      next: (dados) => this.modelos = dados.filter(modelo => modelo.ativo),
+      error: () => this.toastService.error('Não foi possível carregar os modelos.', 'Erro')
+    });
+
+    this.motoristasService.listar().subscribe({
+      next: (dados) => this.motoristas = dados,
+      error: () => this.toastService.error('Não foi possível carregar os motoristas.', 'Erro')
+    });
+
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.carregarParaFinalizar(Number(params['id']));
+        return;
+      }
+
+      const rascunho = this.rascunhoService.obter<typeof this.formulario>(this.chaveRascunho);
+      if (rascunho) {
+        this.formulario = { ...this.formulario, ...rascunho };
+        this.rascunhoService.limpar(this.chaveRascunho);
+      }
+    });
 
     this.route.queryParams.subscribe(params => {
       if (params['retornoCampo'] && params['retornoId']) {
         (this.formulario as any)[params['retornoCampo']] = params['retornoId'];
       }
     });
+  }
+
+  private carregarParaFinalizar(id: number): void {
+    this.checklistService.obter(id).subscribe({
+      next: (checklist) => {
+        this.checklistIdAtual = id;
+        this.checklistCarregado = checklist;
+        this.faseAtual = 'retorno';
+        this.formulario.modelo = String(checklist.modelo_id);
+        this.formulario.veiculo = String(checklist.veiculo_id);
+        this.formulario.kmAtual = checklist.km_saida;
+
+        this.itensChecklistRetorno = (checklist.modelo?.itens || []).map((item: any) => this.mapearItemModelo(item));
+      },
+      error: () => this.toastService.error('Não foi possível carregar o checklist.', 'Erro')
+    });
+  }
+
+  private mapearItemModelo(item: any): any {
+    return {
+      id: item.id,
+      nome: item.nome,
+      tipo: item.tipo === 'avaliacao' ? 'pills' : 'texto',
+      valor: '',
+      obrigatoriaFoto: item.obrigatorio_foto,
+      temFoto: false,
+      observacao: '',
+      respostas: item.tipo === 'avaliacao' ? ['Bom', 'Regular', 'Ruim'] : []
+    };
+  }
+
+  aoSelecionarModelo(): void {
+    const modeloSelecionado = this.modelos.find(m => m.id.toString() === this.formulario.modelo);
+    this.itensChecklistSaida = (modeloSelecionado?.itens || []).map((item: any) => this.mapearItemModelo(item));
   }
 
   irParaCadastro(tipo: 'veiculo' | 'modelo', modo: 'novo' | 'editar', event?: Event): void {
@@ -101,17 +155,6 @@ export class ChecklistWizardComponent implements OnInit {
     this.router.navigate([destino], { queryParams: { retorno: this.router.url.split('?')[0], campo: tipo } });
   }
 
-  private criarItensChecklist(): any[] {
-    return [
-      { id: 1, nome: 'Estado dos Pneus', tipo: 'pills', valor: '', obrigatoriaFoto: true, temFoto: false, respostas: ['Bom', 'Regular', 'Ruim'] },
-      { id: 2, nome: 'Nível de Combustível', tipo: 'pills', valor: '', obrigatoriaFoto: false, temFoto: false, respostas: ['Reserva', '1/4', '1/2', '3/4', 'Cheio'] },
-      { id: 3, nome: 'Iluminação Frontal', tipo: 'pills', valor: '', obrigatoriaFoto: true, temFoto: false, respostas: ['Bom', 'Regular', 'Ruim'] },
-      { id: 4, nome: 'Iluminação Traseira', tipo: 'pills', valor: '', obrigatoriaFoto: true, temFoto: false, respostas: ['Bom', 'Regular', 'Ruim'] },
-      { id: 5, nome: 'Espelhos Retrovisores', tipo: 'pills', valor: '', obrigatoriaFoto: false, temFoto: false, respostas: ['Bom', 'Regular', 'Ruim'] },
-      { id: 6, nome: 'Freios', tipo: 'pills', valor: '', obrigatoriaFoto: false, temFoto: false, respostas: ['Bom', 'Regular', 'Ruim'] }
-    ];
-  }
-
   mudarFase(fase: 'saida' | 'retorno'): void {
     this.faseAtual = fase;
     this.passoAtual = 1;
@@ -124,7 +167,7 @@ export class ChecklistWizardComponent implements OnInit {
 
   eModeloSimples(): boolean {
     const modeloSelecionado = this.modelos.find(m => m.id.toString() === this.formulario.modelo);
-    return modeloSelecionado?.tipo === 'Simples' || modeloSelecionado?.tipo === 'SomenteSaida' || modeloSelecionado?.tipo === 'Somente Saída';
+    return modeloSelecionado?.tipo === 'Simples';
   }
 
   formatarTempo(minutos: number): string {
@@ -151,11 +194,11 @@ export class ChecklistWizardComponent implements OnInit {
         return this.formulario.modelo !== '' && this.formulario.veiculo !== '' && this.formulario.kmAtual !== '';
       }
       if (this.passoAtual === 2) {
-        return this.itensChecklistSaida.every(item => item.valor !== '');
+        return this.itensChecklistSaida.every(item => item.valor !== '' || item.tipo === 'texto');
       }
     } else if (this.faseAtual === 'retorno') {
       if (this.eModeloCompleto()) {
-        return this.formulario.kmRetorno !== '' && this.itensChecklistRetorno.every(item => item.valor !== '');
+        return this.formulario.kmRetorno !== '' && this.itensChecklistRetorno.every(item => item.valor !== '' || item.tipo === 'texto');
       }
       return this.formulario.kmRetorno !== '';
     }
@@ -180,7 +223,7 @@ export class ChecklistWizardComponent implements OnInit {
 
   abrirObservacaoItem(item: any): void {
     this.itemAberto = item;
-    this.observacaoItem = '';
+    this.observacaoItem = item.observacao || '';
   }
 
   salvarObservacao(): void {
@@ -190,30 +233,52 @@ export class ChecklistWizardComponent implements OnInit {
     }
   }
 
-  finalizarSaida(): void {
-    const modeloEhSimples = this.eModeloSimples();
-    
-    console.log('Saída finalizada:', {
-      status: modeloEhSimples ? 'Concluído' : 'Em Andamento',
-      motorista: this.motorista,
-      modeloSelecionado: this.formulario.modelo,
-      veiculo: this.formulario.veiculo,
-      kmSaida: this.formulario.kmAtual,
-      itensSaida: this.itensChecklistSaida
-    });
+  private montarRespostas(itens: any[]): any[] {
+    return itens.map(item => ({
+      item_id: item.id,
+      valor: item.valor || null,
+      foto: item.temFoto ? 'anexo.jpg' : null,
+      observacao: item.observacao || null
+    }));
+  }
 
-    this.router.navigate(['/checklists']);
+  finalizarSaida(): void {
+    const payload = {
+      modelo_id: Number(this.formulario.modelo),
+      veiculo_id: Number(this.formulario.veiculo),
+      motorista_id: this.formulario.motorista ? Number(this.formulario.motorista) : null,
+      km_saida: Number(this.formulario.kmAtual),
+      observacao_saida: this.formulario.observacaoSaida || null,
+      respostas: this.montarRespostas(this.itensChecklistSaida)
+    };
+
+    this.checklistService.criar(payload).subscribe({
+      next: () => {
+        this.toastService.success('Checklist iniciado com sucesso.', 'Sucesso');
+        this.router.navigate(['/checklists']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o checklist.', 'Erro')
+    });
   }
 
   finalizarRetorno(): void {
-    console.log('Retorno finalizado e checklist fechado:', {
-      status: 'Concluído',
-      kmRetorno: this.formulario.kmRetorno,
-      observacaoRetorno: this.formulario.observacaoRetorno,
-      itensRetorno: this.itensChecklistRetorno
-    });
+    if (this.checklistIdAtual === null) {
+      return;
+    }
 
-    this.router.navigate(['/checklists']);
+    const payload = {
+      km_retorno: Number(this.formulario.kmRetorno),
+      observacao_retorno: this.formulario.observacaoRetorno || null,
+      respostas: this.montarRespostas(this.itensChecklistRetorno)
+    };
+
+    this.checklistService.finalizarRetorno(this.checklistIdAtual, payload).subscribe({
+      next: () => {
+        this.toastService.success('Checklist finalizado com sucesso.', 'Sucesso');
+        this.router.navigate(['/checklists']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível finalizar o checklist.', 'Erro')
+    });
   }
 
   cancelar(): void {

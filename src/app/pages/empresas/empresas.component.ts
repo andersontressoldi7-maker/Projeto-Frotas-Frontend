@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedGridComponent } from '../../components/shared-grid/shared-grid.component';
@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { EmpresasService } from '../../services/empresas.service';
 
 @Component({
   selector: 'app-empresas',
@@ -14,7 +15,7 @@ import { ToastService } from '../../components/toast.service';
   imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
   templateUrl: './empresas.component.html'
 })
-export class EmpresasComponent {
+export class EmpresasComponent implements OnInit {
   title = 'Empresas';
   subtitle = 'Cadastro de empresas e transportadoras';
   primaryBtnLabel = 'Novo';
@@ -23,7 +24,6 @@ export class EmpresasComponent {
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'cnpj', label: 'CNPJ', type: 'text' },
     { key: 'telefone', label: 'Telefone', type: 'text' },
-    { key: 'status', label: 'Status', type: 'badge' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
@@ -32,15 +32,25 @@ export class EmpresasComponent {
     { key: 'cnpj', label: 'CNPJ', type: 'text' }
   ];
 
-  data: any[] = [
-    { id: 1, nome: 'Fred Rose enterprise', cnpj: '24523453412534', telefone: '619994235', status: 'Ativa' }
-  ];
+  data: any[] = [];
 
   constructor(
     private router: Router,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private empresasService: EmpresasService
   ) {}
+
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
+  private carregarDados(): void {
+    this.empresasService.listar().subscribe({
+      next: (dados) => this.data = dados,
+      error: () => this.toastService.error('Não foi possível carregar as empresas.', 'Erro')
+    });
+  }
 
   onPrimaryAction(): void { this.router.navigate(['/empresas/novo']); }
   onFilterApplied(filters: any): void {}
@@ -55,7 +65,12 @@ export class EmpresasComponent {
       return;
     }
 
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Empresa excluída.', 'Sucesso');
+    this.empresasService.excluir(row.id).subscribe({
+      next: () => {
+        this.carregarDados();
+        this.toastService.success('Empresa excluída.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir a empresa.', 'Erro')
+    });
   }
 }

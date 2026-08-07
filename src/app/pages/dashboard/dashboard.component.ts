@@ -1,9 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { DashboardService } from '../../services/dashboard.service';
+import { NotificationService } from '../../services/notification.service';
+import { ChecklistService } from '../../services/checklist.service';
+import { ManutencoesService } from '../../services/manutencoes.service';
+import { ViagensService } from '../../services/viagens.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,8 +17,15 @@ import { HeaderComponent } from '../../components/header/header.component';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
-  constructor(private router: Router) {}
+export class DashboardComponent implements OnInit {
+  constructor(
+    private router: Router,
+    private dashboardService: DashboardService,
+    private notificationService: NotificationService,
+    private checklistService: ChecklistService,
+    private manutencoesService: ManutencoesService,
+    private viagensService: ViagensService
+  ) {}
 
   cartoes = [
     { titulo: 'Checklists hoje', valor: 0, icone: 'bi-check2-square', cor: 'success', rota: '' },
@@ -23,26 +35,26 @@ export class DashboardComponent {
       icone: 'bi-clipboard-check',
       cor: 'warning',
       rota: '/checklists',
-      parametros: { status: 'Pendente' }
+      parametros: { status: 'Em Andamento' }
     },
     {
       titulo: 'Veículos cadastrados',
-      valor: 1,
+      valor: 0,
       icone: 'bi-truck',
       cor: 'info',
       rota: '/veiculos'
     },
     {
-      titulo: 'Veículos com problemas',
+      titulo: 'Veículos em manutenção',
       valor: 0,
       icone: 'bi-exclamation-triangle',
       cor: 'danger',
       rota: '/veiculos',
-      parametros: { status: 'Problema' }
+      parametros: { status: 'Em manutenção' }
     },
     {
       titulo: 'Manutenções pendentes',
-      valor: 1,
+      valor: 0,
       icone: 'bi-wrench',
       cor: 'secondary',
       rota: '/manutencoes',
@@ -50,21 +62,20 @@ export class DashboardComponent {
     },
     {
       titulo: 'Manutenções em atraso',
-      valor: 1,
+      valor: 0,
       icone: 'bi-clock-history',
       cor: 'danger-light',
-      rota: '/manutencoes',
-      parametros: { status: 'Atrasada' }
+      rota: '/manutencoes'
     },
     {
       titulo: 'Viagens em andamento',
-      valor: 1,
+      valor: 0,
       icone: 'bi-geo-alt',
       cor: 'primary',
       rota: '/viagens',
-      parametros: { status: 'Em andamento' }
+      parametros: { status: 'Em Rota' }
     },
-    { titulo: 'Alertas críticos', valor: 0, icone: 'bi-bell', cor: 'danger', rota: '' }
+    { titulo: 'Alertas críticos', valor: 0, icone: 'bi-bell', cor: 'danger', rota: '/alertas' }
   ];
 
   aoClicarNoCartao(cartao: any): void {
@@ -75,32 +86,19 @@ export class DashboardComponent {
     }
   }
 
-  manutencoesPendentes = [
-    { descricao: 'Óleo Baixo', data: '22/05/2026', prioridade: 'Crítica', status: 'Aberta' }
-  ];
-
-  checklistsFinalizados = [
-    { veiculo: 'abc-1234', data: '05/06/2026', motorista: 'fred', status: 'Concluído' },
-    { veiculo: 'xyz-9876', data: '04/06/2026', motorista: 'joão', status: 'Concluído' }
-  ];
-
-  viagensFinalizadasBase = [
-    { id: 1, veiculo: 'ABC-1234', motorista: 'João Silva', data: '2026-06-05', origem: 'São Paulo', destino: 'Campinas', status: 'Finalizada' },
-    { id: 2, veiculo: 'XYZ-5678', motorista: 'Maria Santos', data: '2026-06-12', origem: 'Campinas', destino: 'Ribeirão Preto', status: 'Finalizada' },
-    { id: 3, veiculo: 'DEF-9012', motorista: 'Pedro Costa', data: '2026-07-02', origem: 'Belo Horizonte', destino: 'Vitória', status: 'Finalizada' }
-  ];
-
+  manutencoesPendentes: any[] = [];
+  checklistsFinalizados: any[] = [];
   viagensFinalizadas: any[] = [];
 
   filtroData = '30d';
 
   resumoFinanceiro = {
-    totalReceita: 128450,
-    totalDespesa: 36420,
-    lucro: 92030,
-    viagens: 18,
-    ticketMedio: 7136,
-    margem: 71.7
+    totalReceita: 0,
+    totalDespesa: 0,
+    lucro: 0,
+    viagens: 0,
+    ticketMedio: 0,
+    margem: 0
   };
 
   opcoesFiltroData = [
@@ -128,26 +126,62 @@ export class DashboardComponent {
   }
 
   ngOnInit(): void {
+    this.carregarResumo();
+    this.carregarAlertasCriticos();
+    this.carregarChecklistsRecentes();
+    this.carregarManutencoesPendentes();
     this.aplicarFiltroData();
   }
 
+  private carregarResumo(): void {
+    this.dashboardService.resumo().subscribe(resumo => {
+      this.cartoes[0].valor = resumo.checklistsHoje;
+      this.cartoes[1].valor = resumo.checklistsPendentes;
+      this.cartoes[2].valor = resumo.veiculosCadastrados;
+      this.cartoes[3].valor = resumo.veiculosEmManutencao;
+      this.cartoes[4].valor = resumo.manutencoesPendentes;
+      this.cartoes[5].valor = resumo.manutencoesEmAtraso;
+      this.cartoes[6].valor = resumo.viagensEmAndamento;
+    });
+  }
+
+  private carregarAlertasCriticos(): void {
+    this.notificationService.listar().subscribe(alertas => {
+      this.cartoes[7].valor = alertas.filter(a => a.critico).length;
+    });
+  }
+
+  private carregarChecklistsRecentes(): void {
+    this.checklistService.listar().subscribe(dados => {
+      this.checklistsFinalizados = dados.slice(0, 5).map(checklist => ({
+        veiculo: checklist.veiculo?.placa,
+        data: checklist.created_at,
+        motorista: checklist.motorista?.nome,
+        status: checklist.status
+      }));
+    });
+  }
+
+  private carregarManutencoesPendentes(): void {
+    this.manutencoesService.listar().subscribe(dados => {
+      this.manutencoesPendentes = dados
+        .filter(item => item.status !== 'Finalizada')
+        .slice(0, 5)
+        .map(item => ({
+          descricao: item.descricao_problema,
+          data: item.created_at,
+          prioridade: item.prioridade,
+          status: item.status
+        }));
+    });
+  }
+
   aplicarFiltroData(): void {
-    const multiplicadores: Record<string, number> = {
-      '7d': 0.8,
-      '30d': 1,
-      '90d': 2.6
-    };
+    const dias: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90 };
 
-    const fator = multiplicadores[this.filtroData] ?? 1;
-
-    this.resumoFinanceiro = {
-      totalReceita: Math.round(128450 * fator),
-      totalDespesa: Math.round(36420 * fator),
-      lucro: Math.round(92030 * fator),
-      viagens: Math.round(18 * fator),
-      ticketMedio: Math.round(7136 * fator),
-      margem: Number((71.7 - (fator - 1) * 1.8).toFixed(1))
-    };
+    this.dashboardService.financeiro(dias[this.filtroData] ?? 30).subscribe(financeiro => {
+      this.resumoFinanceiro = financeiro;
+    });
 
     this.atualizarViagensFinalizadas();
   }
@@ -168,9 +202,24 @@ export class DashboardComponent {
         break;
     }
 
-    this.viagensFinalizadas = this.viagensFinalizadasBase.filter(item => {
-      const dataItem = new Date(item.data);
-      return dataItem >= limite && dataItem <= hoje;
+    this.viagensService.listar().subscribe(dados => {
+      this.viagensFinalizadas = dados
+        .filter(viagem => {
+          if (viagem.status !== 'Finalizada') {
+            return false;
+          }
+          const dataViagem = new Date(viagem.data_saida);
+          return dataViagem >= limite && dataViagem <= hoje;
+        })
+        .map(viagem => ({
+          id: viagem.id,
+          veiculo: viagem.veiculo?.placa,
+          motorista: viagem.motorista?.nome,
+          data: viagem.data_saida,
+          origem: viagem.origem,
+          destino: viagem.destino,
+          status: viagem.status
+        }));
     });
   }
 

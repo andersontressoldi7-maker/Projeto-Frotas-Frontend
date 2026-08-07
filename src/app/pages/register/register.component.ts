@@ -62,11 +62,11 @@ export class RegisterComponent {
       next: () => {
         this.isLoading = false;
         this.toastService.success('Conta criada com sucesso.', 'Sucesso');
-        this.router.navigate(['/login']);
+        this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (erro) => {
         this.isLoading = false;
-        this.toastService.error('Não foi possível criar a conta. Tente novamente.', 'Erro');
+        this.toastService.error(erro?.error?.message || 'Não foi possível criar a conta. Tente novamente.', 'Erro');
       }
     });
   }

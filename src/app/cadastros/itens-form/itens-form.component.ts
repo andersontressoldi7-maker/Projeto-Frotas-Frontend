@@ -6,6 +6,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
+import { ItensService } from '../../services/itens.service';
 
 @Component({
   selector: 'app-itens-form',
@@ -15,6 +16,7 @@ import { ToastService } from '../../components/toast.service';
 })
 export class ItensFormComponent implements OnInit {
   modoEdicao = false;
+  idEmEdicao: number | null = null;
 
   formulario: any = {
     nome: '',
@@ -48,15 +50,32 @@ export class ItensFormComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private itensService: ItensService
+  ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
+        this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Item';
-        const mock = { id: params['id'], nome: 'Item Mock', categoria: 'Geral', tipo: 'texto', geraManutencao: false, obrigatorioFoto: true, obrigatorioObservacao: false, ativo: true };
-        this.formulario = { nome: mock.nome, categoria: mock.categoria, tipo: mock.tipo, geraManutencao: mock.geraManutencao, obrigatorioFoto: mock.obrigatorioFoto, obrigatorioObservacao: mock.obrigatorioObservacao, ativo: mock.ativo };
+
+        this.itensService.obter(this.idEmEdicao).subscribe({
+          next: (item) => this.formulario = {
+            nome: item.nome,
+            categoria: item.categoria,
+            tipo: item.tipo,
+            geraManutencao: item.gera_manutencao,
+            obrigatorioFoto: item.obrigatorio_foto,
+            obrigatorioObservacao: item.obrigatorio_observacao,
+            ativo: item.ativo
+          },
+          error: () => this.toastService.error('Não foi possível carregar o item.', 'Erro')
+        });
       }
     });
   }
@@ -67,9 +86,27 @@ export class ItensFormComponent implements OnInit {
       return;
     }
 
-    console.log('Salvar item', dados);
-    this.toastService.success('Item salvo (mock).', 'Sucesso');
-    setTimeout(() => this.router.navigate(['/itens']), 300);
+    const payload = {
+      nome: dados.nome,
+      categoria: dados.categoria,
+      tipo: dados.tipo,
+      gera_manutencao: dados.geraManutencao,
+      obrigatorio_foto: dados.obrigatorioFoto,
+      obrigatorio_observacao: dados.obrigatorioObservacao,
+      ativo: dados.ativo
+    };
+
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.itensService.atualizar(this.idEmEdicao, payload)
+      : this.itensService.criar(payload);
+
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Item salvo com sucesso.', 'Sucesso');
+        this.router.navigate(['/itens']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o item.', 'Erro')
+    });
   }
 
   onCancelar(): void {

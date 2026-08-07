@@ -5,6 +5,12 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
+import { ToastService } from '../../components/toast.service';
+import { ManutencoesService } from '../../services/manutencoes.service';
+import { VeiculosService } from '../../services/veiculos.service';
+import { MotoristasService } from '../../services/motoristas.service';
+import { TiposManutencaoService } from '../../services/tipos-manutencao.service';
+import { ChecklistService } from '../../services/checklist.service';
 
 @Component({
   selector: 'app-manutencoes-form',
@@ -15,14 +21,15 @@ import { SharedFormComponent, FormConfig } from '../shared-form.component';
 })
 export class ManutencoesFormComponent implements OnInit {
   modoEdicao = false;
+  idEmEdicao: number | null = null;
   abaAtiva = 'geral';
-  
-  formulario = {
-    origem: 'Checklist #123',
+
+  formulario: any = {
+    origem: '',
     veiculo: '',
     motoristaRelator: '',
-    descricaoProblema: '',
     tipoManutencao: '',
+    descricaoProblema: '',
     prioridade: 'Normal',
     status: 'Aberta',
     dataPrevisaoEntrega: ''
@@ -34,10 +41,9 @@ export class ManutencoesFormComponent implements OnInit {
   listaProdutos: any[] = [];
   novoProduto = { descricao: '', quantidade: 1, valorUnitario: null as any };
 
-  listaChecklists: any[] = [
-    { nome: 'Checklist #123' }
-  ];
-  novoChecklist = '';
+  checklistsDisponiveis: any[] = [];
+  listaChecklists: any[] = [];
+  novoChecklist: number | null = null;
 
   configFormulario: FormConfig = {
     titulo: 'Nova Manutenção',
@@ -48,10 +54,10 @@ export class ManutencoesFormComponent implements OnInit {
       {
         titulo: 'Informações da Manutenção',
         campos: [
-          { nome: 'origem', label: 'Origem', tipo: 'text', readOnly: true, tamanho: '1/2' },
-          { nome: 'veiculo', label: 'Veículo', tipo: 'select', obrigatorio: true, tamanho: '1/2', opcoes: [{ id: 1, label: 'ABC-1234 - Volvo FH' }] },
-          { nome: 'motoristaRelator', label: 'Motorista Relator', tipo: 'select', tamanho: '1/2', opcoes: [{ id: 1, label: 'João Silva' }] },
-          { nome: 'tipoManutencao', label: 'Tipo de Manutenção', tipo: 'select', obrigatorio: true, tamanho: '1/2', opcoes: [{ id: 1, label: 'Mecânica Geral' }] },
+          { nome: 'origem', label: 'Origem', tipo: 'text', tamanho: '1/2' },
+          { nome: 'veiculo', label: 'Veículo', tipo: 'select', obrigatorio: true, tamanho: '1/2', opcoes: [] },
+          { nome: 'motoristaRelator', label: 'Motorista Relator', tipo: 'select', tamanho: '1/2', opcoes: [] },
+          { nome: 'tipoManutencao', label: 'Tipo de Manutenção', tipo: 'select', tamanho: '1/2', opcoes: [] },
           { nome: 'descricaoProblema', label: 'Descrição do Problema', tipo: 'textarea', obrigatorio: true, tamanho: 'full' }
         ]
       },
@@ -66,13 +72,56 @@ export class ManutencoesFormComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private manutencoesService: ManutencoesService,
+    private veiculosService: VeiculosService,
+    private motoristasService: MotoristasService,
+    private tiposManutencaoService: TiposManutencaoService,
+    private checklistService: ChecklistService
+  ) {}
 
   ngOnInit(): void {
+    this.veiculosService.listar().subscribe(dados => {
+      this.configFormulario.secoes[0].campos[1].opcoes = dados.map(v => ({ id: v.id, label: `${v.placa} - ${v.modelo || ''}` }));
+    });
+
+    this.motoristasService.listar().subscribe(dados => {
+      this.configFormulario.secoes[0].campos[2].opcoes = dados.map(m => ({ id: m.id, label: m.nome }));
+    });
+
+    this.tiposManutencaoService.listar().subscribe(dados => {
+      this.configFormulario.secoes[0].campos[3].opcoes = dados.map(t => ({ id: t.id, label: t.nome }));
+    });
+
+    this.checklistService.listar().subscribe(dados => this.checklistsDisponiveis = dados);
+
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
+        this.idEmEdicao = Number(params['id']);
         this.configFormulario.titulo = 'Editar Manutenção';
+
+        this.manutencoesService.obter(this.idEmEdicao).subscribe({
+          next: (manutencao) => {
+            this.formulario = {
+              origem: manutencao.origem,
+              veiculo: manutencao.veiculo_id,
+              motoristaRelator: manutencao.motorista_relator_id,
+              tipoManutencao: manutencao.tipo_manutencao_id,
+              descricaoProblema: manutencao.descricao_problema,
+              prioridade: manutencao.prioridade,
+              status: manutencao.status,
+              dataPrevisaoEntrega: manutencao.data_previsao_entrega
+            };
+            this.listaMaoDeObra = (manutencao.servicos || []).map((s: any) => ({ descricao: s.descricao, valor: s.valor }));
+            this.listaProdutos = (manutencao.produtos || []).map((p: any) => ({ descricao: p.descricao, quantidade: p.quantidade, valorUnitario: p.valor_unitario }));
+            this.listaChecklists = manutencao.checklists || [];
+          },
+          error: () => this.toastService.error('Não foi possível carregar a manutenção.', 'Erro')
+        });
       }
     });
   }
@@ -107,8 +156,11 @@ export class ManutencoesFormComponent implements OnInit {
 
   vincularChecklist(): void {
     if (this.novoChecklist) {
-      this.listaChecklists.push({ nome: this.novoChecklist });
-      this.novoChecklist = '';
+      const checklist = this.checklistsDisponiveis.find(c => c.id === this.novoChecklist);
+      if (checklist && !this.listaChecklists.some(c => c.id === checklist.id)) {
+        this.listaChecklists.push(checklist);
+      }
+      this.novoChecklist = null;
     }
   }
 
@@ -117,16 +169,31 @@ export class ManutencoesFormComponent implements OnInit {
   }
 
   onSalvar(dadosGerais: any): void {
-    const payloadCompleto = {
-      ...dadosGerais,
+    const payload = {
+      origem: dadosGerais.origem,
+      veiculo_id: dadosGerais.veiculo,
+      motorista_relator_id: dadosGerais.motoristaRelator || null,
+      tipo_manutencao_id: dadosGerais.tipoManutencao || null,
+      descricao_problema: dadosGerais.descricaoProblema,
+      prioridade: dadosGerais.prioridade,
+      status: dadosGerais.status,
+      data_previsao_entrega: dadosGerais.dataPrevisaoEntrega || null,
       maoDeObra: this.listaMaoDeObra,
-      produtos: this.listaProdutos,
-      checklistsVinculados: this.listaChecklists,
-      valorTotal: this.calcularTotal()
+      produtos: this.listaProdutos.map(p => ({ descricao: p.descricao, quantidade: p.quantidade, valor_unitario: p.valorUnitario })),
+      checklistsIds: this.listaChecklists.map(c => c.id)
     };
-    
-    console.log(payloadCompleto);
-    this.router.navigate(['/manutencoes']);
+
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.manutencoesService.atualizar(this.idEmEdicao, payload)
+      : this.manutencoesService.criar(payload);
+
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Manutenção salva com sucesso.', 'Sucesso');
+        this.router.navigate(['/manutencoes']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar a manutenção.', 'Erro')
+    });
   }
 
   onCancelar(): void {

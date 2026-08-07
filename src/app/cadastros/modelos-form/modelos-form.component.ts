@@ -6,7 +6,8 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
-import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
+import { ModelosService } from '../../services/modelos.service';
+import { ItensService } from '../../services/itens.service';
 
 @Component({
   selector: 'app-modelos-form',
@@ -34,16 +35,16 @@ export class ModelosFormComponent implements OnInit {
         titulo: 'Detalhes do Modelo',
         campos: [
           { nome: 'nome', label: 'Nome', tipo: 'text', obrigatorio: true, tamanho: 'full' },
-          { 
-            nome: 'tipo', 
-            label: 'Tipo do Modelo', 
-            tipo: 'select', 
-            obrigatorio: true, 
+          {
+            nome: 'tipo',
+            label: 'Tipo do Modelo',
+            tipo: 'select',
+            obrigatorio: true,
             opcoes: [
               { id: 'Completo', label: 'Completo (Saída e Retorno)' },
               { id: 'Simples', label: 'Simples (Somente Saída)' }
-            ], 
-            tamanho: '1/2' 
+            ],
+            tamanho: '1/2'
           },
           { nome: 'ativo', label: 'Ativo', tipo: 'select', opcoes: [{id: true,label:'Sim'},{id:false,label:'Não'}], tamanho: '1/2' }
         ]
@@ -51,12 +52,7 @@ export class ModelosFormComponent implements OnInit {
     ]
   };
 
-  itensDisponiveis = [
-    { id: 1, nome: 'Lampadas', categoria: 'Elétrica' },
-    { id: 2, nome: 'Pneus', categoria: 'Pneus' },
-    { id: 3, nome: 'Freios', categoria: 'Sistema de Freio' }
-  ];
-
+  itensDisponiveis: Array<{ id: number; nome: string; categoria: string }> = [];
   idItemSelecionado: number | null = null;
   itens: Array<any> = [];
   mensagemErro = '';
@@ -65,10 +61,16 @@ export class ModelosFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService,
-    private store: CadastrosRapidosStore
+    private modelosService: ModelosService,
+    private itensService: ItensService
   ) {}
 
   ngOnInit(): void {
+    this.itensService.listar().subscribe({
+      next: (itens) => this.itensDisponiveis = itens.filter(item => item.ativo),
+      error: () => this.toastService.error('Não foi possível carregar os itens disponíveis.', 'Erro')
+    });
+
     this.route.queryParams.subscribe(params => {
       this.retornoUrl = params['retorno'] || null;
       this.retornoCampo = params['campo'] || null;
@@ -80,17 +82,13 @@ export class ModelosFormComponent implements OnInit {
         this.idEmEdicao = Number(parametros['id']);
         this.config.titulo = 'Editar Modelo';
 
-        const existente = this.store.obterModelo(this.idEmEdicao);
-
-        const dadosSimulados = {
-          nome: existente?.nome ?? 'Checklist Diário',
-          tipo: existente?.tipo ?? 'Completo',
-          ativo: existente?.ativo ?? true,
-          itens: [ { id: 1, nome: 'Lampadas', categoria: 'Elétrica' }, { id: 2, nome: 'Pneus', categoria: 'Pneus' } ]
-        };
-
-        this.formulario = { nome: dadosSimulados.nome, tipo: dadosSimulados.tipo, ativo: dadosSimulados.ativo };
-        this.itens = dadosSimulados.itens.slice();
+        this.modelosService.obter(this.idEmEdicao).subscribe({
+          next: (modelo) => {
+            this.formulario = { nome: modelo.nome, tipo: modelo.tipo, ativo: modelo.ativo };
+            this.itens = (modelo.itens || []).map((item: any) => ({ id: item.id, nome: item.nome, categoria: item.categoria }));
+          },
+          error: () => this.toastService.error('Não foi possível carregar o modelo.', 'Erro')
+        });
       }
     });
   }
@@ -103,22 +101,29 @@ export class ModelosFormComponent implements OnInit {
       return;
     }
 
-    let idSalvo: number;
-    if (this.modoEdicao && this.idEmEdicao !== null) {
-      this.store.atualizarModelo(this.idEmEdicao, { nome: dados.nome, tipo: dados.tipo, ativo: dados.ativo });
-      idSalvo = this.idEmEdicao;
-    } else {
-      const novo = this.store.adicionarModelo({ nome: dados.nome, tipo: dados.tipo, ativo: dados.ativo, usosCount: 0 });
-      idSalvo = novo.id;
-    }
+    const payload = {
+      nome: dados.nome,
+      tipo: dados.tipo,
+      ativo: dados.ativo,
+      itensIds: this.itens.map(item => item.id)
+    };
 
-    this.toastService.success('Modelo salvo com sucesso.', 'Sucesso');
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.modelosService.atualizar(this.idEmEdicao, payload)
+      : this.modelosService.criar(payload);
 
-    if (this.retornoUrl && this.retornoCampo) {
-      setTimeout(() => this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: idSalvo } }), 300);
-    } else {
-      setTimeout(() => this.router.navigate(['/modelos']), 300);
-    }
+    requisicao.subscribe({
+      next: (modelo) => {
+        this.toastService.success('Modelo salvo com sucesso.', 'Sucesso');
+
+        if (this.retornoUrl && this.retornoCampo) {
+          this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: modelo.id } });
+        } else {
+          this.router.navigate(['/modelos']);
+        }
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o modelo.', 'Erro')
+    });
   }
 
   aoCancelar(): void {

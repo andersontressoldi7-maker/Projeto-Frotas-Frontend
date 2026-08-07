@@ -6,6 +6,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
+import { EmpresasService } from '../../services/empresas.service';
 
 @Component({
   selector: 'app-empresas-form',
@@ -15,6 +16,7 @@ import { ToastService } from '../../components/toast.service';
 })
 export class EmpresasFormComponent implements OnInit {
   modoEdicao = false;
+  idEmEdicao: number | null = null;
 
   formulario: any = {
     nome: '',
@@ -37,15 +39,24 @@ export class EmpresasFormComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private empresasService: EmpresasService
+  ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
+        this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Empresa';
-        const mock = { id: params['id'], nome: 'Empresa Mock', cnpj: '00000000', telefone: '6198888888' };
-        this.formulario = { nome: mock.nome, cnpj: mock.cnpj, telefone: mock.telefone };
+
+        this.empresasService.obter(this.idEmEdicao).subscribe({
+          next: (empresa) => this.formulario = { nome: empresa.nome, cnpj: empresa.cnpj, telefone: empresa.telefone },
+          error: () => this.toastService.error('Não foi possível carregar a empresa.', 'Erro')
+        });
       }
     });
   }
@@ -56,9 +67,17 @@ export class EmpresasFormComponent implements OnInit {
       return;
     }
 
-    console.log('Salvar empresa', dados);
-    this.toastService.success('Empresa salva (mock).', 'Sucesso');
-    setTimeout(() => this.router.navigate(['/empresas']), 300);
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.empresasService.atualizar(this.idEmEdicao, dados)
+      : this.empresasService.criar(dados);
+
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Empresa salva com sucesso.', 'Sucesso');
+        this.router.navigate(['/empresas']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar a empresa.', 'Erro')
+    });
   }
 
   onCancelar(): void {

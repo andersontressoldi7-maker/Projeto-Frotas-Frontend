@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { ChecklistService } from '../../services/checklist.service';
 
 @Component({
   selector: 'app-checklists',
@@ -19,7 +20,8 @@ export class ChecklistsComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private checklistService: ChecklistService
   ) {}
   title = 'Checklists';
   subtitle = 'Histórico de checklists preenchidos';
@@ -29,11 +31,9 @@ export class ChecklistsComponent implements OnInit {
   columns: GridColumn[] = [
     { key: 'id', label: 'ID', type: 'number' },
     { key: 'modelo', label: 'Modelo', type: 'text' },
-    { key: 'empresa', label: 'Empresa', type: 'text' },
     { key: 'veiculo', label: 'Veículo', type: 'text' },
     { key: 'motorista', label: 'Motorista', type: 'text' },
     { key: 'data', label: 'Data', type: 'date' },
-    { key: 'inconf', label: 'Inconf.', type: 'number' },
     { key: 'status', label: 'Status', type: 'badge', colorGroup: 'statusChecklist' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
@@ -41,34 +41,46 @@ export class ChecklistsComponent implements OnInit {
   filterOptions: GridFilterOption[] = [
     { key: 'id', label: 'ID', type: 'number' },
     { key: 'modelo', label: 'Modelo', type: 'text' },
-    { key: 'empresa', label: 'Empresa', type: 'text' },
     { key: 'veiculo', label: 'Veículo', type: 'text' },
     { key: 'motorista', label: 'Motorista', type: 'text' },
     { key: 'data', label: 'Data', type: 'date' },
     { key: 'status', label: 'Status', type: 'select', options: [
-      { label: 'Finalizado', value: 'Finalizado' },
-      { label: 'Pendente', value: 'Pendente' }
+      { label: 'Em Andamento', value: 'Em Andamento' },
+      { label: 'Concluído', value: 'Concluído' }
     ]}
   ];
 
-  allData: any[] = [
-    { id: 1, modelo: 'Checklist Diário', empresa: 'Frota Norte', veiculo: 'ABC-1234', motorista: 'João', data: '09/07/2026', inconf: 0, status: 'Finalizado' },
-    { id: 2, modelo: 'Checklist Saída', empresa: 'Frota Norte', veiculo: 'XYZ-5678', motorista: 'Maria', data: '09/07/2026', inconf: 1, status: 'Pendente' }
-  ];
-
+  allData: any[] = [];
   data: any[] = [];
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const status = params['status'];
-      if (status) {
-        this.data = this.allData.filter(item => item.status.toLowerCase() === String(status).toLowerCase());
-        this.subtitle = `Filtrando por: ${status}`;
-      } else {
-        this.data = [...this.allData];
-        this.subtitle = 'Histórico de checklists preenchidos';
-      }
+    this.checklistService.listar().subscribe({
+      next: (dados) => {
+        this.allData = dados.map(checklist => ({
+          id: checklist.id,
+          modelo: checklist.modelo?.nome,
+          veiculo: checklist.veiculo?.placa,
+          motorista: checklist.motorista?.nome,
+          data: checklist.created_at,
+          status: checklist.status
+        }));
+        this.aplicarFiltroDaRota();
+      },
+      error: () => this.toastService.error('Não foi possível carregar os checklists.', 'Erro')
     });
+
+    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
+  }
+
+  private aplicarFiltroDaRota(): void {
+    const status = this.route.snapshot.queryParams['status'];
+    if (status) {
+      this.data = this.allData.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
+      this.subtitle = `Filtrando por: ${status}`;
+    } else {
+      this.data = [...this.allData];
+      this.subtitle = 'Histórico de checklists preenchidos';
+    }
   }
 
   onPrimaryAction(): void {
@@ -88,8 +100,13 @@ export class ChecklistsComponent implements OnInit {
       return;
     }
 
-    this.allData = this.allData.filter(item => item.id !== row.id);
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Checklist excluído.', 'Sucesso');
+    this.checklistService.excluir(row.id).subscribe({
+      next: () => {
+        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.aplicarFiltroDaRota();
+        this.toastService.success('Checklist excluído.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir o checklist.', 'Erro')
+    });
   }
 }

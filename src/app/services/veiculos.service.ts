@@ -6,8 +6,8 @@ import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class ViagensService {
-  private apiUrl = `${environment.apiBaseUrl}/viagens`;
+export class VeiculosService {
+  private apiUrl = `${environment.apiBaseUrl}/veiculos`;
 
   constructor(private http: HttpClient) {}
 
@@ -19,12 +19,12 @@ export class ViagensService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  criar(viagem: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, viagem);
+  criar(veiculo: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, veiculo);
   }
 
-  atualizar(id: number, viagem: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, viagem);
+  atualizar(id: number, veiculo: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, veiculo);
   }
 
   excluir(id: number): Observable<void> {

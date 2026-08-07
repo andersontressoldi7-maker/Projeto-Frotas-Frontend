@@ -7,7 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
-import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
+import { ModelosService } from '../../services/modelos.service';
 
 @Component({
   selector: 'app-modelos',
@@ -32,7 +32,7 @@ export class ModelosComponent implements OnInit {
     private router: Router,
     private dialogService: DialogService,
     private toastService: ToastService,
-    private store: CadastrosRapidosStore
+    private modelosService: ModelosService
   ) {}
 
   ngOnInit(): void {
@@ -40,11 +40,14 @@ export class ModelosComponent implements OnInit {
   }
 
   private carregarDados(): void {
-    this.data = this.store.modelos.map(modelo => ({
-      id: modelo.id,
-      nome: modelo.nome,
-      ativo: modelo.ativo ? 'Sim' : 'Não'
-    }));
+    this.modelosService.listar().subscribe({
+      next: (dados) => this.data = dados.map(modelo => ({
+        id: modelo.id,
+        nome: modelo.nome,
+        ativo: modelo.ativo ? 'Sim' : 'Não'
+      })),
+      error: () => this.toastService.error('Não foi possível carregar os modelos.', 'Erro')
+    });
   }
 
   onPrimaryAction(): void { this.router.navigate(['/modelos/novo']); }
@@ -55,28 +58,38 @@ export class ModelosComponent implements OnInit {
   }
 
   async onDeleteClick(row: any): Promise<void> {
-    if (this.store.modeloEstaEmUso(row.id)) {
-      const desativar = await this.dialogService.confirmar(
-        `O modelo "${row.nome}" já foi utilizado em checklists e não pode ser excluído definitivamente. Deseja desativá-lo? Modelos inativos deixam de aparecer na criação de novos checklists.`,
-        'Modelo em uso'
-      );
-
-      if (desativar) {
-        this.store.atualizarModelo(row.id, { ativo: false });
-        this.carregarDados();
-        this.toastService.success('Modelo desativado.', 'Sucesso');
-      }
-
-      return;
-    }
-
     const confirmado = await this.dialogService.confirmar(`Deseja excluir o modelo ${row.nome}?`, 'Excluir modelo');
     if (!confirmado) {
       return;
     }
 
-    this.store.excluirModelo(row.id);
-    this.carregarDados();
-    this.toastService.success('Modelo excluído.', 'Sucesso');
+    this.modelosService.excluir(row.id).subscribe({
+      next: () => {
+        this.carregarDados();
+        this.toastService.success('Modelo excluído.', 'Sucesso');
+      },
+      error: async (erro) => {
+        if (erro.status === 422) {
+          const desativar = await this.dialogService.confirmar(
+            `${erro?.error?.message || 'Este modelo já foi utilizado e não pode ser excluído definitivamente.'} Deseja desativá-lo? Modelos inativos deixam de aparecer na criação de novos checklists.`,
+            'Modelo em uso'
+          );
+
+          if (desativar) {
+            this.modelosService.atualizar(row.id, { ativo: false }).subscribe({
+              next: () => {
+                this.carregarDados();
+                this.toastService.success('Modelo desativado.', 'Sucesso');
+              },
+              error: () => this.toastService.error('Não foi possível desativar o modelo.', 'Erro')
+            });
+          }
+
+          return;
+        }
+
+        this.toastService.error('Não foi possível excluir o modelo.', 'Erro');
+      }
+    });
   }
 }

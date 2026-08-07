@@ -6,6 +6,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
+import { TiposVeiculosService } from '../../services/tipos-veiculos.service';
 
 @Component({
   selector: 'app-tipos-veiculos-form',
@@ -15,6 +16,7 @@ import { ToastService } from '../../components/toast.service';
 })
 export class TiposVeiculosFormComponent implements OnInit {
   modoEdicao = false;
+  idEmEdicao: number | null = null;
 
   formulario: any = {
     nome: '',
@@ -35,15 +37,24 @@ export class TiposVeiculosFormComponent implements OnInit {
     ]
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private toastService: ToastService) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private toastService: ToastService,
+    private tiposVeiculosService: TiposVeiculosService
+  ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
+        this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Tipo de Veículo';
-        const mock = { id: params['id'], nome: 'Tipo Mock', descricao: 'Descrição mock' };
-        this.formulario = { nome: mock.nome, descricao: mock.descricao };
+
+        this.tiposVeiculosService.obter(this.idEmEdicao).subscribe({
+          next: (tipo) => this.formulario = { nome: tipo.nome, descricao: tipo.descricao },
+          error: () => this.toastService.error('Não foi possível carregar o tipo de veículo.', 'Erro')
+        });
       }
     });
   }
@@ -54,9 +65,17 @@ export class TiposVeiculosFormComponent implements OnInit {
       return;
     }
 
-    console.log('Salvar tipo veiculo', dados);
-    this.toastService.success('Tipo de veículo salvo (mock).', 'Sucesso');
-    setTimeout(() => this.router.navigate(['/tipos-veiculos']), 300);
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.tiposVeiculosService.atualizar(this.idEmEdicao, dados)
+      : this.tiposVeiculosService.criar(dados);
+
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Tipo de veículo salvo com sucesso.', 'Sucesso');
+        this.router.navigate(['/tipos-veiculos']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o tipo de veículo.', 'Erro')
+    });
   }
 
   onCancelar(): void {

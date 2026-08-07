@@ -8,13 +8,9 @@
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
           <div>
             <h2 class="h4 fw-bold mb-1">{{ faseAtual === 'saida' ? 'Nova Vistoria (Saída)' : 'Finalizar Vistoria (Retorno)' }}</h2>
-            <p class="text-muted small mb-0">{{ motorista.nome }} - Passo {{ passoAtual }} de {{ faseAtual === 'saida' ? 2 : 1 }}</p>
+            <p class="text-muted small mb-0">Passo {{ passoAtual }} de {{ faseAtual === 'saida' ? 2 : 1 }}</p>
           </div>
           <div class="d-flex align-items-center gap-2">
-            <div class="btn-group me-2">
-              <button class="btn btn-sm" [class.btn-primary]="faseAtual === 'saida'" [class.btn-outline-primary]="faseAtual !== 'saida'" (click)="mudarFase('saida')">Simular Criação (Saída)</button>
-              <button class="btn btn-sm" [class.btn-primary]="faseAtual === 'retorno'" [class.btn-outline-primary]="faseAtual !== 'retorno'" (click)="mudarFase('retorno')">Simular Fechamento (Retorno)</button>
-            </div>
             <button class="btn btn-outline-secondary btn-sm" (click)="cancelar()">
               <i class="bi bi-x-lg"></i> Cancelar
             </button>
@@ -75,9 +71,10 @@
 
                   <div class="form-group mb-3">
                     <label class="form-label">Motorista</label>
-                    <div class="form-control bg-body-tertiary" style="cursor: not-allowed;">
-                      {{ motorista.nome }}
-                    </div>
+                    <select class="form-control" [(ngModel)]="formulario.motorista">
+                      <option value="">Selecione um motorista</option>
+                      <option *ngFor="let m of motoristas" [value]="m.id">{{ m.nome }}</option>
+                    </select>
                   </div>
 
                   <div class="form-group mb-3">
@@ -95,6 +92,7 @@
                     <select
                       class="form-control"
                       [(ngModel)]="formulario.modelo"
+                      (ngModelChange)="aoSelecionarModelo()"
                       (keydown.F9)="irParaCadastro('modelo', 'novo', $event)"
                       (keydown.F8)="irParaCadastro('modelo', 'editar', $event)"
                       required>
@@ -175,16 +173,18 @@
                     <span *ngIf="item.valor" class="badge bg-success">{{ item.valor }}</span>
                   </div>
 
-                  <div class="item-pills">
-                    <button 
+                  <div class="item-pills" *ngIf="item.tipo === 'pills'">
+                    <button
                       *ngFor="let resposta of item.respostas"
-                      class="pill-btn" 
+                      class="pill-btn"
                       [class.ativo]="item.valor === resposta"
                       [class.ruim]="item.valor === 'Ruim'"
                       (click)="selecionarResposta(item, resposta)">
                       {{ resposta }}
                     </button>
                   </div>
+
+                  <input *ngIf="item.tipo === 'texto'" type="text" class="form-control" [(ngModel)]="item.valor" placeholder="Digite a resposta" />
 
                   <div class="item-actions">
                     <button 
@@ -228,15 +228,15 @@
                     <div class="col-md-6 mb-3 mb-md-0">
                       <div class="p-3 bg-body-tertiary rounded border">
                         <small class="text-muted d-block mb-1">Veículo</small>
-                        <strong class="d-block mb-2">ABC-1234 (Volvo FH)</strong>
+                        <strong class="d-block mb-2">{{ checklistCarregado?.veiculo?.placa }} ({{ checklistCarregado?.veiculo?.modelo }})</strong>
                         <small class="text-muted d-block mb-1">KM Registrado na Saída</small>
-                        <strong>125.400 km</strong>
+                        <strong>{{ checklistCarregado?.km_saida }} km</strong>
                       </div>
                     </div>
                     <div class="col-md-6">
                       <div class="p-3 bg-body-tertiary rounded border h-100">
                         <small class="text-muted d-block mb-1">Modelo</small>
-                        <strong>Checklist Diário Completo</strong>
+                        <strong>{{ checklistCarregado?.modelo?.nome }}</strong>
                       </div>
                     </div>
                   </div>

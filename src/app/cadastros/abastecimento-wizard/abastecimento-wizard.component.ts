@@ -5,8 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { ToastService } from '../../components/toast.service';
-import { CadastrosRapidosStore } from '../../services/cadastros-rapidos.store';
 import { RascunhoService } from '../../services/rascunho.service';
+import { VeiculosService } from '../../services/veiculos.service';
+import { MotoristasService } from '../../services/motoristas.service';
+import { AbastecimentosService } from '../../services/abastecimentos.service';
 
 @Component({
   selector: 'app-abastecimento-wizard',
@@ -19,6 +21,7 @@ export class AbastecimentoWizardComponent implements OnInit {
   private readonly chaveRascunho = 'rascunho-abastecimento-wizard';
 
   modoEdicao = false;
+  idEmEdicao: number | null = null;
   passoAtual = 1;
   totalPassos = 3;
 
@@ -36,13 +39,8 @@ export class AbastecimentoWizardComponent implements OnInit {
     observacao: ''
   };
 
-  get veiculos() {
-    return this.store.veiculos;
-  }
-
-  get motoristas() {
-    return this.store.motoristas;
-  }
+  veiculos: any[] = [];
+  motoristas: any[] = [];
 
   tiposAbastecimento = ['Interno', 'Externo'];
 
@@ -52,27 +50,56 @@ export class AbastecimentoWizardComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService,
-    private store: CadastrosRapidosStore,
-    private rascunhoService: RascunhoService
+    private rascunhoService: RascunhoService,
+    private veiculosService: VeiculosService,
+    private motoristasService: MotoristasService,
+    private abastecimentosService: AbastecimentosService
   ) {}
 
   ngOnInit(): void {
+    this.veiculosService.listar().subscribe(dados => this.veiculos = dados);
+    this.motoristasService.listar().subscribe(dados => this.motoristas = dados);
+
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.modoEdicao = true;
+        this.idEmEdicao = Number(params['id']);
+        this.carregarAbastecimento(this.idEmEdicao);
+        return;
+      }
+
+      const rascunho = this.rascunhoService.obter<typeof this.formulario>(this.chaveRascunho);
+      if (rascunho) {
+        this.formulario = { ...this.formulario, ...rascunho };
+        this.rascunhoService.limpar(this.chaveRascunho);
       }
     });
-
-    const rascunho = this.rascunhoService.obter<typeof this.formulario>(this.chaveRascunho);
-    if (rascunho) {
-      this.formulario = { ...this.formulario, ...rascunho };
-      this.rascunhoService.limpar(this.chaveRascunho);
-    }
 
     this.route.queryParams.subscribe(params => {
       if (params['retornoCampo'] && params['retornoId']) {
         (this.formulario as any)[params['retornoCampo']] = params['retornoId'];
       }
+    });
+  }
+
+  private carregarAbastecimento(id: number): void {
+    this.abastecimentosService.obter(id).subscribe({
+      next: (abastecimento) => {
+        this.formulario = {
+          veiculo: abastecimento.veiculo_id,
+          motorista: abastecimento.motorista_id,
+          dataAbastecimento: abastecimento.data_abastecimento,
+          tipoAbastecimento: abastecimento.tipo_abastecimento,
+          km: abastecimento.km,
+          combustivel: abastecimento.combustivel,
+          valorLitro: abastecimento.valor_litro,
+          qtLitros: abastecimento.qt_litros,
+          notaFiscal: abastecimento.nota_fiscal,
+          fornecedor: abastecimento.fornecedor,
+          observacao: abastecimento.observacao
+        };
+      },
+      error: () => this.toastService.error('Não foi possível carregar o abastecimento.', 'Erro')
     });
   }
 
@@ -150,12 +177,31 @@ export class AbastecimentoWizardComponent implements OnInit {
       return;
     }
 
-    console.log('Abastecimento salvo:', {
-      ...this.formulario,
-      valorTotal: this.valorTotalCombustivel
-    });
+    const payload = {
+      veiculo_id: this.formulario.veiculo,
+      motorista_id: this.formulario.motorista || null,
+      data_abastecimento: this.formulario.dataAbastecimento,
+      tipo_abastecimento: this.formulario.tipoAbastecimento,
+      km: this.formulario.km || null,
+      combustivel: this.formulario.combustivel,
+      valor_litro: this.formulario.valorLitro,
+      qt_litros: this.formulario.qtLitros,
+      nota_fiscal: this.formulario.notaFiscal || null,
+      fornecedor: this.formulario.fornecedor || null,
+      observacao: this.formulario.observacao || null
+    };
 
-    this.router.navigate(['/abastecimentos']);
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.abastecimentosService.atualizar(this.idEmEdicao, payload)
+      : this.abastecimentosService.criar(payload);
+
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.success('Abastecimento salvo com sucesso.', 'Sucesso');
+        this.router.navigate(['/abastecimentos']);
+      },
+      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o abastecimento.', 'Erro')
+    });
   }
 
   cancelar(): void {

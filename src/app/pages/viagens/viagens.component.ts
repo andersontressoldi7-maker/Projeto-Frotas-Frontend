@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { ViagensService } from '../../services/viagens.service';
 
 @Component({
   selector: 'app-viagens',
@@ -19,7 +20,8 @@ export class ViagensComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private viagensService: ViagensService
   ) {}
   title = 'Viagens';
   subtitle = 'Controle de viagens simplificadas';
@@ -29,28 +31,40 @@ export class ViagensComponent implements OnInit {
     { key: 'origem', label: 'Origem', type: 'text' },
     { key: 'destino', label: 'Destino', type: 'text' },
     { key: 'saida', label: 'Saída', type: 'date' },
-    { key: 'status', label: 'Status', type: 'badge' },
+    { key: 'status', label: 'Status', type: 'badge', colorGroup: 'statusViagem' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [
-    { id: 1, origem: 'SP', destino: 'JC', saida: '21/05/2026', status: 'Em andamento' },
-    { id: 2, origem: 'RS', destino: 'PR', saida: '22/05/2026', status: 'Concluída' }
-  ];
-
+  allData: any[] = [];
   data: any[] = [];
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const status = params['status'];
-      if (status) {
-        this.data = this.allData.filter(item => item.status.toLowerCase() === String(status).toLowerCase());
-        this.subtitle = `Filtrando por: ${status}`;
-      } else {
-        this.data = [...this.allData];
-        this.subtitle = 'Controle de viagens simplificadas';
-      }
+    this.viagensService.listar().subscribe({
+      next: (dados) => {
+        this.allData = dados.map(viagem => ({
+          id: viagem.id,
+          origem: viagem.origem,
+          destino: viagem.destino,
+          saida: viagem.data_saida,
+          status: viagem.status
+        }));
+        this.aplicarFiltroDaRota();
+      },
+      error: () => this.toastService.error('Não foi possível carregar as viagens.', 'Erro')
     });
+
+    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
+  }
+
+  private aplicarFiltroDaRota(): void {
+    const status = this.route.snapshot.queryParams['status'];
+    if (status) {
+      this.data = this.allData.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
+      this.subtitle = `Filtrando por: ${status}`;
+    } else {
+      this.data = [...this.allData];
+      this.subtitle = 'Controle de viagens simplificadas';
+    }
   }
 
   onPrimaryAction(): void {
@@ -68,8 +82,13 @@ export class ViagensComponent implements OnInit {
       return;
     }
 
-    this.allData = this.allData.filter(item => item.id !== row.id);
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Viagem excluída.', 'Sucesso');
+    this.viagensService.excluir(row.id).subscribe({
+      next: () => {
+        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.aplicarFiltroDaRota();
+        this.toastService.success('Viagem excluída.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir a viagem.', 'Erro')
+    });
   }
 }

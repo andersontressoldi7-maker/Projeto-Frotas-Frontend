@@ -21,17 +21,13 @@ const PALAVRAS_CONCLUSAO = ['conclu', 'finaliz'];
 const PALETA_PADRAO: Record<string, Record<string, TokenCor>> = {
   prioridadeManutencao: {
     'Baixa': 'success',
-    'Média': 'warning',
-    'Alta': 'laranja',
+    'Normal': 'warning',
     'Crítica': 'danger'
   },
   statusManutencao: {
     'Aberta': 'info',
-    'Em andamento': 'warning',
-    'Aguardando peça': 'laranja',
-    'Concluída': 'success',
-    'Cancelada': 'secondary',
-    'Atrasada': 'danger'
+    'Em Execução': 'warning',
+    'Finalizada': 'success'
   },
   statusVeiculo: {
     'Disponível': 'success',
@@ -40,8 +36,13 @@ const PALETA_PADRAO: Record<string, Record<string, TokenCor>> = {
     'Problema': 'danger'
   },
   statusChecklist: {
-    'Finalizado': 'success',
-    'Pendente': 'warning'
+    'Em Andamento': 'warning',
+    'Concluído': 'success'
+  },
+  statusViagem: {
+    'Agendada': 'info',
+    'Em Rota': 'laranja',
+    'Finalizada': 'success'
   },
   statusGenerico: {
     'Ativa': 'success',

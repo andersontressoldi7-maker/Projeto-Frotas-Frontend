@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { NotificationService, Notificacao, CategoriaNotificacao, CATEGORIAS_NOTIFICACAO } from '../../services/notification.service';
 import { ToastService } from '../toast.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -13,8 +14,9 @@ import { ToastService } from '../toast.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
-  emailUsuario = 'andersontressoldi7@gmail.com';
-  iniciaisUsuario = 'AN';
+  usuarioLogado: ReturnType<AuthService['obterUsuarioLogado']>;
+  emailUsuario = '';
+  iniciaisUsuario = '';
 
   notificacoes = signal<Notificacao[]>([]);
   notificacoesAbertas = false;
@@ -36,11 +38,29 @@ export class HeaderComponent {
     private elementRef: ElementRef,
     public themeService: ThemeService,
     private notificationService: NotificationService,
-    private toastService: ToastService
-  ) {}
+    private toastService: ToastService,
+    private authService: AuthService
+  ) {
+    this.usuarioLogado = this.authService.obterUsuarioLogado();
+    this.emailUsuario = this.usuarioLogado?.email || '';
+    this.iniciaisUsuario = this.calcularIniciais(this.usuarioLogado?.nome || this.emailUsuario);
+  }
 
   get notificacoesNaoLidas(): number {
     return this.notificacoes().filter(n => !n.lida).length;
+  }
+
+  private calcularIniciais(nomeOuEmail: string): string {
+    if (!nomeOuEmail) {
+      return '';
+    }
+
+    const partes = nomeOuEmail.split('@')[0].trim().split(/\s+/);
+    if (partes.length === 1) {
+      return partes[0].slice(0, 2).toUpperCase();
+    }
+
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
   }
 
   selecionarCategoria(categoria: CategoriaNotificacao | 'Todas'): void {
@@ -63,12 +83,7 @@ export class HeaderComponent {
         this.carregandoNotificacoes.set(false);
       },
       error: () => {
-        this.notificacoes.set([
-          { id: 1, titulo: 'Manutenção em atraso', mensagem: 'Óleo Baixo — veículo abc-1234 está com manutenção atrasada há 14 dias.', data: '22/05/2026', lida: false, categoria: 'Manutenção' },
-          { id: 2, titulo: 'CNH vencida', mensagem: 'Motorista fred está com a CNH vencida há 16 dias.', data: '20/05/2026', lida: false, categoria: 'Documento' },
-          { id: 3, titulo: 'Checklist com inconformidade', mensagem: 'Checklist #2 do veículo XYZ-5678 foi finalizado com 1 item pendente.', data: '09/07/2026', lida: true, categoria: 'Checklist' },
-          { id: 4, titulo: 'Viagem em andamento', mensagem: 'Viagem SP → JC segue em andamento.', data: '21/05/2026', lida: true, categoria: 'Viagem' }
-        ]);
+        this.notificacoes.set([]);
         this.carregandoNotificacoes.set(false);
       }
     });
@@ -77,7 +92,7 @@ export class HeaderComponent {
   toggleNotificacoes(): void {
     this.notificacoesAbertas = !this.notificacoesAbertas;
     this.menuUsuarioAberto = false;
-    if (this.notificacoesAbertas && this.notificacoes().length === 0) {
+    if (this.notificacoesAbertas) {
       this.carregarNotificacoes();
     }
   }
@@ -93,10 +108,14 @@ export class HeaderComponent {
   }
 
   logout(): void {
-    try {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-    } catch {}
+    this.authService.encerrarSessao().subscribe({
+      next: () => this.finalizarLogout(),
+      error: () => this.finalizarLogout()
+    });
+  }
+
+  private finalizarLogout(): void {
+    this.authService.limparSessao();
     this.router.navigate(['/login']);
   }
 }

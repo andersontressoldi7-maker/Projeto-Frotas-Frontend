@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
+import { VeiculosService } from '../../services/veiculos.service';
 
 @Component({
   selector: 'app-veiculos',
@@ -28,31 +29,38 @@ export class VeiculosComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [
-    { id: 1, placa: 'abc-1234', modelo: 'modelo 1', ano: 2002, km: 50000, status: 'Em viagem' },
-    { id: 2, placa: 'xyz-9999', modelo: 'modelo 2', ano: 2021, km: 120000, status: 'Problema' }
-  ];
-
+  allData: any[] = [];
   data: any[] = [];
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private veiculosService: VeiculosService
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const status = params['status'];
-      if (status) {
-        this.data = this.allData.filter(item => item.status.toLowerCase() === String(status).toLowerCase());
-        this.subtitle = `Filtrando por: ${status}`;
-      } else {
-        this.data = [...this.allData];
-        this.subtitle = 'Gestão da frota com histórico de checklists';
-      }
+    this.veiculosService.listar().subscribe({
+      next: (dados) => {
+        this.allData = dados;
+        this.aplicarFiltroDaRota();
+      },
+      error: () => this.toastService.error('Não foi possível carregar os veículos.', 'Erro')
     });
+
+    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
+  }
+
+  private aplicarFiltroDaRota(): void {
+    const status = this.route.snapshot.queryParams['status'];
+    if (status) {
+      this.data = this.allData.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
+      this.subtitle = `Filtrando por: ${status}`;
+    } else {
+      this.data = [...this.allData];
+      this.subtitle = 'Gestão da frota com histórico de checklists';
+    }
   }
 
   onPrimaryAction(): void { this.router.navigate(['/veiculos/novo']); }
@@ -68,8 +76,13 @@ export class VeiculosComponent implements OnInit {
       return;
     }
 
-    this.allData = this.allData.filter(item => item.id !== row.id);
-    this.data = this.data.filter(item => item.id !== row.id);
-    this.toastService.success('Veículo excluído.', 'Sucesso');
+    this.veiculosService.excluir(row.id).subscribe({
+      next: () => {
+        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.aplicarFiltroDaRota();
+        this.toastService.success('Veículo excluído.', 'Sucesso');
+      },
+      error: () => this.toastService.error('Não foi possível excluir o veículo.', 'Erro')
+    });
   }
 }
