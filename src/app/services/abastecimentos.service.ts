@@ -7,27 +7,27 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class AbastecimentosService {
-  private apiUrl = `${environment.apiBaseUrl}/abastecimentos`;
+  private urlBase = `${environment.apiBaseUrl}/abastecimentos`;
 
   constructor(private http: HttpClient) {}
 
   listar(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(this.urlBase);
   }
 
   obter(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.urlBase}/${id}`);
   }
 
   criar(abastecimento: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, abastecimento);
+    return this.http.post<any>(this.urlBase, abastecimento);
   }
 
   atualizar(id: number, abastecimento: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, abastecimento);
+    return this.http.put<any>(`${this.urlBase}/${id}`, abastecimento);
   }
 
   excluir(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.urlBase}/${id}`);
   }
 }

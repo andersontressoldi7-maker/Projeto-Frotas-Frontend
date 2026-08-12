@@ -16,11 +16,11 @@ import { ItensService } from '../../services/itens.service';
   templateUrl: './itens.component.html'
 })
 export class ItensComponent implements OnInit {
-  title = 'Itens de Checklist';
-  subtitle = 'Perguntas reutilizáveis nos modelos de checklist';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Itens de Checklist';
+  subtitulo = 'Perguntas reutilizáveis nos modelos de checklist';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'categoria', label: 'Categoria', type: 'text' },
     { key: 'tipo', label: 'Tipo', type: 'text' },
@@ -29,7 +29,7 @@ export class ItensComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  filterOptions: GridFilterOption[] = [
+  opcoesFiltro: GridFilterOption[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'categoria', label: 'Categoria', type: 'text' },
     { key: 'gera_manutencao', label: 'Gera manutenção', type: 'select', options: [
@@ -38,7 +38,7 @@ export class ItensComponent implements OnInit {
     ]}
   ];
 
-  data: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -53,34 +53,34 @@ export class ItensComponent implements OnInit {
 
   private carregarDados(): void {
     this.itensService.listar().subscribe({
-      next: (dados) => this.data = dados.map(item => ({
+      next: (dados) => this.dados = dados.map(item => ({
         ...item,
         gera_manutencao: item.gera_manutencao ? 'Sim' : 'Não',
         ativo: item.ativo ? 'Sim' : 'Não'
       })),
-      error: () => this.toastService.error('Não foi possível carregar os itens.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os itens.', 'Erro')
     });
   }
 
-  onPrimaryAction(): void { this.router.navigate(['/itens/novo']); }
-  onFilterApplied(filters: any): void {}
+  aoClicarBotaoPrimario(): void { this.router.navigate(['/itens/novo']); }
+  aoAplicarFiltro(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/itens', row.id, 'editar']);
+  aoClicarEditar(linha: any): void {
+    this.router.navigate(['/itens', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o item ${row.nome}?`, 'Excluir item');
+  async aoClicarExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o item ${linha.nome}?`, 'Excluir item');
     if (!confirmado) {
       return;
     }
 
-    this.itensService.excluir(row.id).subscribe({
+    this.itensService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Item excluído.', 'Sucesso');
+        this.toastService.sucesso('Item excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o item.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o item.', 'Erro')
     });
   }
 }

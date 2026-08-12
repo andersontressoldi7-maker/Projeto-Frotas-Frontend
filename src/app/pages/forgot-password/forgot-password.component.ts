@@ -21,9 +21,9 @@ export class ForgotPasswordComponent {
   novaSenha = '';
   confirmarNovaSenha = '';
 
-  showPassword = false;
-  showConfirmPassword = false;
-  isLoading = false;
+  mostrarSenha = false;
+  mostrarConfirmarSenha = false;
+  carregando = false;
 
   constructor(
     private router: Router,
@@ -32,55 +32,55 @@ export class ForgotPasswordComponent {
     private toastService: ToastService
   ) {}
 
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
+  alternarSenha(): void {
+    this.mostrarSenha = !this.mostrarSenha;
   }
 
-  toggleConfirmPassword(): void {
-    this.showConfirmPassword = !this.showConfirmPassword;
+  alternarConfirmarSenha(): void {
+    this.mostrarConfirmarSenha = !this.mostrarConfirmarSenha;
   }
 
   onSolicitarCodigo(): void {
     if (!this.email.trim()) {
-      this.toastService.error('Informe seu email.', 'Erro');
+      this.toastService.erro('Informe seu email.', 'Erro');
       return;
     }
 
-    this.isLoading = true;
+    this.carregando = true;
     this.authService.solicitarCodigoRecuperacao(this.email).subscribe({
       next: () => {
-        this.isLoading = false;
-        this.toastService.success('Código enviado para o seu email.', 'Sucesso');
+        this.carregando = false;
+        this.toastService.sucesso('Código enviado para o seu email.', 'Sucesso');
         this.etapa = 'redefinir';
       },
       error: () => {
-        this.isLoading = false;
-        this.toastService.error('Não foi possível enviar o código. Tente novamente.', 'Erro');
+        this.carregando = false;
+        this.toastService.erro('Não foi possível enviar o código. Tente novamente.', 'Erro');
       }
     });
   }
 
   onRedefinirSenha(): void {
     if (!this.codigo.trim() || !this.novaSenha) {
-      this.toastService.error('Preencha o código e a nova senha.', 'Erro');
+      this.toastService.erro('Preencha o código e a nova senha.', 'Erro');
       return;
     }
 
     if (this.novaSenha !== this.confirmarNovaSenha) {
-      this.toastService.error('As senhas não coincidem.', 'Erro');
+      this.toastService.erro('As senhas não coincidem.', 'Erro');
       return;
     }
 
-    this.isLoading = true;
+    this.carregando = true;
     this.authService.redefinirSenha(this.email, this.codigo, this.novaSenha).subscribe({
       next: () => {
-        this.isLoading = false;
-        this.toastService.success('Senha redefinida com sucesso.', 'Sucesso');
+        this.carregando = false;
+        this.toastService.sucesso('Senha redefinida com sucesso.', 'Sucesso');
         this.router.navigate(['/login']);
       },
       error: () => {
-        this.isLoading = false;
-        this.toastService.error('Código inválido ou expirado.', 'Erro');
+        this.carregando = false;
+        this.toastService.erro('Código inválido ou expirado.', 'Erro');
       }
     });
   }

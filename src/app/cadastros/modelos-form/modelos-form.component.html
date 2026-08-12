@@ -3,7 +3,7 @@
 <div class="dashboard-wrapper">
   <main class="content-layout">
     <div class="container-fluid p-4">
-      <app-shared-form [config]="config" [formData]="formulario" [extraValidationFn]="podeSalvar" (salvar)="aoSalvar($event)" (cancelar)="aoCancelar()"></app-shared-form>
+      <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" (salvar)="aoSalvar($event)" (cancelar)="aoCancelar()"></app-shared-form>
 
       <div class="card mt-4">
         <div class="card-body">

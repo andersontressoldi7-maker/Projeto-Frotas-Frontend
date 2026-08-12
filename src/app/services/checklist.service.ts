@@ -7,31 +7,31 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class ChecklistService {
-  private apiUrl = `${environment.apiBaseUrl}/checklists`;
+  private urlBase = `${environment.apiBaseUrl}/checklists`;
 
   constructor(private http: HttpClient) {}
 
   listar(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(this.urlBase);
   }
 
   obter(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.urlBase}/${id}`);
   }
 
   criar(checklist: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, checklist);
+    return this.http.post<any>(this.urlBase, checklist);
   }
 
   atualizar(id: number, checklist: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, checklist);
+    return this.http.put<any>(`${this.urlBase}/${id}`, checklist);
   }
 
   finalizarRetorno(id: number, dados: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${id}/finalizar-retorno`, dados);
+    return this.http.post<any>(`${this.urlBase}/${id}/finalizar-retorno`, dados);
   }
 
   excluir(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.urlBase}/${id}`);
   }
 }

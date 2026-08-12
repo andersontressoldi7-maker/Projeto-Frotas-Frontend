@@ -79,15 +79,15 @@ export class VeiculosFormComponent implements OnInit {
             km: veiculo.km,
             status: veiculo.status || 'Disponível'
           },
-          error: () => this.toastService.error('Não foi possível carregar o veículo.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar o veículo.', 'Erro')
         });
       }
     });
   }
 
   onSalvar(dados: any): void {
-    if (!this.canSave()) {
-      this.toastService.error('Preencha os campos obrigatórios antes de salvar.', 'Erro');
+    if (!this.podeSalvar()) {
+      this.toastService.erro('Preencha os campos obrigatórios antes de salvar.', 'Erro');
       return;
     }
 
@@ -106,7 +106,7 @@ export class VeiculosFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: (veiculo) => {
-        this.toastService.success('Veículo salvo com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Veículo salvo com sucesso.', 'Sucesso');
 
         if (this.retornoUrl && this.retornoCampo) {
           this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: veiculo.id } });
@@ -114,7 +114,7 @@ export class VeiculosFormComponent implements OnInit {
           this.router.navigate(['/veiculos']);
         }
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o veículo.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o veículo.', 'Erro')
     });
   }
 
@@ -126,7 +126,7 @@ export class VeiculosFormComponent implements OnInit {
     }
   }
 
-  canSave = (): boolean => {
+  podeSalvar = (): boolean => {
     if (!this.formulario) return false;
     if (!this.formulario.placa || this.formulario.placa.trim().length === 0) return false;
     return true;

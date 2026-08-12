@@ -30,14 +30,14 @@ export class SharedGridComponent implements OnInit {
   @Output() editClick = new EventEmitter<any>();
   @Output() deleteClick = new EventEmitter<any>();
 
-  filterOptions: GridFilterOption[] = [];
-  activeFilters: { option: GridFilterOption }[] = [];
-  currentFiltersModel: { [key: string]: any } = {};
-  appliedFiltersModel: { [key: string]: any } = {};
-  isFilterExpanded: boolean = false;
+  opcoesFiltro: GridFilterOption[] = [];
+  filtrosAtivos: { option: GridFilterOption }[] = [];
+  modeloFiltrosAtuais: { [key: string]: any } = {};
+  modeloFiltrosAplicados: { [key: string]: any } = {};
+  filtroExpandido: boolean = false;
 
-  get filteredData(): any[] {
-    const chaves = Object.keys(this.appliedFiltersModel);
+  get dadosFiltrados(): any[] {
+    const chaves = Object.keys(this.modeloFiltrosAplicados);
     if (chaves.length === 0) {
       return this.data;
     }
@@ -46,8 +46,8 @@ export class SharedGridComponent implements OnInit {
   }
 
   private linhaCorrespondeAoFiltro(row: any, key: string): boolean {
-    const valorFiltro = this.appliedFiltersModel[key];
-    const opcao = this.filterOptions.find(opt => opt.key === key);
+    const valorFiltro = this.modeloFiltrosAplicados[key];
+    const opcao = this.opcoesFiltro.find(opt => opt.key === key);
     const valorLinha = row[key];
 
     if (opcao?.type === 'multi-select') {
@@ -76,11 +76,11 @@ export class SharedGridComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.generateFiltersFromColumns();
+    this.gerarFiltrosDasColunas();
   }
 
-  generateFiltersFromColumns(): void {
-    this.filterOptions = this.columns
+  gerarFiltrosDasColunas(): void {
+    this.opcoesFiltro = this.columns
       .filter(col => col.key !== 'acoes')
       .map(col => {
         let type: 'text' | 'number' | 'date' | 'select' | 'multi-select' = col.filterType || 'text';
@@ -93,39 +93,39 @@ export class SharedGridComponent implements OnInit {
 
         let options = col.filterOptions;
         if (!options && (type === 'select' || type === 'multi-select')) {
-          options = this.extractUniqueValues(col.key);
+          options = this.extrairValoresUnicos(col.key);
         }
 
         return { key: col.key, label: col.label, type, options };
       });
   }
 
-  extractUniqueValues(key: string): string[] {
+  extrairValoresUnicos(key: string): string[] {
     const values = this.data.map(item => item[key]).filter(val => val !== undefined && val !== null && val !== '');
     return [...new Set(values)].map(val => String(val));
   }
 
-  toggleFilters(): void {
-    this.isFilterExpanded = !this.isFilterExpanded;
+  alternarFiltros(): void {
+    this.filtroExpandido = !this.filtroExpandido;
   }
 
-  getAvailableFilters(): GridFilterOption[] {
-    return this.filterOptions.filter(opt => !this.activeFilters.some(f => f.option.key === opt.key));
+  obterFiltrosDisponiveis(): GridFilterOption[] {
+    return this.opcoesFiltro.filter(opt => !this.filtrosAtivos.some(f => f.option.key === opt.key));
   }
 
-  addFilter(option: GridFilterOption): void {
-    this.activeFilters.push({ option });
-    this.currentFiltersModel[option.key] = option.type === 'multi-select' ? [] : '';
+  adicionarFiltro(option: GridFilterOption): void {
+    this.filtrosAtivos.push({ option });
+    this.modeloFiltrosAtuais[option.key] = option.type === 'multi-select' ? [] : '';
   }
 
-  removeFilter(index: number, key: string): void {
-    this.activeFilters.splice(index, 1);
-    delete this.currentFiltersModel[key];
-    this.applyFilters();
+  removerFiltro(index: number, key: string): void {
+    this.filtrosAtivos.splice(index, 1);
+    delete this.modeloFiltrosAtuais[key];
+    this.aplicarFiltros();
   }
 
-  toggleMultiSelectValue(key: string, value: string): void {
-    const currentValues: string[] = this.currentFiltersModel[key] || [];
+  alternarValorMultiplo(key: string, value: string): void {
+    const currentValues: string[] = this.modeloFiltrosAtuais[key] || [];
     const index = currentValues.indexOf(value);
 
     if (index > -1) {
@@ -134,21 +134,21 @@ export class SharedGridComponent implements OnInit {
       currentValues.push(value);
     }
 
-    this.currentFiltersModel[key] = [...currentValues];
+    this.modeloFiltrosAtuais[key] = [...currentValues];
   }
 
-  isMultiSelectChecked(key: string, value: string): boolean {
-    return (this.currentFiltersModel[key] || []).includes(value);
+  valorMultiploMarcado(key: string, value: string): boolean {
+    return (this.modeloFiltrosAtuais[key] || []).includes(value);
   }
 
-  clearAllFilters(): void {
-    this.activeFilters = [];
-    this.currentFiltersModel = {};
-    this.applyFilters();
+  limparFiltros(): void {
+    this.filtrosAtivos = [];
+    this.modeloFiltrosAtuais = {};
+    this.aplicarFiltros();
   }
 
-  applyFilters(): void {
-    this.appliedFiltersModel = { ...this.currentFiltersModel };
-    this.filterApplied.emit(this.currentFiltersModel);
+  aplicarFiltros(): void {
+    this.modeloFiltrosAplicados = { ...this.modeloFiltrosAtuais };
+    this.filterApplied.emit(this.modeloFiltrosAtuais);
   }
 }

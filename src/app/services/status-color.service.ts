@@ -62,9 +62,9 @@ const CHAVE_STORAGE = 'status-cores-personalizadas';
   providedIn: 'root'
 })
 export class StatusColorService {
-  private overrides: Record<string, Record<string, TokenCor>> = this.carregarOverrides();
+  private personalizacoes: Record<string, Record<string, TokenCor>> = this.carregarPersonalizacoes();
 
-  private carregarOverrides(): Record<string, Record<string, TokenCor>> {
+  private carregarPersonalizacoes(): Record<string, Record<string, TokenCor>> {
     try {
       const salvo = localStorage.getItem(CHAVE_STORAGE);
       return salvo ? JSON.parse(salvo) : {};
@@ -75,7 +75,7 @@ export class StatusColorService {
 
   private persistir(): void {
     try {
-      localStorage.setItem(CHAVE_STORAGE, JSON.stringify(this.overrides));
+      localStorage.setItem(CHAVE_STORAGE, JSON.stringify(this.personalizacoes));
     } catch {}
   }
 
@@ -97,19 +97,19 @@ export class StatusColorService {
       return 'success';
     }
 
-    return this.overrides[grupo]?.[valor] || PALETA_PADRAO[grupo]?.[valor] || 'secondary';
+    return this.personalizacoes[grupo]?.[valor] || PALETA_PADRAO[grupo]?.[valor] || 'secondary';
   }
 
   definirCor(grupo: string, valor: string, token: TokenCor): void {
-    if (!this.overrides[grupo]) {
-      this.overrides[grupo] = {};
+    if (!this.personalizacoes[grupo]) {
+      this.personalizacoes[grupo] = {};
     }
-    this.overrides[grupo][valor] = token;
+    this.personalizacoes[grupo][valor] = token;
     this.persistir();
   }
 
   restaurarPadrao(grupo: string): void {
-    delete this.overrides[grupo];
+    delete this.personalizacoes[grupo];
     this.persistir();
   }
 

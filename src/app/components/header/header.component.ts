@@ -89,7 +89,7 @@ export class HeaderComponent {
     });
   }
 
-  toggleNotificacoes(): void {
+  alternarNotificacoes(): void {
     this.notificacoesAbertas = !this.notificacoesAbertas;
     this.menuUsuarioAberto = false;
     if (this.notificacoesAbertas) {
@@ -97,17 +97,17 @@ export class HeaderComponent {
     }
   }
 
-  toggleMenuUsuario(): void {
+  alternarMenuUsuario(): void {
     this.menuUsuarioAberto = !this.menuUsuarioAberto;
     this.notificacoesAbertas = false;
   }
 
   abrirSuporte(): void {
     this.menuUsuarioAberto = false;
-    this.toastService.info('Central de suporte em breve.', 'Em breve');
+    this.toastService.informar('Central de suporte em breve.', 'Em breve');
   }
 
-  logout(): void {
+  sair(): void {
     this.authService.encerrarSessao().subscribe({
       next: () => this.finalizarLogout(),
       error: () => this.finalizarLogout()

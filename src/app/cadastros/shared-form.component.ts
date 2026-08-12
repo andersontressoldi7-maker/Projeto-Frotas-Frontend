@@ -41,24 +41,24 @@ export interface FormConfig {
 })
 export class SharedFormComponent {
   @Input() config!: FormConfig;
-  @Input() formData: any = {};
-  @Input() extraValidationFn?: () => boolean;
+  @Input() dadosFormulario: any = {};
+  @Input() funcaoValidacaoExtra?: () => boolean;
   @Output() salvar = new EventEmitter<any>();
   @Output() cancelar = new EventEmitter<void>();
 
   obterClasseTamanho(campo: FormCampo): string {
     const tamanho = campo.tamanho || 'full';
-    const map: Record<string, string> = {
+    const mapa: Record<string, string> = {
       'full': 'col-12 mb-3',
       '1/2': 'col-md-6 mb-3',
       '1/3': 'col-md-4 mb-3',
       '2/3': 'col-md-8 mb-3'
     };
-    return map[tamanho] || map['full'];
+    return mapa[tamanho] || mapa['full'];
   }
 
   isCampoValido(campo: FormCampo): boolean {
-    const val = this.formData[campo.nome];
+    const val = this.dadosFormulario[campo.nome];
     if (campo.validacao) {
       try {
         return campo.validacao(val);
@@ -84,9 +84,9 @@ export class SharedFormComponent {
       }
     }
 
-    if (this.extraValidationFn) {
+    if (this.funcaoValidacaoExtra) {
       try {
-        return this.extraValidationFn();
+        return this.funcaoValidacaoExtra();
       } catch {
         return false;
       }
@@ -96,14 +96,14 @@ export class SharedFormComponent {
   }
 
   alternarToggle(nomeCampo: string): void {
-    if (this.formData && typeof this.formData[nomeCampo] === 'boolean') {
-      this.formData[nomeCampo] = !this.formData[nomeCampo];
+    if (this.dadosFormulario && typeof this.dadosFormulario[nomeCampo] === 'boolean') {
+      this.dadosFormulario[nomeCampo] = !this.dadosFormulario[nomeCampo];
     }
   }
 
   onSalvar(): void {
     if (this.validarFormulario()) {
-      this.salvar.emit(this.formData);
+      this.salvar.emit(this.dadosFormulario);
     }
   }
 

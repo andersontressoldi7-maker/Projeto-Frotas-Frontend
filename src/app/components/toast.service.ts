@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 export type ToastLevel = 'success' | 'info' | 'warning' | 'danger';
 
@@ -13,19 +12,24 @@ export interface ToastMessage {
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private subject = new Subject<ToastMessage>();
+  mensagens = signal<ToastMessage[]>([]);
+  private contador = 0;
 
-  onToast(): Observable<ToastMessage> {
-    return this.subject.asObservable();
+  mostrar(level: ToastLevel, message: string, title?: string, timeout = 5000) {
+    const t: ToastMessage = { id: `${++this.contador}`, level, message, title, timeout };
+    this.mensagens.update(msgs => [...msgs, t]);
+
+    if (timeout > 0) {
+      setTimeout(() => this.descartar(t.id), timeout);
+    }
   }
 
-  show(level: ToastLevel, message: string, title?: string, timeout = 5000) {
-    const t: ToastMessage = { id: Date.now().toString(), level, message, title, timeout };
-    this.subject.next(t);
+  descartar(id: string) {
+    this.mensagens.update(msgs => msgs.filter(m => m.id !== id));
   }
 
-  success(message: string, title?: string, timeout?: number) { this.show('success', message, title, timeout); }
-  info(message: string, title?: string, timeout?: number) { this.show('info', message, title, timeout); }
-  warning(message: string, title?: string, timeout?: number) { this.show('warning', message, title, timeout); }
-  error(message: string, title?: string, timeout?: number) { this.show('danger', message, title, timeout); }
+  sucesso(message: string, title?: string, timeout?: number) { this.mostrar('success', message, title, timeout); }
+  informar(message: string, title?: string, timeout?: number) { this.mostrar('info', message, title, timeout); }
+  avisar(message: string, title?: string, timeout?: number) { this.mostrar('warning', message, title, timeout); }
+  erro(message: string, title?: string, timeout?: number) { this.mostrar('danger', message, title, timeout); }
 }

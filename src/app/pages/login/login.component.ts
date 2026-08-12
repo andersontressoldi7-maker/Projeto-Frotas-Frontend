@@ -15,10 +15,10 @@ import { ToastService } from '../../components/toast.service';
 })
 export class LoginComponent {
   email = '';
-  password = '';
-  rememberMe = false;
-  showPassword = false;
-  isLoading = false;
+  senha = '';
+  lembrarDeMim = false;
+  mostrarSenha = false;
+  carregando = false;
 
   constructor(
     private router: Router,
@@ -27,20 +27,20 @@ export class LoginComponent {
     private toastService: ToastService
   ) {}
 
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
+  alternarSenha(): void {
+    this.mostrarSenha = !this.mostrarSenha;
   }
 
-  onLogin(): void {
-    this.isLoading = true;
-    this.authService.login(this.email, this.password).subscribe({
+  entrar(): void {
+    this.carregando = true;
+    this.authService.login(this.email, this.senha).subscribe({
       next: () => {
-        this.isLoading = false;
+        this.carregando = false;
         this.router.navigate(['/dashboard']);
       },
-      error: (erro) => {
-        this.isLoading = false;
-        this.toastService.error(erro?.error?.message || 'Usuário ou senha inválidos.', 'Erro');
+      error: () => {
+        this.carregando = false;
+        this.toastService.erro('Usuário ou senha inválidos.', 'Erro');
       }
     });
   }

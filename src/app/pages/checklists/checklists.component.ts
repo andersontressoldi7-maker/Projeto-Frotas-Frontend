@@ -66,7 +66,7 @@ export class ChecklistsComponent implements OnInit {
         }));
         this.aplicarFiltroDaRota();
       },
-      error: () => this.toastService.error('Não foi possível carregar os checklists.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os checklists.', 'Erro')
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
@@ -104,9 +104,9 @@ export class ChecklistsComponent implements OnInit {
       next: () => {
         this.allData = this.allData.filter(item => item.id !== row.id);
         this.aplicarFiltroDaRota();
-        this.toastService.success('Checklist excluído.', 'Sucesso');
+        this.toastService.sucesso('Checklist excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o checklist.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o checklist.', 'Erro')
     });
   }
 }

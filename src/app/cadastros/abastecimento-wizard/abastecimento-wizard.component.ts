@@ -99,7 +99,7 @@ export class AbastecimentoWizardComponent implements OnInit {
           observacao: abastecimento.observacao
         };
       },
-      error: () => this.toastService.error('Não foi possível carregar o abastecimento.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar o abastecimento.', 'Erro')
     });
   }
 
@@ -110,7 +110,7 @@ export class AbastecimentoWizardComponent implements OnInit {
     const idAtual = tipo === 'veiculo' ? this.formulario.veiculo : this.formulario.motorista;
 
     if (modo === 'editar' && !idAtual) {
-      this.toastService.warning(`Selecione um ${tipo === 'veiculo' ? 'veículo' : 'motorista'} antes de editar.`, 'Atenção');
+      this.toastService.avisar(`Selecione um ${tipo === 'veiculo' ? 'veículo' : 'motorista'} antes de editar.`, 'Atenção');
       return;
     }
 
@@ -197,10 +197,10 @@ export class AbastecimentoWizardComponent implements OnInit {
 
     requisicao.subscribe({
       next: () => {
-        this.toastService.success('Abastecimento salvo com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Abastecimento salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/abastecimentos']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o abastecimento.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o abastecimento.', 'Erro')
     });
   }
 

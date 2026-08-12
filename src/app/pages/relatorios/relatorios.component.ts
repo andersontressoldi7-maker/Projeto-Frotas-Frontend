@@ -11,8 +11,8 @@ import { HeaderComponent } from '../../components/header/header.component';
   styleUrls: ['./relatorios.component.scss']
 })
 export class RelatoriosComponent {
-  title = 'Relatórios Analíticos';
-  subtitle = 'Consulte e exporte os dados consolidados da sua operação';
+  titulo = 'Relatórios Analíticos';
+  subtitulo = 'Consulte e exporte os dados consolidados da sua operação';
 
   categorias = [
     {

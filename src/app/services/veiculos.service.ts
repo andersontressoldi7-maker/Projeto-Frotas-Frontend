@@ -7,27 +7,27 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class VeiculosService {
-  private apiUrl = `${environment.apiBaseUrl}/veiculos`;
+  private urlBase = `${environment.apiBaseUrl}/veiculos`;
 
   constructor(private http: HttpClient) {}
 
   listar(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(this.urlBase);
   }
 
   obter(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.urlBase}/${id}`);
   }
 
   criar(veiculo: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, veiculo);
+    return this.http.post<any>(this.urlBase, veiculo);
   }
 
   atualizar(id: number, veiculo: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, veiculo);
+    return this.http.put<any>(`${this.urlBase}/${id}`, veiculo);
   }
 
   excluir(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.urlBase}/${id}`);
   }
 }

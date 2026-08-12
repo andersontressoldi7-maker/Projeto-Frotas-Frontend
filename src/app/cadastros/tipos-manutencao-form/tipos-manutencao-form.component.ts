@@ -53,15 +53,15 @@ export class TiposManutencaoFormComponent implements OnInit {
 
         this.tiposManutencaoService.obter(this.idEmEdicao).subscribe({
           next: (tipo) => this.formulario = { nome: tipo.nome, descricao: tipo.descricao },
-          error: () => this.toastService.error('Não foi possível carregar o tipo de manutenção.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar o tipo de manutenção.', 'Erro')
         });
       }
     });
   }
 
   onSalvar(dados: any): void {
-    if (!this.canSave()) {
-      this.toastService.error('Nome é obrigatório.', 'Erro');
+    if (!this.podeSalvar()) {
+      this.toastService.erro('Nome é obrigatório.', 'Erro');
       return;
     }
 
@@ -71,10 +71,10 @@ export class TiposManutencaoFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: () => {
-        this.toastService.success('Tipo de manutenção salvo com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Tipo de manutenção salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/tipos-manutencao']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o tipo de manutenção.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o tipo de manutenção.', 'Erro')
     });
   }
 
@@ -82,7 +82,7 @@ export class TiposManutencaoFormComponent implements OnInit {
     this.router.navigate(['/tipos-manutencao']);
   }
 
-  canSave = (): boolean => {
+  podeSalvar = (): boolean => {
     return !!(this.formulario && this.formulario.nome && this.formulario.nome.trim().length > 0);
   }
 }

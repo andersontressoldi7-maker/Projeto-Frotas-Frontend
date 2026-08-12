@@ -31,7 +31,7 @@
         <div *ngIf="abaAtiva === 'geral'">
           <app-shared-form
             [config]="configFormulario"
-            [formData]="formulario"
+            [dadosFormulario]="formulario"
             (salvar)="onSalvar($event)"
             (cancelar)="onCancelar()">
           </app-shared-form>

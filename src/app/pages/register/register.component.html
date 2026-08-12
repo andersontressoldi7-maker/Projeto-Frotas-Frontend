@@ -1,7 +1,7 @@
 <div class="login-page d-flex align-items-center justify-content-center">
 
-  <button class="btn theme-toggle-btn rounded-circle d-flex align-items-center justify-content-center" (click)="themeService.toggleTheme()">
-    <i class="bi" [class.bi-sun-fill]="themeService.isDark()" [class.bi-moon-fill]="!themeService.isDark()"></i>
+  <button class="btn theme-toggle-btn rounded-circle d-flex align-items-center justify-content-center" (click)="themeService.alternarTema()">
+    <i class="bi" [class.bi-sun-fill]="themeService.estaEscuro()" [class.bi-moon-fill]="!themeService.estaEscuro()"></i>
   </button>
 
   <div class="card border-0 shadow-sm login-card">
@@ -44,9 +44,9 @@
         <div class="form-group mb-3">
           <label class="form-label" for="senha">Senha</label>
           <div class="input-group">
-            <input id="senha" [type]="showPassword ? 'text' : 'password'" name="senha" class="form-control" [(ngModel)]="senha" placeholder="••••••••" autocomplete="new-password" required>
-            <button class="btn btn-outline-secondary" type="button" (click)="togglePassword()">
-              <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+            <input id="senha" [type]="mostrarSenha ? 'text' : 'password'" name="senha" class="form-control" [(ngModel)]="senha" placeholder="••••••••" autocomplete="new-password" required>
+            <button class="btn btn-outline-secondary" type="button" (click)="alternarSenha()">
+              <i class="bi" [class.bi-eye]="!mostrarSenha" [class.bi-eye-slash]="mostrarSenha"></i>
             </button>
           </div>
         </div>
@@ -54,17 +54,17 @@
         <div class="form-group mb-4">
           <label class="form-label" for="confirmarSenha">Confirmar senha</label>
           <div class="input-group">
-            <input id="confirmarSenha" [type]="showConfirmPassword ? 'text' : 'password'" name="confirmarSenha" class="form-control" [(ngModel)]="confirmarSenha" placeholder="••••••••" autocomplete="new-password" required>
-            <button class="btn btn-outline-secondary" type="button" (click)="toggleConfirmPassword()">
-              <i class="bi" [class.bi-eye]="!showConfirmPassword" [class.bi-eye-slash]="showConfirmPassword"></i>
+            <input id="confirmarSenha" [type]="mostrarConfirmarSenha ? 'text' : 'password'" name="confirmarSenha" class="form-control" [(ngModel)]="confirmarSenha" placeholder="••••••••" autocomplete="new-password" required>
+            <button class="btn btn-outline-secondary" type="button" (click)="alternarConfirmarSenha()">
+              <i class="bi" [class.bi-eye]="!mostrarConfirmarSenha" [class.bi-eye-slash]="mostrarConfirmarSenha"></i>
             </button>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" [disabled]="isLoading">
-          <span *ngIf="!isLoading">Criar conta</span>
-          <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status"></span>
-          <span *ngIf="isLoading">Criando...</span>
+        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" [disabled]="carregando">
+          <span *ngIf="!carregando">Criar conta</span>
+          <span *ngIf="carregando" class="spinner-border spinner-border-sm" role="status"></span>
+          <span *ngIf="carregando">Criando...</span>
         </button>
 
         <p class="register text-center small mb-0 mt-3">Já tem conta? <a routerLink="/login" class="text-decoration-none">Entrar</a></p>

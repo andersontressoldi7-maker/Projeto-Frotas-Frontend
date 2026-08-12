@@ -23,11 +23,11 @@ export class ViagensComponent implements OnInit {
     private toastService: ToastService,
     private viagensService: ViagensService
   ) {}
-  title = 'Viagens';
-  subtitle = 'Controle de viagens simplificadas';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Viagens';
+  subtitulo = 'Controle de viagens simplificadas';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'origem', label: 'Origem', type: 'text' },
     { key: 'destino', label: 'Destino', type: 'text' },
     { key: 'saida', label: 'Saída', type: 'date' },
@@ -35,13 +35,13 @@ export class ViagensComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [];
-  data: any[] = [];
+  todosDados: any[] = [];
+  dados: any[] = [];
 
   ngOnInit(): void {
     this.viagensService.listar().subscribe({
       next: (dados) => {
-        this.allData = dados.map(viagem => ({
+        this.todosDados = dados.map(viagem => ({
           id: viagem.id,
           origem: viagem.origem,
           destino: viagem.destino,
@@ -50,7 +50,7 @@ export class ViagensComponent implements OnInit {
         }));
         this.aplicarFiltroDaRota();
       },
-      error: () => this.toastService.error('Não foi possível carregar as viagens.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar as viagens.', 'Erro')
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
@@ -59,36 +59,36 @@ export class ViagensComponent implements OnInit {
   private aplicarFiltroDaRota(): void {
     const status = this.route.snapshot.queryParams['status'];
     if (status) {
-      this.data = this.allData.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
-      this.subtitle = `Filtrando por: ${status}`;
+      this.dados = this.todosDados.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
+      this.subtitulo = `Filtrando por: ${status}`;
     } else {
-      this.data = [...this.allData];
-      this.subtitle = 'Controle de viagens simplificadas';
+      this.dados = [...this.todosDados];
+      this.subtitulo = 'Controle de viagens simplificadas';
     }
   }
 
-  onPrimaryAction(): void {
+  aoAcaoPrimaria(): void {
     this.router.navigate(['/viagens/novo']);
   }
-  onFilterApplied(filters: any): void {}
+  aoFiltroAplicado(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/viagens', row.id, 'editar']);
+  aoEditar(linha: any): void {
+    this.router.navigate(['/viagens', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir a viagem ${row.origem} → ${row.destino}?`, 'Excluir viagem');
+  async aoExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir a viagem ${linha.origem} → ${linha.destino}?`, 'Excluir viagem');
     if (!confirmado) {
       return;
     }
 
-    this.viagensService.excluir(row.id).subscribe({
+    this.viagensService.excluir(linha.id).subscribe({
       next: () => {
-        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.todosDados = this.todosDados.filter(item => item.id !== linha.id);
         this.aplicarFiltroDaRota();
-        this.toastService.success('Viagem excluída.', 'Sucesso');
+        this.toastService.sucesso('Viagem excluída.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir a viagem.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir a viagem.', 'Erro')
     });
   }
 }

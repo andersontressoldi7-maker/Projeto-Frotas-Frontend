@@ -68,7 +68,7 @@ export class ModelosFormComponent implements OnInit {
   ngOnInit(): void {
     this.itensService.listar().subscribe({
       next: (itens) => this.itensDisponiveis = itens.filter(item => item.ativo),
-      error: () => this.toastService.error('Não foi possível carregar os itens disponíveis.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os itens disponíveis.', 'Erro')
     });
 
     this.route.queryParams.subscribe(params => {
@@ -87,7 +87,7 @@ export class ModelosFormComponent implements OnInit {
             this.formulario = { nome: modelo.nome, tipo: modelo.tipo, ativo: modelo.ativo };
             this.itens = (modelo.itens || []).map((item: any) => ({ id: item.id, nome: item.nome, categoria: item.categoria }));
           },
-          error: () => this.toastService.error('Não foi possível carregar o modelo.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar o modelo.', 'Erro')
         });
       }
     });
@@ -97,7 +97,7 @@ export class ModelosFormComponent implements OnInit {
     this.mensagemErro = '';
     if (!this.itens || this.itens.length === 0) {
       this.mensagemErro = 'O modelo precisa ter ao menos um item de checklist.';
-      this.toastService.error(this.mensagemErro, 'Erro');
+      this.toastService.erro(this.mensagemErro, 'Erro');
       return;
     }
 
@@ -114,7 +114,7 @@ export class ModelosFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: (modelo) => {
-        this.toastService.success('Modelo salvo com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Modelo salvo com sucesso.', 'Sucesso');
 
         if (this.retornoUrl && this.retornoCampo) {
           this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: modelo.id } });
@@ -122,7 +122,7 @@ export class ModelosFormComponent implements OnInit {
           this.router.navigate(['/modelos']);
         }
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o modelo.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o modelo.', 'Erro')
     });
   }
 
@@ -138,14 +138,14 @@ export class ModelosFormComponent implements OnInit {
     this.mensagemErro = '';
     if (!this.idItemSelecionado) {
       this.mensagemErro = 'Selecione o item para adicionar.';
-      this.toastService.warning(this.mensagemErro, 'Atenção');
+      this.toastService.avisar(this.mensagemErro, 'Atenção');
       return;
     }
 
     const jaExiste = this.itens.find(i => i.id === this.idItemSelecionado);
     if (jaExiste) {
       this.mensagemErro = 'Este item já foi adicionado ao modelo.';
-      this.toastService.warning(this.mensagemErro, 'Atenção');
+      this.toastService.avisar(this.mensagemErro, 'Atenção');
       return;
     }
 
@@ -153,13 +153,13 @@ export class ModelosFormComponent implements OnInit {
     if (encontrado) {
       this.itens.push({ ...encontrado });
       this.idItemSelecionado = null;
-      this.toastService.info(`Item "${encontrado.nome}" adicionado ao modelo.`, 'Item adicionado');
+      this.toastService.informar(`Item "${encontrado.nome}" adicionado ao modelo.`, 'Item adicionado');
     }
   }
 
   removerItem(indice: number): void {
     this.itens.splice(indice, 1);
-    this.toastService.info('Item removido do modelo.', 'Removido');
+    this.toastService.informar('Item removido do modelo.', 'Removido');
   }
 
   podeSalvar = (): boolean => {

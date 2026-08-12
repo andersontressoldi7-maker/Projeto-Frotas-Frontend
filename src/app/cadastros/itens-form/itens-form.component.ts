@@ -74,15 +74,15 @@ export class ItensFormComponent implements OnInit {
             obrigatorioObservacao: item.obrigatorio_observacao,
             ativo: item.ativo
           },
-          error: () => this.toastService.error('Não foi possível carregar o item.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar o item.', 'Erro')
         });
       }
     });
   }
 
   onSalvar(dados: any): void {
-    if (!this.canSave()) {
-      this.toastService.error('Nome é obrigatório.', 'Erro');
+    if (!this.podeSalvar()) {
+      this.toastService.erro('Nome é obrigatório.', 'Erro');
       return;
     }
 
@@ -102,10 +102,10 @@ export class ItensFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: () => {
-        this.toastService.success('Item salvo com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Item salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/itens']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o item.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o item.', 'Erro')
     });
   }
 
@@ -113,7 +113,7 @@ export class ItensFormComponent implements OnInit {
     this.router.navigate(['/itens']);
   }
 
-  canSave = (): boolean => {
+  podeSalvar = (): boolean => {
     return !!(this.formulario && this.formulario.nome && this.formulario.nome.trim().length > 0);
   }
 }

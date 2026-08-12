@@ -16,20 +16,20 @@ import { TiposDespesasService } from '../../services/tipos-despesas.service';
   templateUrl: './tipos-despesas.component.html'
 })
 export class TiposDespesasComponent implements OnInit {
-  title = 'Tipos de Despesas';
-  subtitle = 'Cadastre os tipos de despesas usados nas viagens';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Tipos de Despesas';
+  subtitulo = 'Cadastre os tipos de despesas usados nas viagens';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  filterOptions: GridFilterOption[] = [
+  opcoesFiltro: GridFilterOption[] = [
     { key: 'nome', label: 'Nome', type: 'text' }
   ];
 
-  data: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -44,33 +44,33 @@ export class TiposDespesasComponent implements OnInit {
 
   private carregarDados(): void {
     this.tiposDespesasService.listar().subscribe({
-      next: (dados) => this.data = dados,
-      error: () => this.toastService.error('Não foi possível carregar os tipos de despesas.', 'Erro')
+      next: (dados) => this.dados = dados,
+      error: () => this.toastService.erro('Não foi possível carregar os tipos de despesas.', 'Erro')
     });
   }
 
-  onPrimaryAction(): void {
+  aoAcaoPrimaria(): void {
     this.router.navigate(['/tipos-despesas/novo']);
   }
 
-  onFilterApplied(filters: any): void {}
+  aoAplicarFiltro(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/tipos-despesas', row.id, 'editar']);
+  aoClicarEditar(linha: any): void {
+    this.router.navigate(['/tipos-despesas', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo de despesa ${row.nome}?`, 'Excluir tipo de despesa');
+  async aoClicarExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo de despesa ${linha.nome}?`, 'Excluir tipo de despesa');
     if (!confirmado) {
       return;
     }
 
-    this.tiposDespesasService.excluir(row.id).subscribe({
+    this.tiposDespesasService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Tipo de despesa excluído.', 'Sucesso');
+        this.toastService.sucesso('Tipo de despesa excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o tipo de despesa.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o tipo de despesa.', 'Erro')
     });
   }
 }

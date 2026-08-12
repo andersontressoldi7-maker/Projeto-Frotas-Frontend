@@ -16,21 +16,21 @@ import { TiposManutencaoService } from '../../services/tipos-manutencao.service'
   templateUrl: './tipos-manutencao.component.html'
 })
 export class TiposManutencaoComponent implements OnInit {
-  title = 'Tipos de Manutenção';
-  subtitle = 'Categorias de serviços de manutenção';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Tipos de Manutenção';
+  subtitulo = 'Categorias de serviços de manutenção';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'descricao', label: 'Descrição', type: 'text' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  filterOptions: GridFilterOption[] = [
+  opcoesFiltro: GridFilterOption[] = [
     { key: 'nome', label: 'Nome', type: 'text' }
   ];
 
-  data: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -45,30 +45,30 @@ export class TiposManutencaoComponent implements OnInit {
 
   private carregarDados(): void {
     this.tiposManutencaoService.listar().subscribe({
-      next: (dados) => this.data = dados,
-      error: () => this.toastService.error('Não foi possível carregar os tipos de manutenção.', 'Erro')
+      next: (dados) => this.dados = dados,
+      error: () => this.toastService.erro('Não foi possível carregar os tipos de manutenção.', 'Erro')
     });
   }
 
-  onPrimaryAction(): void { this.router.navigate(['/tipos-manutencao/novo']); }
-  onFilterApplied(filters: any): void {}
+  aoAcaoPrimaria(): void { this.router.navigate(['/tipos-manutencao/novo']); }
+  aoAplicarFiltro(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/tipos-manutencao', row.id, 'editar']);
+  aoClicarEditar(linha: any): void {
+    this.router.navigate(['/tipos-manutencao', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo ${row.nome}?`, 'Excluir tipo de manutenção');
+  async aoClicarExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo ${linha.nome}?`, 'Excluir tipo de manutenção');
     if (!confirmado) {
       return;
     }
 
-    this.tiposManutencaoService.excluir(row.id).subscribe({
+    this.tiposManutencaoService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Tipo de manutenção excluído.', 'Sucesso');
+        this.toastService.sucesso('Tipo de manutenção excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o tipo de manutenção.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o tipo de manutenção.', 'Erro')
     });
   }
 }

@@ -55,15 +55,15 @@ export class EmpresasFormComponent implements OnInit {
 
         this.empresasService.obter(this.idEmEdicao).subscribe({
           next: (empresa) => this.formulario = { nome: empresa.nome, cnpj: empresa.cnpj, telefone: empresa.telefone },
-          error: () => this.toastService.error('Não foi possível carregar a empresa.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar a empresa.', 'Erro')
         });
       }
     });
   }
 
   onSalvar(dados: any): void {
-    if (!this.canSave()) {
-      this.toastService.error('Nome é obrigatório.', 'Erro');
+    if (!this.podeSalvar()) {
+      this.toastService.erro('Nome é obrigatório.', 'Erro');
       return;
     }
 
@@ -73,10 +73,10 @@ export class EmpresasFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: () => {
-        this.toastService.success('Empresa salva com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Empresa salva com sucesso.', 'Sucesso');
         this.router.navigate(['/empresas']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar a empresa.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a empresa.', 'Erro')
     });
   }
 
@@ -84,7 +84,7 @@ export class EmpresasFormComponent implements OnInit {
     this.router.navigate(['/empresas']);
   }
 
-  canSave = (): boolean => {
+  podeSalvar = (): boolean => {
     return !!(this.formulario && this.formulario.nome && this.formulario.nome.trim().length > 0);
   }
 }

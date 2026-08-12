@@ -120,7 +120,7 @@ export class ManutencoesFormComponent implements OnInit {
             this.listaProdutos = (manutencao.produtos || []).map((p: any) => ({ descricao: p.descricao, quantidade: p.quantidade, valorUnitario: p.valor_unitario }));
             this.listaChecklists = manutencao.checklists || [];
           },
-          error: () => this.toastService.error('Não foi possível carregar a manutenção.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar a manutenção.', 'Erro')
         });
       }
     });
@@ -189,10 +189,10 @@ export class ManutencoesFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: () => {
-        this.toastService.success('Manutenção salva com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Manutenção salva com sucesso.', 'Sucesso');
         this.router.navigate(['/manutencoes']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar a manutenção.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a manutenção.', 'Erro')
     });
   }
 

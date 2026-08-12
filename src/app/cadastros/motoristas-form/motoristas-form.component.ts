@@ -117,7 +117,7 @@ export class MotoristasFormComponent implements OnInit {
               telefone: motorista.telefone
             };
           },
-          error: () => this.toastService.error('Não foi possível carregar o motorista.', 'Erro')
+          error: () => this.toastService.erro('Não foi possível carregar o motorista.', 'Erro')
         });
 
         this.carregarDocumentos();
@@ -136,7 +136,7 @@ export class MotoristasFormComponent implements OnInit {
 
     this.motoristasService.listarDocumentos(this.idEmEdicao).subscribe({
       next: (documentos) => this.documentos = documentos.map(doc => this.mapearDocumento(doc)),
-      error: () => this.toastService.error('Não foi possível carregar os documentos.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os documentos.', 'Erro')
     });
   }
 
@@ -173,8 +173,8 @@ export class MotoristasFormComponent implements OnInit {
   }
 
   onSalvar(dados: any): void {
-    if (!this.canSave()) {
-      this.toastService.error('Preencha o nome do motorista antes de salvar.', 'Erro');
+    if (!this.podeSalvar()) {
+      this.toastService.erro('Preencha o nome do motorista antes de salvar.', 'Erro');
       return;
     }
 
@@ -191,7 +191,7 @@ export class MotoristasFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: (motorista) => {
-        this.toastService.success('Motorista salvo com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Motorista salvo com sucesso.', 'Sucesso');
 
         if (this.retornoUrl && this.retornoCampo) {
           this.router.navigate([this.retornoUrl], { queryParams: { retornoCampo: this.retornoCampo, retornoId: motorista.id } });
@@ -201,7 +201,7 @@ export class MotoristasFormComponent implements OnInit {
           this.router.navigate(['/motoristas']);
         }
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o motorista.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o motorista.', 'Erro')
     });
   }
 
@@ -213,7 +213,7 @@ export class MotoristasFormComponent implements OnInit {
     }
   }
 
-  canSave = (): boolean => {
+  podeSalvar = (): boolean => {
     return !!(this.formulario && this.formulario.nome && this.formulario.nome.trim().length > 0);
   }
 
@@ -231,22 +231,22 @@ export class MotoristasFormComponent implements OnInit {
 
   salvarDocumento(): void {
     if (this.idEmEdicao === null) {
-      this.toastService.error('Salve o motorista antes de adicionar documentos.', 'Erro');
+      this.toastService.erro('Salve o motorista antes de adicionar documentos.', 'Erro');
       return;
     }
 
     if (!this.novoDocumento.titulo.trim() || !this.novoDocumento.dataVencimento) {
-      this.toastService.error('Informe o título e a data de vencimento do documento.', 'Erro');
+      this.toastService.erro('Informe o título e a data de vencimento do documento.', 'Erro');
       return;
     }
 
     this.motoristasService.salvarDocumento(this.idEmEdicao, this.novoDocumento).subscribe({
       next: () => {
-        this.toastService.success('Documento adicionado ao controle.', 'Sucesso');
+        this.toastService.sucesso('Documento adicionado ao controle.', 'Sucesso');
         this.carregarDocumentos();
         this.limparNovoDocumento();
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o documento.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o documento.', 'Erro')
     });
   }
 
@@ -262,10 +262,10 @@ export class MotoristasFormComponent implements OnInit {
 
     this.motoristasService.excluirDocumento(this.idEmEdicao, id).subscribe({
       next: () => {
-        this.toastService.success('Documento excluído.', 'Sucesso');
+        this.toastService.sucesso('Documento excluído.', 'Sucesso');
         this.carregarDocumentos();
       },
-      error: () => this.toastService.error('Não foi possível excluir o documento.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o documento.', 'Erro')
     });
   }
 

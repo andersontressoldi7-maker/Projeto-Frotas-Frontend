@@ -26,15 +26,15 @@ export interface FinanceiroDashboard {
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = `${environment.apiBaseUrl}/dashboard`;
+  private urlBase = `${environment.apiBaseUrl}/dashboard`;
 
   constructor(private http: HttpClient) {}
 
   resumo(): Observable<ResumoDashboard> {
-    return this.http.get<ResumoDashboard>(`${this.apiUrl}/resumo`);
+    return this.http.get<ResumoDashboard>(`${this.urlBase}/resumo`);
   }
 
   financeiro(dias = 30): Observable<FinanceiroDashboard> {
-    return this.http.get<FinanceiroDashboard>(`${this.apiUrl}/financeiro`, { params: { dias } });
+    return this.http.get<FinanceiroDashboard>(`${this.urlBase}/financeiro`, { params: { dias } });
   }
 }

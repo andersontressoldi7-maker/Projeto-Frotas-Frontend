@@ -7,27 +7,27 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class TiposManutencaoService {
-  private apiUrl = `${environment.apiBaseUrl}/tipos-manutencao`;
+  private urlBase = `${environment.apiBaseUrl}/tipos-manutencao`;
 
   constructor(private http: HttpClient) {}
 
   listar(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(this.urlBase);
   }
 
   obter(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.urlBase}/${id}`);
   }
 
   criar(tipo: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, tipo);
+    return this.http.post<any>(this.urlBase, tipo);
   }
 
   atualizar(id: number, tipo: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, tipo);
+    return this.http.put<any>(`${this.urlBase}/${id}`, tipo);
   }
 
   excluir(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.urlBase}/${id}`);
   }
 }

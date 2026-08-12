@@ -1,39 +1,39 @@
-<div class="global-hamburger" (click)="openMobile()">
+<div class="global-hamburger" (click)="abrirMobile()">
   <i class="bi bi-list"></i>
 </div>
 
-<div class="sidebar d-flex flex-column p-3" [class.is-mini]="isCollapsed" [class.mobile-open]="isMobileOpen">
+<div class="sidebar d-flex flex-column p-3" [class.is-mini]="recolhida" [class.mobile-open]="abertoMobile">
   <div class="brand d-flex align-items-center justify-content-between mb-4 px-2">
     <div class="d-flex align-items-center logo-area">
       <i class="bi bi-truck-flatbed me-2 fs-4 text-success"></i>
       <span class="fs-4 fw-bold logo-text">FrotaCheck</span>
     </div>
-    <button class="btn p-0 toggle-btn mx-auto desktop-toggle" (click)="toggleSidebar()">
-      <i class="bi" [class.bi-list]="!isCollapsed" [class.bi-arrow-right-short]="isCollapsed" style="font-size: 1.25rem;"></i>
+    <button class="btn p-0 toggle-btn mx-auto desktop-toggle" (click)="alternarSidebar()">
+      <i class="bi" [class.bi-list]="!recolhida" [class.bi-arrow-right-short]="recolhida" style="font-size: 1.25rem;"></i>
     </button>
   </div>
   
   <small class="text-muted px-2 mb-2 text-uppercase fw-bold text-xs menu-label">Menu</small>
   
   <ul class="nav nav-pills flex-column mb-auto">
-    <li class="nav-item mb-1" *ngFor="let item of menuItems">
+    <li class="nav-item mb-1" *ngFor="let item of itensMenu">
       <ng-container *ngIf="!item.children; else grupoTpl">
-        <a [routerLink]="item.route" routerLinkActive="active" class="nav-link d-flex align-items-center" [title]="item.label" (click)="closeMobile()">
-          <i class="bi {{ item.icon }}" [class.me-3]="!isCollapsed"></i>
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-link d-flex align-items-center" [title]="item.label" (click)="fecharMobile()">
+          <i class="bi {{ item.icon }}" [class.me-3]="!recolhida"></i>
           <span class="nav-text">{{ item.label }}</span>
         </a>
       </ng-container>
 
       <ng-template #grupoTpl>
         <a class="nav-link d-flex align-items-center grupo-toggle" [class.active]="grupoAtivo(item)" [title]="item.label" (click)="navegarParaGrupo(item)">
-          <i class="bi {{ item.icon }}" [class.me-3]="!isCollapsed"></i>
+          <i class="bi {{ item.icon }}" [class.me-3]="!recolhida"></i>
           <span class="nav-text flex-grow-1">{{ item.label }}</span>
-          <i class="bi bi-chevron-down nav-text chevron-grupo" *ngIf="!isCollapsed" [class.rotacionado]="grupoExpandido === item.label"></i>
+          <i class="bi bi-chevron-down nav-text chevron-grupo" *ngIf="!recolhida" [class.rotacionado]="grupoExpandido === item.label"></i>
         </a>
 
-        <ul class="nav flex-column submenu" *ngIf="!isCollapsed && grupoExpandido === item.label">
+        <ul class="nav flex-column submenu" *ngIf="!recolhida && grupoExpandido === item.label">
           <li *ngFor="let filho of item.children">
-            <a [routerLink]="filho.route" routerLinkActive="active" class="nav-link sub-link d-flex align-items-center" (click)="closeMobile()">
+            <a [routerLink]="filho.route" routerLinkActive="active" class="nav-link sub-link d-flex align-items-center" (click)="fecharMobile()">
               <i class="bi {{ filho.icon }} me-2"></i>
               <span class="nav-text">{{ filho.label }}</span>
             </a>
@@ -44,4 +44,4 @@
   </ul>
 </div>
 
-<div class="sidebar-backdrop" *ngIf="isMobileOpen" (click)="closeMobile()"></div>
+<div class="sidebar-backdrop" *ngIf="abertoMobile" (click)="fecharMobile()"></div>

@@ -1,11 +1,11 @@
 <div class="toasts-wrapper" aria-live="polite" aria-atomic="true">
-  <div *ngFor="let t of toasts" class="toast-item alert" [ngClass]="levelClass(t.level)">
+  <div *ngFor="let t of toastService.mensagens()" class="toast-item alert" [ngClass]="classeNivel(t.level)">
     <div class="d-flex">
       <div class="toast-body flex-grow-1">
         <strong *ngIf="t.title">{{ t.title }}</strong>
         <div>{{ t.message }}</div>
       </div>
-      <button type="button" class="btn-close ms-2" aria-label="Close" (click)="dismiss(t.id)"></button>
+      <button type="button" class="btn-close ms-2" aria-label="Close" (click)="descartar(t.id)"></button>
     </div>
   </div>
 </div>

@@ -60,7 +60,7 @@ export class AbastecimentosComponent implements OnInit {
         }));
         this.aplicarFiltroDaRota();
       },
-      error: () => this.toastService.error('Não foi possível carregar os abastecimentos.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os abastecimentos.', 'Erro')
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
@@ -97,9 +97,9 @@ export class AbastecimentosComponent implements OnInit {
       next: () => {
         this.allData = this.allData.filter(item => item.id !== row.id);
         this.aplicarFiltroDaRota();
-        this.toastService.success('Abastecimento excluído.', 'Sucesso');
+        this.toastService.sucesso('Abastecimento excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o abastecimento.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o abastecimento.', 'Erro')
     });
   }
 }

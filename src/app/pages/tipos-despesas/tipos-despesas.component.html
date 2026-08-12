@@ -3,15 +3,15 @@
 <div class="dashboard-wrapper">
   <main class="content-layout">
     <app-shared-grid
-      [title]="title"
-      [subtitle]="subtitle"
-      [columns]="columns"
-      [data]="data"
-      [primaryBtnLabel]="primaryBtnLabel"
-      (primaryBtnClick)="onPrimaryAction()"
-      (filterApplied)="onFilterApplied($event)"
-      (editClick)="onEditClick($event)"
-      (deleteClick)="onDeleteClick($event)">
+      [title]="titulo"
+      [subtitle]="subtitulo"
+      [columns]="colunas"
+      [data]="dados"
+      [primaryBtnLabel]="rotuloBotaoPrimario"
+      (primaryBtnClick)="aoAcaoPrimaria()"
+      (filterApplied)="aoAplicarFiltro($event)"
+      (editClick)="aoClicarEditar($event)"
+      (deleteClick)="aoClicarExcluir($event)">
     </app-shared-grid>
   </main>
 </div>

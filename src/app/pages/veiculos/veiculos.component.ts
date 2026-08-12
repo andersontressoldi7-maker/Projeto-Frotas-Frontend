@@ -16,11 +16,11 @@ import { VeiculosService } from '../../services/veiculos.service';
   templateUrl: './veiculos.component.html'
 })
 export class VeiculosComponent implements OnInit {
-  title = 'Veículos';
-  subtitle = 'Gestão da frota com histórico de checklists';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Veículos';
+  subtitulo = 'Gestão da frota com histórico de checklists';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'placa', label: 'Placa', type: 'text' },
     { key: 'modelo', label: 'Modelo', type: 'text' },
     { key: 'ano', label: 'Ano', type: 'number' },
@@ -29,8 +29,8 @@ export class VeiculosComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [];
-  data: any[] = [];
+  todosDados: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -43,10 +43,10 @@ export class VeiculosComponent implements OnInit {
   ngOnInit(): void {
     this.veiculosService.listar().subscribe({
       next: (dados) => {
-        this.allData = dados;
+        this.todosDados = dados;
         this.aplicarFiltroDaRota();
       },
-      error: () => this.toastService.error('Não foi possível carregar os veículos.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os veículos.', 'Erro')
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
@@ -55,34 +55,34 @@ export class VeiculosComponent implements OnInit {
   private aplicarFiltroDaRota(): void {
     const status = this.route.snapshot.queryParams['status'];
     if (status) {
-      this.data = this.allData.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
-      this.subtitle = `Filtrando por: ${status}`;
+      this.dados = this.todosDados.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
+      this.subtitulo = `Filtrando por: ${status}`;
     } else {
-      this.data = [...this.allData];
-      this.subtitle = 'Gestão da frota com histórico de checklists';
+      this.dados = [...this.todosDados];
+      this.subtitulo = 'Gestão da frota com histórico de checklists';
     }
   }
 
-  onPrimaryAction(): void { this.router.navigate(['/veiculos/novo']); }
-  onFilterApplied(filters: any): void {}
+  aoAcaoPrimaria(): void { this.router.navigate(['/veiculos/novo']); }
+  aoFiltroAplicado(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/veiculos', row.id, 'editar']);
+  aoEditar(linha: any): void {
+    this.router.navigate(['/veiculos', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o veículo ${row.placa}?`, 'Excluir veículo');
+  async aoExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o veículo ${linha.placa}?`, 'Excluir veículo');
     if (!confirmado) {
       return;
     }
 
-    this.veiculosService.excluir(row.id).subscribe({
+    this.veiculosService.excluir(linha.id).subscribe({
       next: () => {
-        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.todosDados = this.todosDados.filter(item => item.id !== linha.id);
         this.aplicarFiltroDaRota();
-        this.toastService.success('Veículo excluído.', 'Sucesso');
+        this.toastService.sucesso('Veículo excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o veículo.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o veículo.', 'Erro')
     });
   }
 }

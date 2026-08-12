@@ -16,21 +16,21 @@ import { TiposVeiculosService } from '../../services/tipos-veiculos.service';
   templateUrl: './tipos-veiculos.component.html'
 })
 export class TiposVeiculosComponent implements OnInit {
-  title = 'Tipos de Veículos';
-  subtitle = 'Categorias para classificar a frota';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Tipos de Veículos';
+  subtitulo = 'Categorias para classificar a frota';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'descricao', label: 'Descrição', type: 'text' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  filterOptions: GridFilterOption[] = [
+  opcoesFiltro: GridFilterOption[] = [
     { key: 'nome', label: 'Nome', type: 'text' }
   ];
 
-  data: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -45,30 +45,30 @@ export class TiposVeiculosComponent implements OnInit {
 
   private carregarDados(): void {
     this.tiposVeiculosService.listar().subscribe({
-      next: (dados) => this.data = dados,
-      error: () => this.toastService.error('Não foi possível carregar os tipos de veículos.', 'Erro')
+      next: (dados) => this.dados = dados,
+      error: () => this.toastService.erro('Não foi possível carregar os tipos de veículos.', 'Erro')
     });
   }
 
-  onPrimaryAction(): void { this.router.navigate(['/tipos-veiculos/novo']); }
-  onFilterApplied(filters: any): void {}
+  aoAcaoPrimaria(): void { this.router.navigate(['/tipos-veiculos/novo']); }
+  aoFiltroAplicado(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/tipos-veiculos', row.id, 'editar']);
+  aoEditar(linha: any): void {
+    this.router.navigate(['/tipos-veiculos', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo ${row.nome}?`, 'Excluir tipo de veículo');
+  async aoExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo ${linha.nome}?`, 'Excluir tipo de veículo');
     if (!confirmado) {
       return;
     }
 
-    this.tiposVeiculosService.excluir(row.id).subscribe({
+    this.tiposVeiculosService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Tipo de veículo excluído.', 'Sucesso');
+        this.toastService.sucesso('Tipo de veículo excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o tipo de veículo.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o tipo de veículo.', 'Erro')
     });
   }
 }

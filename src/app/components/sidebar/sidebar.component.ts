@@ -24,11 +24,11 @@ interface ItemMenu {
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit {
-  isCollapsed = false;
-  isMobileOpen = false;
+  recolhida = false;
+  abertoMobile = false;
   grupoExpandido: string | null = null;
 
-  menuItems: ItemMenu[] = [
+  itensMenu: ItemMenu[] = [
     { icon: 'bi-grid', label: 'Dashboard', route: '/dashboard' },
     {
       icon: 'bi-card-checklist', label: 'Checklist', children: [
@@ -72,20 +72,20 @@ export class SidebarComponent implements OnInit {
   constructor(private router: Router) {}
 
   @HostListener('window:keydown', ['$event'])
-  handleKeydown(event: KeyboardEvent): void {
+  aoTeclaPressionada(event: KeyboardEvent): void {
   }
 
   ngOnInit(): void {
     try {
       const saved = localStorage.getItem('sidebarCollapsed');
       if (saved === 'true') {
-        this.isCollapsed = true;
+        this.recolhida = true;
       }
     } catch {}
 
     const wrapper = document.querySelector('.dashboard-wrapper');
     const header = document.querySelector('.header-dashboard');
-    if (this.isCollapsed) {
+    if (this.recolhida) {
       wrapper?.classList.add('collapsed');
       header?.classList.add('collapsed');
     } else {
@@ -100,7 +100,7 @@ export class SidebarComponent implements OnInit {
   }
 
   private expandirGrupoDaRotaAtual(url: string): void {
-    const grupo = this.menuItems.find(item => item.children?.some(filho => url.startsWith(filho.route)));
+    const grupo = this.itensMenu.find(item => item.children?.some(filho => url.startsWith(filho.route)));
     if (grupo) {
       this.grupoExpandido = grupo.label;
     }
@@ -115,23 +115,23 @@ export class SidebarComponent implements OnInit {
   }
 
   navegarParaGrupo(item: ItemMenu): void {
-    if (this.isCollapsed && item.children?.length) {
+    if (this.recolhida && item.children?.length) {
       this.router.navigate([item.children[0].route]);
-      this.closeMobile();
+      this.fecharMobile();
     } else {
       this.toggleGrupo(item.label);
     }
   }
 
-  toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
+  alternarSidebar(): void {
+    this.recolhida = !this.recolhida;
     try {
-      localStorage.setItem('sidebarCollapsed', this.isCollapsed ? 'true' : 'false');
+      localStorage.setItem('sidebarCollapsed', this.recolhida ? 'true' : 'false');
     } catch {}
     const wrapper = document.querySelector('.dashboard-wrapper');
     const header = document.querySelector('.header-dashboard');
     
-    if (this.isCollapsed) {
+    if (this.recolhida) {
       wrapper?.classList.add('collapsed');
       header?.classList.add('collapsed');
     } else {
@@ -140,22 +140,22 @@ export class SidebarComponent implements OnInit {
     }
   }
 
-  toggleMobileOpen(): void {
-    this.isMobileOpen = !this.isMobileOpen;
-    if (this.isMobileOpen) {
+  alternarMobile(): void {
+    this.abertoMobile = !this.abertoMobile;
+    if (this.abertoMobile) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
   }
 
-  openMobile(): void {
-    this.isMobileOpen = true;
+  abrirMobile(): void {
+    this.abertoMobile = true;
     document.body.style.overflow = 'hidden';
   }
 
-  closeMobile(): void {
-    this.isMobileOpen = false;
+  fecharMobile(): void {
+    this.abertoMobile = false;
     document.body.style.overflow = '';
   }
 }

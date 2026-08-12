@@ -48,7 +48,7 @@ export class EmpresasComponent implements OnInit {
   private carregarDados(): void {
     this.empresasService.listar().subscribe({
       next: (dados) => this.data = dados,
-      error: () => this.toastService.error('Não foi possível carregar as empresas.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar as empresas.', 'Erro')
     });
   }
 
@@ -68,9 +68,9 @@ export class EmpresasComponent implements OnInit {
     this.empresasService.excluir(row.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Empresa excluída.', 'Sucesso');
+        this.toastService.sucesso('Empresa excluída.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir a empresa.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir a empresa.', 'Erro')
     });
   }
 }

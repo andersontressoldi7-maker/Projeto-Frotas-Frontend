@@ -28,8 +28,8 @@ interface GrupoConfig {
   styleUrls: ['./configuracoes.component.scss']
 })
 export class ConfiguracoesComponent {
-  title = 'Configurações Globais';
-  subtitle = 'Gerencie as diretrizes de funcionamento e integrações da plataforma';
+  titulo = 'Configurações Globais';
+  subtitulo = 'Gerencie as diretrizes de funcionamento e integrações da plataforma';
 
   coresDisponiveis = CORES_DISPONIVEIS;
 
@@ -72,12 +72,12 @@ export class ConfiguracoesComponent {
       return;
     }
     this.statusColorService.definirCor(grupo, valor, token);
-    this.toastService.success(`Cor de "${valor}" atualizada.`, 'Sucesso');
+    this.toastService.sucesso(`Cor de "${valor}" atualizada.`, 'Sucesso');
   }
 
   restaurarPadraoGrupo(grupo: string): void {
     this.statusColorService.restaurarPadrao(grupo);
-    this.toastService.info(`Cores de "${this.nomeGrupo(grupo)}" restauradas ao padrão.`, 'Restaurado');
+    this.toastService.informar(`Cores de "${this.nomeGrupo(grupo)}" restauradas ao padrão.`, 'Restaurado');
   }
 
   configuracoes: GrupoConfig[] = [

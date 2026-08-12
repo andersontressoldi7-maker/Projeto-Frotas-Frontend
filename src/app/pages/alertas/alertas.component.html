@@ -6,46 +6,46 @@
     <div class="container-fluid p-4">
       
       <div class="mb-4">
-        <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
-        <p class="text-muted small mb-0">{{ subtitle }}</p>
+        <h2 class="h4 fw-bold mb-1 text-body">{{ titulo }}</h2>
+        <p class="text-muted small mb-0">{{ subtitulo }}</p>
       </div>
 
-      <div class="card border-0 shadow-sm mb-4 filter-section">
-        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center p-3" (click)="toggleFilters()" style="cursor: pointer;">
+      <div class="card border-0 shadow-sm mb-4 filtro-section">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center p-3" (click)="alternarFiltros()" style="cursor: pointer;">
           <div class="d-flex align-items-center gap-2 fw-semibold text-body">
-            <i class="bi bi-filter-left fs-5 text-success"></i>
+            <i class="bi bi-filtro-left fs-5 text-success"></i>
             <span>Filtros</span>
-            <span *ngIf="activeFilters.length > 0" class="badge bg-success-subtle text-success rounded-pill font-monospace">{{ activeFilters.length }}</span>
+            <span *ngIf="filtrosAtivos.length > 0" class="badge bg-success-subtle text-success rounded-pill font-monospace">{{ filtrosAtivos.length }}</span>
           </div>
-          <i class="bi text-muted" [class.bi-chevron-down]="!isFilterExpanded" [class.bi-chevron-up]="isFilterExpanded"></i>
+          <i class="bi text-muted" [class.bi-chevron-down]="!filtroExpandido" [class.bi-chevron-up]="filtroExpandido"></i>
         </div>
 
-        <div class="card-body pt-0 px-3 pb-3" *ngIf="isFilterExpanded">
+        <div class="card-body pt-0 px-3 pb-3" *ngIf="filtroExpandido">
           <div class="d-flex align-items-center gap-2 mb-3 flex-wrap border-top pt-3">
             <span class="small text-muted fw-medium">Filtrar por:</span>
-            <div class="dropdown" *ngIf="getAvailableFilters().length > 0">
+            <div class="dropdown" *ngIf="obterFiltrosDisponiveis().length > 0">
               <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown">
                 <i class="bi bi-plus"></i> Adicionar campo
               </button>
               <ul class="dropdown-menu shadow-sm">
-                <li *ngFor="let opt of getAvailableFilters()">
-                  <a class="dropdown-item small" (click)="addFilter(opt)">{{ opt.label }}</a>
+                <li *ngFor="let opt of obterFiltrosDisponiveis()">
+                  <a class="dropdown-item small" (click)="adicionarFiltro(opt)">{{ opt.label }}</a>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div class="row g-3 align-items-end" *ngIf="activeFilters.length > 0">
-            <div class="col-12 col-md-4 col-lg-3" *ngFor="let filter of activeFilters; let i = index">
-              <div class="filter-field-box p-2 rounded position-relative">
+          <div class="row g-3 align-items-end" *ngIf="filtrosAtivos.length > 0">
+            <div class="col-12 col-md-4 col-lg-3" *ngFor="let filtro of filtrosAtivos; let i = index">
+              <div class="filtro-field-box p-2 rounded position-relative">
                 <label class="form-label small text-muted mb-1 d-flex justify-content-between align-items-center">
-                  <span>{{ filter.label }}</span>
-                  <button type="button" class="btn-close small-close" (click)="removeFilter(i, filter.key)"></button>
+                  <span>{{ filtro.label }}</span>
+                  <button type="button" class="btn-close small-close" (click)="removerFiltro(i, filtro.key)"></button>
                 </label>
-                <input *ngIf="filter.type === 'text'" type="text" class="form-control form-control-sm" [(ngModel)]="filterModel[filter.key]"/>
-                <select *ngIf="filter.type === 'select'" class="form-select form-select-sm" [(ngModel)]="filterModel[filter.key]">
+                <input *ngIf="filtro.type === 'text'" type="text" class="form-control form-control-sm" [(ngModel)]="modeloFiltro[filtro.key]"/>
+                <select *ngIf="filtro.type === 'select'" class="form-select form-select-sm" [(ngModel)]="modeloFiltro[filtro.key]">
                   <option value="">Todos</option>
-                  <option *ngFor="let opt of filter.options" [value]="opt">{{ opt }}</option>
+                  <option *ngFor="let opt of filtro.options" [value]="opt">{{ opt }}</option>
                 </select>
               </div>
             </div>
@@ -54,22 +54,22 @@
       </div>
 
       <div class="d-flex gap-2 mb-4 nav-tabs-custom p-1 rounded bg-body-tertiary">
-        <button class="btn btn-tab small px-3 py-2" [class.active]="activeTab === 'pendentes'" (click)="activeTab = 'pendentes'">
+        <button class="btn btn-tab small px-3 py-2" [class.active]="abaAtiva === 'pendentes'" (click)="abaAtiva = 'pendentes'">
           Pendentes (2)
         </button>
-        <button class="btn btn-tab small px-3 py-2" [class.active]="activeTab === 'criticos'" (click)="activeTab = 'criticos'">
+        <button class="btn btn-tab small px-3 py-2" [class.active]="abaAtiva === 'criticos'" (click)="abaAtiva = 'criticos'">
           Críticos (2)
         </button>
-        <button class="btn btn-tab small px-3 py-2" [class.active]="activeTab === 'datas'" (click)="activeTab = 'datas'">
+        <button class="btn btn-tab small px-3 py-2" [class.active]="abaAtiva === 'datas'" (click)="abaAtiva = 'datas'">
           Datas próximas (0)
         </button>
       </div>
 
       <div class="d-flex flex-column gap-3">
-        <div class="card alert-item-card border-0 shadow-sm p-3" *ngFor="let item of getFilteredAlertas()">
+        <div class="card alert-item-card border-0 shadow-sm p-3" *ngFor="let item of obterAlertasFiltrados()">
           <div class="d-flex align-items-start gap-3">
-            <div class="alert-icon-wrapper rounded-3 p-2.5 d-flex align-items-center justify-content-center {{ item.iconColor }}">
-              <i class="bi {{ item.icon }} fs-5"></i>
+            <div class="alert-icone-wrapper rounded-3 p-2.5 d-flex align-items-center justify-content-center {{ item.corIcone }}">
+              <i class="bi {{ item.icone }} fs-5"></i>
             </div>
             <div class="flex-grow-1">
               <div class="d-flex justify-content-between align-items-start">
@@ -87,7 +87,7 @@
           </div>
         </div>
 
-        <div *ngIf="getFilteredAlertas().length === 0" class="text-center py-5 text-muted small">
+        <div *ngIf="obterAlertasFiltrados().length === 0" class="text-center py-5 text-muted small">
           Nenhum alerta nesta categoria.
         </div>
       </div>

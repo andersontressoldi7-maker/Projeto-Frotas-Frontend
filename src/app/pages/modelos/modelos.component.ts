@@ -16,17 +16,17 @@ import { ModelosService } from '../../services/modelos.service';
   templateUrl: './modelos.component.html'
 })
 export class ModelosComponent implements OnInit {
-  title = 'Modelos de Checklist';
-  subtitle = 'Configuração de formulários de vistoria';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Modelos de Checklist';
+  subtitulo = 'Configuração de formulários de vistoria';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'ativo', label: 'Ativo', type: 'text', filterType: 'select', filterOptions: ['Sim', 'Não'] },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  data: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -41,32 +41,32 @@ export class ModelosComponent implements OnInit {
 
   private carregarDados(): void {
     this.modelosService.listar().subscribe({
-      next: (dados) => this.data = dados.map(modelo => ({
+      next: (dados) => this.dados = dados.map(modelo => ({
         id: modelo.id,
         nome: modelo.nome,
         ativo: modelo.ativo ? 'Sim' : 'Não'
       })),
-      error: () => this.toastService.error('Não foi possível carregar os modelos.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os modelos.', 'Erro')
     });
   }
 
-  onPrimaryAction(): void { this.router.navigate(['/modelos/novo']); }
-  onFilterApplied(filters: any): void {}
+  aoClicarBotaoPrimario(): void { this.router.navigate(['/modelos/novo']); }
+  aoAplicarFiltro(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/modelos', row.id, 'editar']);
+  aoClicarEditar(linha: any): void {
+    this.router.navigate(['/modelos', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o modelo ${row.nome}?`, 'Excluir modelo');
+  async aoClicarExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o modelo ${linha.nome}?`, 'Excluir modelo');
     if (!confirmado) {
       return;
     }
 
-    this.modelosService.excluir(row.id).subscribe({
+    this.modelosService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Modelo excluído.', 'Sucesso');
+        this.toastService.sucesso('Modelo excluído.', 'Sucesso');
       },
       error: async (erro) => {
         if (erro.status === 422) {
@@ -76,19 +76,19 @@ export class ModelosComponent implements OnInit {
           );
 
           if (desativar) {
-            this.modelosService.atualizar(row.id, { ativo: false }).subscribe({
+            this.modelosService.atualizar(linha.id, { ativo: false }).subscribe({
               next: () => {
                 this.carregarDados();
-                this.toastService.success('Modelo desativado.', 'Sucesso');
+                this.toastService.sucesso('Modelo desativado.', 'Sucesso');
               },
-              error: () => this.toastService.error('Não foi possível desativar o modelo.', 'Erro')
+              error: () => this.toastService.erro('Não foi possível desativar o modelo.', 'Erro')
             });
           }
 
           return;
         }
 
-        this.toastService.error('Não foi possível excluir o modelo.', 'Erro');
+        this.toastService.erro('Não foi possível excluir o modelo.', 'Erro');
       }
     });
   }

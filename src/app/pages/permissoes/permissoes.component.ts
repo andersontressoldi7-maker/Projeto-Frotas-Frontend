@@ -21,8 +21,8 @@ interface Usuario {
   styleUrls: ['./permissoes.component.scss']
 })
 export class PermissoesComponent implements OnInit {
-  title = 'Permissões';
-  subtitle = 'Defina os perfis de acesso e privilégios de cada usuário';
+  titulo = 'Permissões';
+  subtitulo = 'Defina os perfis de acesso e privilégios de cada usuário';
 
   usuarios: Usuario[] = [];
   usuarioSelecionado: Usuario | null = null;
@@ -47,7 +47,7 @@ export class PermissoesComponent implements OnInit {
   private carregarUsuarios(): void {
     this.permissoesService.listarUsuarios().subscribe({
       next: (dados) => this.usuarios = dados.map(u => this.mapearUsuario(u)),
-      error: () => this.toastService.error('Não foi possível carregar os usuários.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os usuários.', 'Erro')
     });
   }
 
@@ -60,7 +60,7 @@ export class PermissoesComponent implements OnInit {
     };
   }
 
-  toggleFormNovoUsuario(): void {
+  alternarFormNovoUsuario(): void {
     this.mostrarFormNovoUsuario = !this.mostrarFormNovoUsuario;
     if (this.mostrarFormNovoUsuario) {
       this.novoUsuario = { nome: '', email: '', perfil: 'Customizado' };
@@ -69,18 +69,18 @@ export class PermissoesComponent implements OnInit {
 
   cadastrarUsuario(): void {
     if (!this.novoUsuario.nome.trim() || !this.novoUsuario.email.trim()) {
-      this.toastService.error('Preencha nome e email do usuário.', 'Erro');
+      this.toastService.erro('Preencha nome e email do usuário.', 'Erro');
       return;
     }
 
     this.permissoesService.cadastrarUsuario(this.novoUsuario).subscribe({
       next: (usuario) => {
         this.mostrarFormNovoUsuario = false;
-        this.toastService.success('Usuário cadastrado com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Usuário cadastrado com sucesso.', 'Sucesso');
         this.carregarUsuarios();
         this.selecionarUsuario(this.mapearUsuario({ id: usuario.id, nome: usuario.name, email: usuario.email, perfil: usuario.perfil }));
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível cadastrar o usuário.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível cadastrar o usuário.', 'Erro')
     });
   }
 
@@ -88,7 +88,7 @@ export class PermissoesComponent implements OnInit {
     this.usuarioSelecionado = usuario;
     this.permissoesService.obterPermissoes(usuario.id).subscribe({
       next: (telas) => this.telasPermissoes = telas,
-      error: () => this.toastService.error('Não foi possível carregar as permissões do usuário.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar as permissões do usuário.', 'Erro')
     });
   }
 
@@ -117,10 +117,10 @@ export class PermissoesComponent implements OnInit {
 
     this.permissoesService.salvarPermissoes(this.usuarioSelecionado.id, this.telasPermissoes).subscribe({
       next: () => {
-        this.toastService.success('Permissões salvas com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Permissões salvas com sucesso.', 'Sucesso');
         this.usuarioSelecionado = null;
       },
-      error: () => this.toastService.error('Não foi possível salvar as permissões.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível salvar as permissões.', 'Erro')
     });
   }
 }

@@ -28,36 +28,36 @@ export interface RespostaAutenticacao {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiBaseUrl}/auth`;
+  private urlBase = `${environment.apiBaseUrl}/auth`;
 
   constructor(private http: HttpClient) {}
 
   login(usuario: string, senha: string): Observable<RespostaAutenticacao> {
-    return this.http.post<RespostaAutenticacao>(`${this.apiUrl}/login`, { usuario, senha }).pipe(
+    return this.http.post<RespostaAutenticacao>(`${this.urlBase}/login`, { usuario, senha }).pipe(
       tap(resposta => this.salvarSessao(resposta))
     );
   }
 
   registrar(dados: RegistroConta): Observable<RespostaAutenticacao> {
-    return this.http.post<RespostaAutenticacao>(`${this.apiUrl}/registrar`, dados).pipe(
+    return this.http.post<RespostaAutenticacao>(`${this.urlBase}/registrar`, dados).pipe(
       tap(resposta => this.salvarSessao(resposta))
     );
   }
 
   solicitarCodigoRecuperacao(email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/esqueci-senha`, { email });
+    return this.http.post<any>(`${this.urlBase}/esqueci-senha`, { email });
   }
 
   redefinirSenha(email: string, codigo: string, novaSenha: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/redefinir-senha`, { email, codigo, novaSenha });
+    return this.http.post<any>(`${this.urlBase}/redefinir-senha`, { email, codigo, novaSenha });
   }
 
   encerrarSessao(): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/sair`, {});
+    return this.http.post<any>(`${this.urlBase}/sair`, {});
   }
 
   minhaConta(): Observable<UsuarioLogado> {
-    return this.http.get<UsuarioLogado>(`${this.apiUrl}/minha-conta`);
+    return this.http.get<UsuarioLogado>(`${this.urlBase}/minha-conta`);
   }
 
   obterUsuarioLogado(): UsuarioLogado | null {

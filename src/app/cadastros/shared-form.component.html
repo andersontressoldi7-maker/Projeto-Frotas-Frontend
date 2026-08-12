@@ -25,7 +25,7 @@
                 *ngIf="['text', 'email', 'tel', 'number', 'date', 'time', 'datetime-local'].includes(campo.tipo)"
                 [type]="campo.tipo"
                 class="form-control"
-                [(ngModel)]="formData[campo.nome]"
+                [(ngModel)]="dadosFormulario[campo.nome]"
                 [placeholder]="campo.placeholder || ''"
                 [readOnly]="campo.readOnly || false"
                 [required]="campo.obrigatorio || false">
@@ -37,7 +37,7 @@
               <textarea
                 *ngIf="campo.tipo === 'textarea'"
                 class="form-control"
-                [(ngModel)]="formData[campo.nome]"
+                [(ngModel)]="dadosFormulario[campo.nome]"
                 [placeholder]="campo.placeholder || ''"
                 rows="4"
                 [required]="campo.obrigatorio || false"></textarea>
@@ -49,7 +49,7 @@
               <select
                 *ngIf="campo.tipo === 'select'"
                 class="form-control"
-                [(ngModel)]="formData[campo.nome]"
+                [(ngModel)]="dadosFormulario[campo.nome]"
                 [required]="campo.obrigatorio || false">
                 <option value="">Selecione...</option>
                 <option *ngFor="let opt of campo.opcoes" [value]="opt.id">{{ opt.label }}</option>
@@ -65,8 +65,8 @@
                   *ngFor="let opt of campo.opcoes"
                   type="button"
                   class="pill-btn"
-                  [class.ativo]="formData[campo.nome] === opt.id"
-                  (click)="formData[campo.nome] = opt.id">
+                  [class.ativo]="dadosFormulario[campo.nome] === opt.id"
+                  (click)="dadosFormulario[campo.nome] = opt.id">
                   {{ opt.label }}
                 </button>
               </div>
@@ -78,7 +78,7 @@
                 <input
                   type="number"
                   class="form-control"
-                  [(ngModel)]="formData[campo.nome]"
+                  [(ngModel)]="dadosFormulario[campo.nome]"
                   [placeholder]="campo.placeholder || '0,00'"
                   step="0.01"
                   min="0"
@@ -90,12 +90,12 @@
                 class="checkbox-label">
                 <input
                   type="checkbox"
-                  [(ngModel)]="formData[campo.nome]">
+                  [(ngModel)]="dadosFormulario[campo.nome]">
                 <span>{{ campo.label }}</span>
               </label>
 
               <div *ngIf="campo.tipo === 'toggle'" class="toggle-wrapper">
-                <button type="button" class="toggle-switch" [class.active]="!!formData[campo.nome]" (click)="alternarToggle(campo.nome)">
+                <button type="button" class="toggle-switch" [class.active]="!!dadosFormulario[campo.nome]" (click)="alternarToggle(campo.nome)">
                   <span class="toggle-knob"></span>
                 </button>
                 <span class="toggle-label">{{ campo.label }}</span>

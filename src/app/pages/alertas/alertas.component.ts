@@ -12,26 +12,26 @@ import { HeaderComponent } from '../../components/header/header.component';
   styleUrls: ['./alertas.component.scss']
 })
 export class AlertasComponent {
-  title = 'Alertas e Notificações';
-  subtitle = 'Eventos críticos, pendências e prazos próximos';
+  titulo = 'Alertas e Notificações';
+  subtitulo = 'Eventos críticos, pendências e prazos próximos';
 
-  activeTab = 'pendentes';
-  isFilterExpanded = false;
+  abaAtiva = 'pendentes';
+  filtroExpandido = false;
 
-  filterOptions = [
+  opcoesFiltro = [
     { key: 'mensagem', label: 'Mensagem', type: 'text' },
     { key: 'nivel', label: 'Nível', type: 'select', options: ['Crítico', 'Aviso'] }
   ];
   
-  activeFilters: any[] = [];
-  filterModel: { [key: string]: any } = {};
+  filtrosAtivos: any[] = [];
+  modeloFiltro: { [key: string]: any } = {};
 
   alertas = [
     {
       id: 1,
       tipo: 'cnh',
-      icon: 'bi-person-badge',
-      iconColor: 'text-danger bg-danger-subtle',
+      icone: 'bi-person-badge',
+      corIcone: 'text-danger bg-danger-subtle',
       titulo: 'CNH vencida há 16 dia(s)',
       detalhe: 'Motorista fred — validade 20/05/2026',
       data: '20/05/2026',
@@ -41,8 +41,8 @@ export class AlertasComponent {
     {
       id: 2,
       tipo: 'manutencao',
-      icon: 'bi-wrench',
-      iconColor: 'text-danger bg-danger-subtle',
+      icone: 'bi-wrench',
+      corIcone: 'text-danger bg-danger-subtle',
       titulo: 'Manutenção pendente — abc-1234 (atrasada 14d)',
       detalhe: 'Óleo Baixo',
       data: '22/05/2026',
@@ -51,27 +51,27 @@ export class AlertasComponent {
     }
   ];
 
-  getFilteredAlertas() {
-    return this.alertas.filter(alerta => alerta.categoria === this.activeTab);
+  obterAlertasFiltrados() {
+    return this.alertas.filter(alerta => alerta.categoria === this.abaAtiva);
   }
 
-  toggleFilters() {
-    this.isFilterExpanded = !this.isFilterExpanded;
+  alternarFiltros() {
+    this.filtroExpandido = !this.filtroExpandido;
   }
 
-  addFilter(opt: any) {
-    if (!this.activeFilters.some(f => f.key === opt.key)) {
-      this.activeFilters.push(opt);
-      this.filterModel[opt.key] = '';
+  adicionarFiltro(opt: any) {
+    if (!this.filtrosAtivos.some(f => f.key === opt.key)) {
+      this.filtrosAtivos.push(opt);
+      this.modeloFiltro[opt.key] = '';
     }
   }
 
-  removeFilter(index: number, key: string) {
-    this.activeFilters.splice(index, 1);
-    delete this.filterModel[key];
+  removerFiltro(index: number, key: string) {
+    this.filtrosAtivos.splice(index, 1);
+    delete this.modeloFiltro[key];
   }
 
-  getAvailableFilters() {
-    return this.filterOptions.filter(opt => !this.activeFilters.some(f => f.key === opt.key));
+  obterFiltrosDisponiveis() {
+    return this.opcoesFiltro.filter(opt => !this.filtrosAtivos.some(f => f.key === opt.key));
   }
 }

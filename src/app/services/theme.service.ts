@@ -5,37 +5,37 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root'
 })
 export class ThemeService {
-  private currentTheme = 'light';
-  private isBrowser: boolean;
+  private temaAtual = 'light';
+  private ehNavegador: boolean;
 
-  constructor(@Inject(PLATFORM_ID) platformId: Object) {
-    this.isBrowser = isPlatformBrowser(platformId);
+  constructor(@Inject(PLATFORM_ID) plataformaId: Object) {
+    this.ehNavegador = isPlatformBrowser(plataformaId);
 
-    if (this.isBrowser) {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        this.setTheme(savedTheme);
+    if (this.ehNavegador) {
+      const temaSalvo = localStorage.getItem('theme');
+      if (temaSalvo) {
+        this.definirTema(temaSalvo);
       } else {
-        this.setTheme('light');
+        this.definirTema('light');
       }
     }
   }
 
-  isDark(): boolean {
-    return this.currentTheme === 'dark';
+  estaEscuro(): boolean {
+    return this.temaAtual === 'dark';
   }
 
-  toggleTheme(): void {
-    const targetTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-    this.setTheme(targetTheme);
+  alternarTema(): void {
+    const temaAlvo = this.temaAtual === 'light' ? 'dark' : 'light';
+    this.definirTema(temaAlvo);
   }
 
-  private setTheme(theme: string): void {
-    this.currentTheme = theme;
-    
-    if (this.isBrowser) {
-      localStorage.setItem('theme', theme);
-      document.documentElement.setAttribute('data-bs-theme', theme);
+  private definirTema(tema: string): void {
+    this.temaAtual = tema;
+
+    if (this.ehNavegador) {
+      localStorage.setItem('theme', tema);
+      document.documentElement.setAttribute('data-bs-theme', tema);
     }
   }
 }

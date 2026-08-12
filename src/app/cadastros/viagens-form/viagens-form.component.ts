@@ -160,7 +160,7 @@ export class ViagensFormComponent implements OnInit {
           abastecimentos: (viagem.abastecimentos || []).map((a: any) => ({ data: a.data_abastecimento, local: '', tipo: a.tipo_abastecimento, combustivel: a.combustivel, quantidadeLitros: a.qt_litros, valor: a.valor_litro, observacao: a.observacao }))
         };
       },
-      error: () => this.toastService.error('Não foi possível carregar a viagem.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar a viagem.', 'Erro')
     });
   }
 
@@ -171,7 +171,7 @@ export class ViagensFormComponent implements OnInit {
     const idAtual = tipo === 'veiculo' ? this.formulario.veiculo : this.formulario.motorista;
 
     if (modo === 'editar' && !idAtual) {
-      this.toastService.warning(`Selecione um ${tipo === 'veiculo' ? 'veículo' : 'motorista'} antes de editar.`, 'Atenção');
+      this.toastService.avisar(`Selecione um ${tipo === 'veiculo' ? 'veículo' : 'motorista'} antes de editar.`, 'Atenção');
       return;
     }
 
@@ -269,10 +269,10 @@ export class ViagensFormComponent implements OnInit {
 
     requisicao.subscribe({
       next: () => {
-        this.toastService.success('Viagem salva com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Viagem salva com sucesso.', 'Sucesso');
         this.router.navigate(['/viagens']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar a viagem.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a viagem.', 'Erro')
     });
   }
 

@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ToastService, ToastMessage } from './toast.service';
+import { ToastService } from './toast.service';
 
 @Component({
   selector: 'app-toasts',
@@ -9,25 +9,14 @@ import { ToastService, ToastMessage } from './toast.service';
   templateUrl: './toasts.component.html',
   styleUrls: ['./toasts.component.scss']
 })
-export class ToastsComponent implements OnInit {
-  toasts: ToastMessage[] = [];
+export class ToastsComponent {
+  constructor(public toastService: ToastService) {}
 
-  constructor(private toastService: ToastService) {}
-
-  ngOnInit(): void {
-    this.toastService.onToast().subscribe(t => {
-      this.toasts.push(t);
-      if (t.timeout && t.timeout > 0) {
-        setTimeout(() => this.dismiss(t.id), t.timeout);
-      }
-    });
+  descartar(id: string) {
+    this.toastService.descartar(id);
   }
 
-  dismiss(id: string) {
-    this.toasts = this.toasts.filter(t => t.id !== id);
-  }
-
-  levelClass(level: string) {
+  classeNivel(level: string) {
     switch (level) {
       case 'success': return 'alert-success';
       case 'info': return 'alert-info';

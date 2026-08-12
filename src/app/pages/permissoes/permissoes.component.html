@@ -6,8 +6,8 @@
     <div class="container-fluid p-4">
       
       <div class="mb-4">
-        <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
-        <p class="text-muted small mb-0">{{ subtitle }}</p>
+        <h2 class="h4 fw-bold mb-1 text-body">{{ titulo }}</h2>
+        <p class="text-muted small mb-0">{{ subtitulo }}</p>
       </div>
 
       <div class="row g-4">
@@ -15,7 +15,7 @@
           <div class="card border-0 shadow-sm p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h5 class="fw-bold card-title mb-0 fs-6">Usuários do Sistema</h5>
-              <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1" (click)="toggleFormNovoUsuario()">
+              <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1" (click)="alternarFormNovoUsuario()">
                 <i class="bi" [class.bi-plus-lg]="!mostrarFormNovoUsuario" [class.bi-x-lg]="mostrarFormNovoUsuario"></i>
                 {{ mostrarFormNovoUsuario ? 'Cancelar' : 'Novo usuário' }}
               </button>
@@ -38,7 +38,7 @@
                 </select>
               </div>
               <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-sm btn-light" (click)="toggleFormNovoUsuario()">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-light" (click)="alternarFormNovoUsuario()">Cancelar</button>
                 <button type="button" class="btn btn-sm btn-success" (click)="cadastrarUsuario()">Cadastrar</button>
               </div>
             </div>

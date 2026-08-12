@@ -21,9 +21,9 @@ export class RegisterComponent {
   senha = '';
   confirmarSenha = '';
 
-  showPassword = false;
-  showConfirmPassword = false;
-  isLoading = false;
+  mostrarSenha = false;
+  mostrarConfirmarSenha = false;
+  carregando = false;
 
   constructor(
     private router: Router,
@@ -32,26 +32,26 @@ export class RegisterComponent {
     private toastService: ToastService
   ) {}
 
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
+  alternarSenha(): void {
+    this.mostrarSenha = !this.mostrarSenha;
   }
 
-  toggleConfirmPassword(): void {
-    this.showConfirmPassword = !this.showConfirmPassword;
+  alternarConfirmarSenha(): void {
+    this.mostrarConfirmarSenha = !this.mostrarConfirmarSenha;
   }
 
   onRegistrar(): void {
     if (!this.razaoSocial.trim() || !this.fantasia.trim() || !this.cnpj.trim() || !this.usuario.trim() || !this.senha) {
-      this.toastService.error('Preencha todos os campos.', 'Erro');
+      this.toastService.erro('Preencha todos os campos.', 'Erro');
       return;
     }
 
     if (this.senha !== this.confirmarSenha) {
-      this.toastService.error('As senhas não coincidem.', 'Erro');
+      this.toastService.erro('As senhas não coincidem.', 'Erro');
       return;
     }
 
-    this.isLoading = true;
+    this.carregando = true;
     this.authService.registrar({
       razaoSocial: this.razaoSocial,
       fantasia: this.fantasia,
@@ -60,13 +60,13 @@ export class RegisterComponent {
       senha: this.senha
     }).subscribe({
       next: () => {
-        this.isLoading = false;
-        this.toastService.success('Conta criada com sucesso.', 'Sucesso');
+        this.carregando = false;
+        this.toastService.sucesso('Conta criada com sucesso.', 'Sucesso');
         this.router.navigate(['/dashboard']);
       },
       error: (erro) => {
-        this.isLoading = false;
-        this.toastService.error(erro?.error?.message || 'Não foi possível criar a conta. Tente novamente.', 'Erro');
+        this.carregando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível criar a conta. Tente novamente.', 'Erro');
       }
     });
   }

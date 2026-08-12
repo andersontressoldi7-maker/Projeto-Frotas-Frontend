@@ -30,12 +30,12 @@ interface AlertaApi {
   providedIn: 'root'
 })
 export class NotificationService {
-  private apiUrl = `${environment.apiBaseUrl}/alertas`;
+  private urlBase = `${environment.apiBaseUrl}/alertas`;
 
   constructor(private http: HttpClient) {}
 
   listar(): Observable<Notificacao[]> {
-    return this.http.get<AlertaApi[]>(this.apiUrl).pipe(
+    return this.http.get<AlertaApi[]>(this.urlBase).pipe(
       map(alertas => alertas.map((alerta, indice) => this.mapearAlerta(alerta, indice)))
     );
   }

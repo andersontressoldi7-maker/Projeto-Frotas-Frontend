@@ -23,11 +23,11 @@ export class ManutencoesComponent implements OnInit {
     private toastService: ToastService,
     private manutencoesService: ManutencoesService
   ) {}
-  title = 'Manutenções';
-  subtitle = 'Gestão de manutenções e ocorrências';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Manutenções';
+  subtitulo = 'Gestão de manutenções e ocorrências';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'descricao', label: 'Descrição', type: 'text' },
     { key: 'prioridade', label: 'Prioridade', type: 'badge', colorGroup: 'prioridadeManutencao' },
     { key: 'status', label: 'Status', type: 'badge', colorGroup: 'statusManutencao' },
@@ -35,13 +35,13 @@ export class ManutencoesComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [];
-  data: any[] = [];
+  todosDados: any[] = [];
+  dados: any[] = [];
 
   ngOnInit(): void {
     this.manutencoesService.listar().subscribe({
       next: (dados) => {
-        this.allData = dados.map(manutencao => ({
+        this.todosDados = dados.map(manutencao => ({
           id: manutencao.id,
           descricao: manutencao.descricao_problema,
           prioridade: manutencao.prioridade,
@@ -50,7 +50,7 @@ export class ManutencoesComponent implements OnInit {
         }));
         this.aplicarFiltroDaRota();
       },
-      error: () => this.toastService.error('Não foi possível carregar as manutenções.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar as manutenções.', 'Erro')
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
@@ -61,42 +61,42 @@ export class ManutencoesComponent implements OnInit {
     const prioridade = this.route.snapshot.queryParams['prioridade'];
 
     if (status || prioridade) {
-      this.data = this.allData.filter(item => {
-        const matchStatus = !status || (item.status || '').toLowerCase() === String(status).toLowerCase();
-        const matchPrioridade = !prioridade || (item.prioridade || '').toLowerCase() === String(prioridade).toLowerCase();
-        return matchStatus && matchPrioridade;
+      this.dados = this.todosDados.filter(item => {
+        const correspondeStatus = !status || (item.status || '').toLowerCase() === String(status).toLowerCase();
+        const correspondePrioridade = !prioridade || (item.prioridade || '').toLowerCase() === String(prioridade).toLowerCase();
+        return correspondeStatus && correspondePrioridade;
       });
-      this.subtitle = status
+      this.subtitulo = status
         ? `Filtrando por: ${status}`
         : `Filtrando por prioridade: ${prioridade}`;
     } else {
-      this.data = [...this.allData];
-      this.subtitle = 'Gestão de manutenções e ocorrências';
+      this.dados = [...this.todosDados];
+      this.subtitulo = 'Gestão de manutenções e ocorrências';
     }
   }
 
-  onPrimaryAction(): void {
+  aoClicarBotaoPrimario(): void {
     this.router.navigate(['/manutencoes/novo']);
   }
-  onFilterApplied(filters: any): void {}
+  aoAplicarFiltro(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/manutencoes', row.id, 'editar']);
+  aoClicarEditar(linha: any): void {
+    this.router.navigate(['/manutencoes', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir a manutenção "${row.descricao}"?`, 'Excluir manutenção');
+  async aoClicarExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir a manutenção "${linha.descricao}"?`, 'Excluir manutenção');
     if (!confirmado) {
       return;
     }
 
-    this.manutencoesService.excluir(row.id).subscribe({
+    this.manutencoesService.excluir(linha.id).subscribe({
       next: () => {
-        this.allData = this.allData.filter(item => item.id !== row.id);
+        this.todosDados = this.todosDados.filter(item => item.id !== linha.id);
         this.aplicarFiltroDaRota();
-        this.toastService.success('Manutenção excluída.', 'Sucesso');
+        this.toastService.sucesso('Manutenção excluída.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir a manutenção.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir a manutenção.', 'Erro')
     });
   }
 }

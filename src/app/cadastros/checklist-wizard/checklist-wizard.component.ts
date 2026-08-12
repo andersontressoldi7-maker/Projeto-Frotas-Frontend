@@ -71,17 +71,17 @@ export class ChecklistWizardComponent implements OnInit {
   ngOnInit(): void {
     this.veiculosService.listar().subscribe({
       next: (dados) => this.veiculos = dados,
-      error: () => this.toastService.error('Não foi possível carregar os veículos.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os veículos.', 'Erro')
     });
 
     this.modelosService.listar().subscribe({
       next: (dados) => this.modelos = dados.filter(modelo => modelo.ativo),
-      error: () => this.toastService.error('Não foi possível carregar os modelos.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os modelos.', 'Erro')
     });
 
     this.motoristasService.listar().subscribe({
       next: (dados) => this.motoristas = dados,
-      error: () => this.toastService.error('Não foi possível carregar os motoristas.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar os motoristas.', 'Erro')
     });
 
     this.route.params.subscribe(params => {
@@ -116,7 +116,7 @@ export class ChecklistWizardComponent implements OnInit {
 
         this.itensChecklistRetorno = (checklist.modelo?.itens || []).map((item: any) => this.mapearItemModelo(item));
       },
-      error: () => this.toastService.error('Não foi possível carregar o checklist.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível carregar o checklist.', 'Erro')
     });
   }
 
@@ -145,7 +145,7 @@ export class ChecklistWizardComponent implements OnInit {
     const idAtual = tipo === 'veiculo' ? this.formulario.veiculo : this.formulario.modelo;
 
     if (modo === 'editar' && !idAtual) {
-      this.toastService.warning(`Selecione um ${tipo === 'veiculo' ? 'veículo' : 'modelo'} antes de editar.`, 'Atenção');
+      this.toastService.avisar(`Selecione um ${tipo === 'veiculo' ? 'veículo' : 'modelo'} antes de editar.`, 'Atenção');
       return;
     }
 
@@ -254,10 +254,10 @@ export class ChecklistWizardComponent implements OnInit {
 
     this.checklistService.criar(payload).subscribe({
       next: () => {
-        this.toastService.success('Checklist iniciado com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Checklist iniciado com sucesso.', 'Sucesso');
         this.router.navigate(['/checklists']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível salvar o checklist.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o checklist.', 'Erro')
     });
   }
 
@@ -274,10 +274,10 @@ export class ChecklistWizardComponent implements OnInit {
 
     this.checklistService.finalizarRetorno(this.checklistIdAtual, payload).subscribe({
       next: () => {
-        this.toastService.success('Checklist finalizado com sucesso.', 'Sucesso');
+        this.toastService.sucesso('Checklist finalizado com sucesso.', 'Sucesso');
         this.router.navigate(['/checklists']);
       },
-      error: (erro) => this.toastService.error(erro?.error?.message || 'Não foi possível finalizar o checklist.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível finalizar o checklist.', 'Erro')
     });
   }
 

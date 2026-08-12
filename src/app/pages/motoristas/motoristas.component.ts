@@ -16,11 +16,11 @@ import { MotoristasService } from '../../services/motoristas.service';
   templateUrl: './motoristas.component.html'
 })
 export class MotoristasComponent implements OnInit {
-  title = 'Motoristas';
-  subtitle = 'Cadastro e controle de documentos';
-  primaryBtnLabel = 'Novo';
+  titulo = 'Motoristas';
+  subtitulo = 'Cadastro e controle de documentos';
+  rotuloBotaoPrimario = 'Novo';
 
-  columns: GridColumn[] = [
+  colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
     { key: 'cnh', label: 'CNH', type: 'text' },
     { key: 'validade_cnh', label: 'Validade', type: 'date' },
@@ -28,7 +28,7 @@ export class MotoristasComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  data: any[] = [];
+  dados: any[] = [];
 
   constructor(
     private router: Router,
@@ -43,30 +43,30 @@ export class MotoristasComponent implements OnInit {
 
   private carregarDados(): void {
     this.motoristasService.listar().subscribe({
-      next: (dados) => this.data = dados,
-      error: () => this.toastService.error('Não foi possível carregar os motoristas.', 'Erro')
+      next: (dados) => this.dados = dados,
+      error: () => this.toastService.erro('Não foi possível carregar os motoristas.', 'Erro')
     });
   }
 
-  onPrimaryAction(): void { this.router.navigate(['/motoristas/novo']); }
-  onFilterApplied(filters: any): void {}
+  aoAcaoPrimaria(): void { this.router.navigate(['/motoristas/novo']); }
+  aoAplicarFiltro(filtros: any): void {}
 
-  onEditClick(row: any): void {
-    this.router.navigate(['/motoristas', row.id, 'editar']);
+  aoClicarEditar(linha: any): void {
+    this.router.navigate(['/motoristas', linha.id, 'editar']);
   }
 
-  async onDeleteClick(row: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o motorista ${row.nome}?`, 'Excluir motorista');
+  async aoClicarExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir o motorista ${linha.nome}?`, 'Excluir motorista');
     if (!confirmado) {
       return;
     }
 
-    this.motoristasService.excluir(row.id).subscribe({
+    this.motoristasService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.success('Motorista excluído.', 'Sucesso');
+        this.toastService.sucesso('Motorista excluído.', 'Sucesso');
       },
-      error: () => this.toastService.error('Não foi possível excluir o motorista.', 'Erro')
+      error: () => this.toastService.erro('Não foi possível excluir o motorista.', 'Erro')
     });
   }
 }
