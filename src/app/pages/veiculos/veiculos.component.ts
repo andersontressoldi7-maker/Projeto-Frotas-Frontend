@@ -31,6 +31,7 @@ export class VeiculosComponent implements OnInit {
 
   todosDados: any[] = [];
   dados: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -45,8 +46,12 @@ export class VeiculosComponent implements OnInit {
       next: (dados) => {
         this.todosDados = dados;
         this.aplicarFiltroDaRota();
+        this.carregando = false;
       },
-      error: () => this.toastService.erro('Não foi possível carregar os veículos.', 'Erro')
+      error: () => {
+        this.carregando = false;
+        this.toastService.erro('Não foi possível carregar os veículos.', 'Erro');
+      }
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());

@@ -102,6 +102,25 @@
   padding: 0.4rem;
 }
 
+.empresa-toggle-btn {
+  border-radius: 999px;
+  color: var(--bs-body-color);
+
+  &:hover {
+    background-color: var(--bs-tertiary-bg);
+  }
+}
+
+.empresa-panel {
+  width: 240px;
+  padding: 0.4rem;
+
+  .dropdown-panel-item.ativa {
+    color: #40916c;
+    font-weight: 600;
+  }
+}
+
 .dropdown-panel-item {
   display: flex;
   align-items: center;

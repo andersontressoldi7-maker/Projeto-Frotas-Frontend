@@ -16,7 +16,11 @@
         </div>
       </div>
 
-      <div class="tabs-container">
+      <div *ngIf="carregando" class="d-flex justify-content-center align-items-center py-5">
+        <div class="spinner-border text-success" role="status"></div>
+      </div>
+
+      <div class="tabs-container" *ngIf="!carregando">
         <div class="nav-tabs-custom">
           <button 
             class="nav-tab-item" 

@@ -5,6 +5,8 @@ import { RouterModule, Router } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../components/toast.service';
+import { DialogService } from '../../components/dialog/dialog.service';
+import { aplicarMascaraCnpj } from '../../shared/mascaras.util';
 
 @Component({
   selector: 'app-register',
@@ -29,8 +31,13 @@ export class RegisterComponent {
     private router: Router,
     public themeService: ThemeService,
     private authService: AuthService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private dialogService: DialogService
   ) {}
+
+  onCnpjAlterado(valor: string): void {
+    this.cnpj = aplicarMascaraCnpj(valor);
+  }
 
   alternarSenha(): void {
     this.mostrarSenha = !this.mostrarSenha;
@@ -59,9 +66,12 @@ export class RegisterComponent {
       usuario: this.usuario,
       senha: this.senha
     }).subscribe({
-      next: () => {
+      next: async (resposta) => {
         this.carregando = false;
-        this.toastService.sucesso('Conta criada com sucesso.', 'Sucesso');
+        await this.dialogService.aviso(
+          `Sua unidade é ${resposta.unidade}. Guarde esse número — ele é obrigatório em todo login.`,
+          'Conta criada com sucesso'
+        );
         this.router.navigate(['/dashboard']);
       },
       error: (erro) => {

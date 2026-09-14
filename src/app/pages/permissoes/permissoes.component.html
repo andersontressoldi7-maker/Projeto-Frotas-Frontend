@@ -30,12 +30,25 @@
                 <label class="form-label small mb-1">Email</label>
                 <input type="email" class="form-control form-control-sm" [(ngModel)]="novoUsuario.email" placeholder="usuario@empresa.com">
               </div>
+              <div class="mb-2">
+                <label class="form-label small mb-1">Senha</label>
+                <input type="password" class="form-control form-control-sm" [(ngModel)]="novoUsuario.senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+              </div>
               <div class="mb-3">
                 <label class="form-label small mb-1">Perfil</label>
                 <select class="form-select form-select-sm" [(ngModel)]="novoUsuario.perfil">
                   <option value="Customizado">Customizado</option>
                   <option value="Admin">Admin</option>
                 </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small mb-1 d-block">Empresas com acesso</label>
+                <div class="form-check" *ngFor="let empresa of empresasDisponiveis">
+                  <input type="checkbox" class="form-check-input" [id]="'nova-empresa-' + empresa.id"
+                         [checked]="novoUsuario.empresasIds.includes(empresa.id)"
+                         (change)="alternarEmpresaNoNovoUsuario(empresa.id)">
+                  <label class="form-check-label small" [for]="'nova-empresa-' + empresa.id">{{ empresa.fantasia || empresa.razaoSocial }}</label>
+                </div>
               </div>
               <div class="d-flex justify-content-end gap-2">
                 <button type="button" class="btn btn-sm btn-light" (click)="alternarFormNovoUsuario()">Cancelar</button>
@@ -91,6 +104,16 @@
                 <div *ngIf="usuarioSelecionado.perfil === 'Admin'" class="alert alert-success d-flex align-items-center gap-2 border-0 rounded-3 mb-4">
                   <i class="bi bi-check-circle-fill"></i>
                   <span class="small">Perfil Administrador possui acesso total irrestrito para ver, editar e excluir em todos os módulos.</span>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label small mb-1 d-block fw-semibold">Empresas com acesso</label>
+                  <div class="form-check" *ngFor="let empresa of empresasDisponiveis">
+                    <input type="checkbox" class="form-check-input" [id]="'empresa-' + empresa.id"
+                           [checked]="usuarioSelecionado.empresasIds.includes(empresa.id)"
+                           (change)="alternarEmpresaDoUsuarioSelecionado(empresa.id)">
+                    <label class="form-check-label small" [for]="'empresa-' + empresa.id">{{ empresa.fantasia || empresa.razaoSocial }}</label>
+                  </div>
                 </div>
 
                 <div class="table-responsive">

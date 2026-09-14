@@ -11,6 +11,11 @@
         </div>
       </div>
 
+      <div *ngIf="carregando" class="d-flex justify-content-center align-items-center py-5">
+        <div class="spinner-border text-success" role="status"></div>
+      </div>
+
+      <ng-container *ngIf="!carregando">
       <ul class="nav nav-tabs mb-4">
         <li class="nav-item">
           <a class="nav-link cursor-pointer" [class.active]="abaAtiva === 'geral'" (click)="abaAtiva = 'geral'">Informações Gerais</a>
@@ -151,6 +156,7 @@
         </div>
 
       </div>
+      </ng-container>
     </div>
   </main>
 </div>

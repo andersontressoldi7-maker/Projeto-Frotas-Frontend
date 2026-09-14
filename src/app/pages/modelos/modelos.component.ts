@@ -27,6 +27,7 @@ export class ModelosComponent implements OnInit {
   ];
 
   dados: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -41,12 +42,15 @@ export class ModelosComponent implements OnInit {
 
   private carregarDados(): void {
     this.modelosService.listar().subscribe({
-      next: (dados) => this.dados = dados.map(modelo => ({
-        id: modelo.id,
-        nome: modelo.nome,
-        ativo: modelo.ativo ? 'Sim' : 'Não'
-      })),
-      error: () => this.toastService.erro('Não foi possível carregar os modelos.', 'Erro')
+      next: (dados) => {
+        this.dados = dados.map(modelo => ({
+          id: modelo.id,
+          nome: modelo.nome,
+          ativo: modelo.ativo ? 'Sim' : 'Não'
+        }));
+        this.carregando = false;
+      },
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os modelos.', 'Erro'); }
     });
   }
 

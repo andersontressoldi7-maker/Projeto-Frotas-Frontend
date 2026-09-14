@@ -17,20 +17,26 @@
 
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-          <div class="mb-3">
-            <label class="form-label required">Nome da despesa</label>
-            <input
-              type="text"
-              class="form-control"
-              [(ngModel)]="nome"
-              placeholder="Ex.: Alimentação"
-              required>
+          <div *ngIf="carregando" class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-success" role="status"></div>
           </div>
 
-          <div class="form-actions">
-            <button type="button" class="btn btn-light" (click)="onCancelar()">Cancelar</button>
-            <button type="button" class="btn btn-success" (click)="onSalvar()">Salvar</button>
-          </div>
+          <ng-container *ngIf="!carregando">
+            <div class="mb-3">
+              <label class="form-label required">Nome da despesa</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="nome"
+                placeholder="Ex.: Alimentação"
+                required>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-light" (click)="onCancelar()">Cancelar</button>
+              <button type="button" class="btn btn-success" (click)="onSalvar()">Salvar</button>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

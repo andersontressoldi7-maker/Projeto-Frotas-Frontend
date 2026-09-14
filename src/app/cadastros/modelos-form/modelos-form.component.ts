@@ -20,6 +20,7 @@ export class ModelosFormComponent implements OnInit {
   idEmEdicao: number | null = null;
   retornoUrl: string | null = null;
   retornoCampo: string | null = null;
+  carregando = false;
 
   formulario: any = {
     nome: '',
@@ -81,13 +82,15 @@ export class ModelosFormComponent implements OnInit {
         this.modoEdicao = true;
         this.idEmEdicao = Number(parametros['id']);
         this.config.titulo = 'Editar Modelo';
+        this.carregando = true;
 
         this.modelosService.obter(this.idEmEdicao).subscribe({
           next: (modelo) => {
             this.formulario = { nome: modelo.nome, tipo: modelo.tipo, ativo: modelo.ativo };
             this.itens = (modelo.itens || []).map((item: any) => ({ id: item.id, nome: item.nome, categoria: item.categoria }));
+            this.carregando = false;
           },
-          error: () => this.toastService.erro('Não foi possível carregar o modelo.', 'Erro')
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar o modelo.', 'Erro'); }
         });
       }
     });
@@ -167,5 +170,9 @@ export class ModelosFormComponent implements OnInit {
     if (!this.formulario || !this.formulario.nome || this.formulario.nome.trim().length === 0) return false;
     if (!this.formulario.tipo) return false;
     return true;
+  }
+
+  formatarItem(nome: string, categoria?: string | null): string {
+    return categoria ? `${nome} (${categoria})` : nome;
   }
 }

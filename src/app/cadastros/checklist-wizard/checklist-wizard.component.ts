@@ -44,18 +44,8 @@ export class ChecklistWizardComponent implements OnInit {
   itensChecklistRetorno: any[] = [];
 
   itemAberto: any = null;
+  itemParaFoto: any = null;
   observacaoItem: string = '';
-  abaAtiva: 'preenchimento' | 'tempo' = 'preenchimento';
-
-  tempoPreenchimento = {
-    aberturaSaida: '07:10',
-    encerramentoSaida: '07:24',
-    aberturaRetorno: '18:40',
-    encerramentoRetorno: '18:58',
-    tempoSaidaMinutos: 14,
-    tempoRetornoMinutos: 18,
-    tempoTotalMinutos: 32
-  };
 
   constructor(
     private router: Router,
@@ -129,13 +119,21 @@ export class ChecklistWizardComponent implements OnInit {
       obrigatoriaFoto: item.obrigatorio_foto,
       temFoto: false,
       observacao: '',
-      respostas: item.tipo === 'avaliacao' ? ['Bom', 'Regular', 'Ruim'] : []
+      respostas: item.tipo === 'avaliacao' ? (item.categoria?.opcoes || []) : []
     };
   }
 
   aoSelecionarModelo(): void {
-    const modeloSelecionado = this.modelos.find(m => m.id.toString() === this.formulario.modelo);
-    this.itensChecklistSaida = (modeloSelecionado?.itens || []).map((item: any) => this.mapearItemModelo(item));
+    this.itensChecklistSaida = [];
+
+    if (!this.formulario.modelo) {
+      return;
+    }
+
+    this.modelosService.obter(Number(this.formulario.modelo)).subscribe({
+      next: (modelo) => this.itensChecklistSaida = (modelo?.itens || []).map((item: any) => this.mapearItemModelo(item)),
+      error: () => this.toastService.erro('Não foi possível carregar os itens do modelo.', 'Erro')
+    });
   }
 
   irParaCadastro(tipo: 'veiculo' | 'modelo', modo: 'novo' | 'editar', event?: Event): void {
@@ -168,12 +166,6 @@ export class ChecklistWizardComponent implements OnInit {
   eModeloSimples(): boolean {
     const modeloSelecionado = this.modelos.find(m => m.id.toString() === this.formulario.modelo);
     return modeloSelecionado?.tipo === 'Simples';
-  }
-
-  formatarTempo(minutos: number): string {
-    const horas = Math.floor(minutos / 60);
-    const mins = minutos % 60;
-    return `${horas.toString().padStart(2, '0')}h ${mins.toString().padStart(2, '0')}min`;
   }
 
   proximoPasso(): void {
@@ -210,14 +202,14 @@ export class ChecklistWizardComponent implements OnInit {
   }
 
   abrirFotoItem(item: any): void {
-    this.itemAberto = item;
+    this.itemParaFoto = item;
     const input = document.getElementById('foto-input') as HTMLInputElement;
     input?.click();
   }
 
   aoSelecionarFoto(evento: any): void {
-    if (this.itemAberto && evento.target.files.length > 0) {
-      this.itemAberto.temFoto = true;
+    if (this.itemParaFoto && evento.target.files.length > 0) {
+      this.itemParaFoto.temFoto = true;
     }
   }
 

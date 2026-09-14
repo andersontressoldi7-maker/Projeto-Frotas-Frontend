@@ -22,6 +22,8 @@ import { EmpresasFormComponent } from './cadastros/empresas-form/empresas-form.c
 import { TiposVeiculosFormComponent } from './cadastros/tipos-veiculos-form/tipos-veiculos-form.component';
 import { TiposManutencaoFormComponent } from './cadastros/tipos-manutencao-form/tipos-manutencao-form.component';
 import { ItensFormComponent } from './cadastros/itens-form/itens-form.component';
+import { CategoriasComponent } from './pages/categorias/categorias.component';
+import { CategoriasFormComponent } from './cadastros/categorias-form/categorias-form.component';
 import { TiposManutencaoComponent } from './pages/tipos-manutencao/tipos-manutencao.component';
 import { AlertasComponent } from './pages/alertas/alertas.component';
 import { PermissoesComponent } from './pages/permissoes/permissoes.component';
@@ -47,6 +49,9 @@ export const routes: Routes = [
   { path: 'itens', component: ItensComponent },
   { path: 'itens/novo', component: ItensFormComponent },
   { path: 'itens/:id/editar', component: ItensFormComponent },
+  { path: 'categorias', component: CategoriasComponent },
+  { path: 'categorias/novo', component: CategoriasFormComponent },
+  { path: 'categorias/:id/editar', component: CategoriasFormComponent },
   { path: 'veiculos', component: VeiculosComponent },
   { path: 'veiculos/novo', component: VeiculosFormComponent },
   { path: 'veiculos/:id/editar', component: VeiculosFormComponent },

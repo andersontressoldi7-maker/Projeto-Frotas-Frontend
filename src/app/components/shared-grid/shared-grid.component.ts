@@ -24,6 +24,7 @@ export class SharedGridComponent implements OnInit {
   @Input() columns: GridColumn[] = [];
   @Input() data: any[] = [];
   @Input() emptyMessage: string = 'Nenhum registro encontrado.';
+  @Input() carregando: boolean = false;
 
   @Output() primaryBtnClick = new EventEmitter<void>();
   @Output() filterApplied = new EventEmitter<any>();

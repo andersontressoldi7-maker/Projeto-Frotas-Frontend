@@ -16,20 +16,40 @@ export class ToastService {
   private contador = 0;
 
   mostrar(level: ToastLevel, message: string, title?: string, timeout = 5000) {
-    const t: ToastMessage = { id: `${++this.contador}`, level, message, title, timeout };
-    this.mensagens.update(msgs => [...msgs, t]);
+    const toast: ToastMessage = {
+      id: `${++this.contador}`,
+      level,
+      message,
+      title,
+      timeout
+    };
+
+    this.mensagens.update(mensagens => [...mensagens, toast]);
 
     if (timeout > 0) {
-      setTimeout(() => this.descartar(t.id), timeout);
+      setTimeout(() => this.descartar(toast.id), timeout);
     }
   }
 
   descartar(id: string) {
-    this.mensagens.update(msgs => msgs.filter(m => m.id !== id));
+    this.mensagens.update(mensagens =>
+      mensagens.filter(mensagem => mensagem.id !== id)
+    );
   }
 
-  sucesso(message: string, title?: string, timeout?: number) { this.mostrar('success', message, title, timeout); }
-  informar(message: string, title?: string, timeout?: number) { this.mostrar('info', message, title, timeout); }
-  avisar(message: string, title?: string, timeout?: number) { this.mostrar('warning', message, title, timeout); }
-  erro(message: string, title?: string, timeout?: number) { this.mostrar('danger', message, title, timeout); }
+  sucesso(message: string, title?: string, timeout?: number) {
+    this.mostrar('success', message, title, timeout);
+  }
+
+  informar(message: string, title?: string, timeout?: number) {
+    this.mostrar('info', message, title, timeout);
+  }
+
+  avisar(message: string, title?: string, timeout?: number) {
+    this.mostrar('warning', message, title, timeout);
+  }
+
+  erro(message: string, title?: string, timeout?: number) {
+    this.mostrar('danger', message, title, timeout);
+  }
 }

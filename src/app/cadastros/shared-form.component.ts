@@ -16,6 +16,9 @@ export interface FormCampo {
   mensagemErro?: string;
   tamanho?: 'full' | '1/2' | '1/3' | '2/3';
   helpText?: string;
+  mascara?: (valor: string) => string;
+  exibirSe?: (dadosFormulario: any) => boolean;
+  atalhoCadastro?: { rota: string };
 }
 
 export interface FormSecao {
@@ -43,8 +46,10 @@ export class SharedFormComponent {
   @Input() config!: FormConfig;
   @Input() dadosFormulario: any = {};
   @Input() funcaoValidacaoExtra?: () => boolean;
+  @Input() carregando = false;
   @Output() salvar = new EventEmitter<any>();
   @Output() cancelar = new EventEmitter<void>();
+  @Output() criarNovoCampo = new EventEmitter<{ campo: FormCampo; modo: 'novo' | 'editar' }>();
 
   obterClasseTamanho(campo: FormCampo): string {
     const tamanho = campo.tamanho || 'full';
@@ -55,6 +60,10 @@ export class SharedFormComponent {
       '2/3': 'col-md-8 mb-3'
     };
     return mapa[tamanho] || mapa['full'];
+  }
+
+  exibirCampo(campo: FormCampo): boolean {
+    return !campo.exibirSe || campo.exibirSe(this.dadosFormulario);
   }
 
   isCampoValido(campo: FormCampo): boolean {
@@ -80,7 +89,7 @@ export class SharedFormComponent {
 
     for (const secao of this.config.secoes) {
       for (const campo of secao.campos) {
-        if (!this.isCampoValido(campo)) return false;
+        if (this.exibirCampo(campo) && !this.isCampoValido(campo)) return false;
       }
     }
 
@@ -93,6 +102,14 @@ export class SharedFormComponent {
     }
 
     return true;
+  }
+
+  onCriarNovoCampo(campo: FormCampo, modo: 'novo' | 'editar'): void {
+    this.criarNovoCampo.emit({ campo, modo });
+  }
+
+  onCampoAlterado(campo: FormCampo, valor: any): void {
+    this.dadosFormulario[campo.nome] = campo.mascara ? campo.mascara(valor) : valor;
   }
 
   alternarToggle(nomeCampo: string): void {

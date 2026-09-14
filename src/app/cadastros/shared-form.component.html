@@ -9,23 +9,37 @@
     </button>
   </div>
 
-  <div class="form-container">
+  <div *ngIf="carregando" class="d-flex justify-content-center align-items-center py-5">
+    <div class="spinner-border text-success" role="status"></div>
+  </div>
+
+  <div class="form-container" *ngIf="!carregando">
     <div *ngFor="let secao of config.secoes" class="card border-0 shadow-sm mb-3">
       <div class="card-body p-4">
         <h5 class="card-title mb-4">{{ secao.titulo }}</h5>
 
         <div class="form-row">
-          <div *ngFor="let campo of secao.campos" [ngClass]="obterClasseTamanho(campo)">
+          <ng-container *ngFor="let campo of secao.campos">
+          <div *ngIf="exibirCampo(campo)" [ngClass]="obterClasseTamanho(campo)">
             <div class="form-group">
-              <label class="form-label" [class.required]="campo.obrigatorio">
-                {{ campo.label }}
+              <label class="form-label d-flex align-items-center gap-2" [class.required]="campo.obrigatorio">
+                <span>{{ campo.label }}</span>
+                <span class="atalhos-cadastro" *ngIf="campo.tipo === 'select' && campo.atalhoCadastro">
+                  <button type="button" class="btn-atalho-cadastro" (click)="onCriarNovoCampo(campo, 'novo')">
+                    <i class="bi bi-plus-circle"></i> Novo (F9)
+                  </button>
+                  <button type="button" class="btn-atalho-cadastro" (click)="onCriarNovoCampo(campo, 'editar')">
+                    <i class="bi bi-pencil"></i> Editar (F8)
+                  </button>
+                </span>
               </label>
 
               <input
                 *ngIf="['text', 'email', 'tel', 'number', 'date', 'time', 'datetime-local'].includes(campo.tipo)"
                 [type]="campo.tipo"
                 class="form-control"
-                [(ngModel)]="dadosFormulario[campo.nome]"
+                [ngModel]="dadosFormulario[campo.nome]"
+                (ngModelChange)="onCampoAlterado(campo, $event)"
                 [placeholder]="campo.placeholder || ''"
                 [readOnly]="campo.readOnly || false"
                 [required]="campo.obrigatorio || false">
@@ -50,7 +64,9 @@
                 *ngIf="campo.tipo === 'select'"
                 class="form-control"
                 [(ngModel)]="dadosFormulario[campo.nome]"
-                [required]="campo.obrigatorio || false">
+                [required]="campo.obrigatorio || false"
+                (keydown.F9)="campo.atalhoCadastro && onCriarNovoCampo(campo, 'novo')"
+                (keydown.F8)="campo.atalhoCadastro && onCriarNovoCampo(campo, 'editar')">
                 <option value="">Selecione...</option>
                 <option *ngFor="let opt of campo.opcoes" [value]="opt.id">{{ opt.label }}</option>
               </select>
@@ -106,12 +122,13 @@
               </small>
             </div>
           </div>
+          </ng-container>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="form-actions">
+  <div class="form-actions" *ngIf="!carregando">
     <button class="btn btn-light border" (click)="onCancelar()">
       {{ config.botaoCancelLabel || 'Cancelar' }}
     </button>

@@ -33,6 +33,7 @@ export class EmpresasComponent implements OnInit {
   ];
 
   data: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -47,8 +48,8 @@ export class EmpresasComponent implements OnInit {
 
   private carregarDados(): void {
     this.empresasService.listar().subscribe({
-      next: (dados) => this.data = dados,
-      error: () => this.toastService.erro('Não foi possível carregar as empresas.', 'Erro')
+      next: (dados) => { this.data = dados; this.carregando = false; },
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar as empresas.', 'Erro'); }
     });
   }
 

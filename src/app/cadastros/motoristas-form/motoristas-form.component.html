@@ -20,7 +20,7 @@
       </div>
 
       <div *ngIf="abaAtiva === 'dados'">
-        <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" (salvar)="onSalvar($event)" (cancelar)="onCancelar()"></app-shared-form>
+        <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" [carregando]="carregando" (salvar)="onSalvar($event)" (cancelar)="onCancelar()"></app-shared-form>
       </div>
 
       <div *ngIf="abaAtiva === 'controle'" class="controle-docs">

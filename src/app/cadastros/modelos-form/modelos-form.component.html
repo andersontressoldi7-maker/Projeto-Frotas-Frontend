@@ -3,7 +3,7 @@
 <div class="dashboard-wrapper">
   <main class="content-layout">
     <div class="container-fluid p-4">
-      <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" (salvar)="aoSalvar($event)" (cancelar)="aoCancelar()"></app-shared-form>
+      <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" [carregando]="carregando" (salvar)="aoSalvar($event)" (cancelar)="aoCancelar()"></app-shared-form>
 
       <div class="card mt-4">
         <div class="card-body">
@@ -15,7 +15,9 @@
           <div class="d-flex gap-2 mb-3">
             <select class="form-select" [(ngModel)]="idItemSelecionado">
               <option [ngValue]="null">Selecione o item...</option>
-              <option *ngFor="let it of itensDisponiveis" [ngValue]="it.id">{{ it.nome }} ({{ it.categoria }})</option>
+              <option *ngFor="let it of itensDisponiveis" [ngValue]="it.id">
+                {{ formatarItem(it.nome, it.categoria) }}
+              </option>
             </select>
             <button class="btn btn-success" (click)="adicionarItem()">Adicionar</button>
           </div>

@@ -37,6 +37,7 @@ export class ManutencoesComponent implements OnInit {
 
   todosDados: any[] = [];
   dados: any[] = [];
+  carregando = true;
 
   ngOnInit(): void {
     this.manutencoesService.listar().subscribe({
@@ -49,8 +50,9 @@ export class ManutencoesComponent implements OnInit {
           abertura: manutencao.created_at
         }));
         this.aplicarFiltroDaRota();
+        this.carregando = false;
       },
-      error: () => this.toastService.erro('Não foi possível carregar as manutenções.', 'Erro')
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar as manutenções.', 'Erro'); }
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());

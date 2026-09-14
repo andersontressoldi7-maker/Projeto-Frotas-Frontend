@@ -35,6 +35,7 @@ export class AbastecimentosComponent implements OnInit {
 
   allData: any[] = [];
   data: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -59,8 +60,9 @@ export class AbastecimentosComponent implements OnInit {
           tipoAbastecimento: abastecimento.tipo_abastecimento
         }));
         this.aplicarFiltroDaRota();
+        this.carregando = false;
       },
-      error: () => this.toastService.erro('Não foi possível carregar os abastecimentos.', 'Erro')
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os abastecimentos.', 'Erro'); }
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());

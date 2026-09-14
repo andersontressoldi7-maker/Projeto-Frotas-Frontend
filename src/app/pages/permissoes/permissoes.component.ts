@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { ToastService } from '../../components/toast.service';
-import { PermissoesService, UsuarioPermissao, TelaPermissao } from '../../services/permissoes.service';
+import { PermissoesService, UsuarioPermissao, TelaPermissao, EmpresaDisponivel } from '../../services/permissoes.service';
 
 interface Usuario {
   id: number;
   nome: string;
   email: string;
   perfil: 'Admin' | 'Customizado';
+  empresasIds: number[];
 }
 
 @Component({
@@ -27,12 +28,15 @@ export class PermissoesComponent implements OnInit {
   usuarios: Usuario[] = [];
   usuarioSelecionado: Usuario | null = null;
   telasPermissoes: TelaPermissao[] = [];
+  empresasDisponiveis: EmpresaDisponivel[] = [];
 
   mostrarFormNovoUsuario = false;
-  novoUsuario: { nome: string; email: string; perfil: 'Admin' | 'Customizado' } = {
+  novoUsuario: { nome: string; email: string; perfil: 'Admin' | 'Customizado'; senha: string; empresasIds: number[] } = {
     nome: '',
     email: '',
-    perfil: 'Customizado'
+    perfil: 'Customizado',
+    senha: '',
+    empresasIds: []
   };
 
   constructor(
@@ -42,6 +46,14 @@ export class PermissoesComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarUsuarios();
+    this.carregarEmpresas();
+  }
+
+  private carregarEmpresas(): void {
+    this.permissoesService.listarEmpresas().subscribe({
+      next: (empresas) => this.empresasDisponiveis = empresas,
+      error: () => this.toastService.erro('Não foi possível carregar as empresas.', 'Erro')
+    });
   }
 
   private carregarUsuarios(): void {
@@ -56,20 +68,53 @@ export class PermissoesComponent implements OnInit {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
-      perfil: usuario.perfil.toLowerCase() === 'admin' ? 'Admin' : 'Customizado'
+      perfil: usuario.perfil.toLowerCase() === 'admin' ? 'Admin' : 'Customizado',
+      empresasIds: []
     };
   }
 
   alternarFormNovoUsuario(): void {
     this.mostrarFormNovoUsuario = !this.mostrarFormNovoUsuario;
     if (this.mostrarFormNovoUsuario) {
-      this.novoUsuario = { nome: '', email: '', perfil: 'Customizado' };
+      this.novoUsuario = { nome: '', email: '', perfil: 'Customizado', senha: '', empresasIds: [] };
+    }
+  }
+
+  alternarEmpresaNoNovoUsuario(empresaId: number): void {
+    const indice = this.novoUsuario.empresasIds.indexOf(empresaId);
+    if (indice === -1) {
+      this.novoUsuario.empresasIds.push(empresaId);
+    } else {
+      this.novoUsuario.empresasIds.splice(indice, 1);
+    }
+  }
+
+  alternarEmpresaDoUsuarioSelecionado(empresaId: number): void {
+    if (!this.usuarioSelecionado) {
+      return;
+    }
+
+    const indice = this.usuarioSelecionado.empresasIds.indexOf(empresaId);
+    if (indice === -1) {
+      this.usuarioSelecionado.empresasIds.push(empresaId);
+    } else {
+      this.usuarioSelecionado.empresasIds.splice(indice, 1);
     }
   }
 
   cadastrarUsuario(): void {
-    if (!this.novoUsuario.nome.trim() || !this.novoUsuario.email.trim()) {
-      this.toastService.erro('Preencha nome e email do usuário.', 'Erro');
+    if (!this.novoUsuario.nome.trim() || !this.novoUsuario.email.trim() || !this.novoUsuario.senha.trim()) {
+      this.toastService.erro('Preencha nome, email e senha do usuário.', 'Erro');
+      return;
+    }
+
+    if (this.novoUsuario.senha.trim().length < 6) {
+      this.toastService.erro('A senha deve ter pelo menos 6 caracteres.', 'Erro');
+      return;
+    }
+
+    if (this.novoUsuario.empresasIds.length === 0) {
+      this.toastService.erro('Selecione ao menos uma empresa.', 'Erro');
       return;
     }
 
@@ -87,7 +132,12 @@ export class PermissoesComponent implements OnInit {
   selecionarUsuario(usuario: Usuario): void {
     this.usuarioSelecionado = usuario;
     this.permissoesService.obterPermissoes(usuario.id).subscribe({
-      next: (telas) => this.telasPermissoes = telas,
+      next: (resposta) => {
+        this.telasPermissoes = resposta.telas;
+        if (this.usuarioSelecionado) {
+          this.usuarioSelecionado.empresasIds = resposta.empresasIds;
+        }
+      },
       error: () => this.toastService.erro('Não foi possível carregar as permissões do usuário.', 'Erro')
     });
   }
@@ -115,7 +165,12 @@ export class PermissoesComponent implements OnInit {
       return;
     }
 
-    this.permissoesService.salvarPermissoes(this.usuarioSelecionado.id, this.telasPermissoes).subscribe({
+    if (this.usuarioSelecionado.empresasIds.length === 0) {
+      this.toastService.erro('Selecione ao menos uma empresa.', 'Erro');
+      return;
+    }
+
+    this.permissoesService.salvarPermissoes(this.usuarioSelecionado.id, this.telasPermissoes, this.usuarioSelecionado.empresasIds).subscribe({
       next: () => {
         this.toastService.sucesso('Permissões salvas com sucesso.', 'Sucesso');
         this.usuarioSelecionado = null;

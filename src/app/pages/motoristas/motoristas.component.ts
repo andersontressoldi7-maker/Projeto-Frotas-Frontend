@@ -29,6 +29,7 @@ export class MotoristasComponent implements OnInit {
   ];
 
   dados: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -43,8 +44,8 @@ export class MotoristasComponent implements OnInit {
 
   private carregarDados(): void {
     this.motoristasService.listar().subscribe({
-      next: (dados) => this.dados = dados,
-      error: () => this.toastService.erro('Não foi possível carregar os motoristas.', 'Erro')
+      next: (dados) => { this.dados = dados; this.carregando = false; },
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os motoristas.', 'Erro'); }
     });
   }
 

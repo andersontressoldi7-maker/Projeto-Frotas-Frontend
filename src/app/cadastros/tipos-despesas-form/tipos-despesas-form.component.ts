@@ -18,6 +18,7 @@ export class TiposDespesasFormComponent implements OnInit {
   modoEdicao = false;
   nome = '';
   itemId: number | null = null;
+  carregando = false;
 
   constructor(
     private router: Router,
@@ -31,10 +32,11 @@ export class TiposDespesasFormComponent implements OnInit {
       if (params['id']) {
         this.modoEdicao = true;
         this.itemId = Number(params['id']);
+        this.carregando = true;
 
         this.tiposDespesasService.obter(this.itemId).subscribe({
-          next: (tipo) => this.nome = tipo.nome,
-          error: () => this.toastService.erro('Não foi possível carregar o tipo de despesa.', 'Erro')
+          next: (tipo) => { this.nome = tipo.nome; this.carregando = false; },
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar o tipo de despesa.', 'Erro'); }
         });
       }
     });

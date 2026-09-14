@@ -22,8 +22,7 @@ export class ItensComponent implements OnInit {
 
   colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
-    { key: 'categoria', label: 'Categoria', type: 'text' },
-    { key: 'tipo', label: 'Tipo', type: 'text' },
+    { key: 'categoriaNome', label: 'Categoria', type: 'text' },
     { key: 'gera_manutencao', label: 'Gera manutenção', type: 'text' },
     { key: 'ativo', label: 'Ativo', type: 'text' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
@@ -31,7 +30,7 @@ export class ItensComponent implements OnInit {
 
   opcoesFiltro: GridFilterOption[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
-    { key: 'categoria', label: 'Categoria', type: 'text' },
+    { key: 'categoriaNome', label: 'Categoria', type: 'text' },
     { key: 'gera_manutencao', label: 'Gera manutenção', type: 'select', options: [
       { label: 'Sim', value: 'Sim' },
       { label: 'Não', value: 'Não' }
@@ -39,6 +38,7 @@ export class ItensComponent implements OnInit {
   ];
 
   dados: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -53,12 +53,16 @@ export class ItensComponent implements OnInit {
 
   private carregarDados(): void {
     this.itensService.listar().subscribe({
-      next: (dados) => this.dados = dados.map(item => ({
-        ...item,
-        gera_manutencao: item.gera_manutencao ? 'Sim' : 'Não',
-        ativo: item.ativo ? 'Sim' : 'Não'
-      })),
-      error: () => this.toastService.erro('Não foi possível carregar os itens.', 'Erro')
+      next: (dados) => {
+        this.dados = dados.map(item => ({
+          ...item,
+          categoriaNome: item.categoria?.nome || '-',
+          gera_manutencao: item.gera_manutencao ? 'Sim' : 'Não',
+          ativo: item.ativo ? 'Sim' : 'Não'
+        }));
+        this.carregando = false;
+      },
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os itens.', 'Erro'); }
     });
   }
 

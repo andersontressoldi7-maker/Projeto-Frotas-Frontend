@@ -7,22 +7,22 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
-import { TiposManutencaoService } from '../../services/tipos-manutencao.service';
+import { CategoriasService } from '../../services/categorias.service';
 
 @Component({
-  selector: 'app-tipos-manutencao',
+  selector: 'app-categorias',
   standalone: true,
   imports: [CommonModule, SharedGridComponent, SidebarComponent, HeaderComponent],
-  templateUrl: './tipos-manutencao.component.html'
+  templateUrl: './categorias.component.html'
 })
-export class TiposManutencaoComponent implements OnInit {
-  titulo = 'Tipos de Manutenção';
-  subtitulo = 'Categorias de serviços de manutenção';
+export class CategoriasComponent implements OnInit {
+  titulo = 'Categorias';
+  subtitulo = 'Escalas de avaliação para itens de checklist';
   rotuloBotaoPrimario = 'Novo';
 
   colunas: GridColumn[] = [
     { key: 'nome', label: 'Nome', type: 'text' },
-    { key: 'descricao', label: 'Descrição', type: 'text' },
+    { key: 'opcoesTexto', label: 'Opções', type: 'text' },
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
@@ -37,7 +37,7 @@ export class TiposManutencaoComponent implements OnInit {
     private router: Router,
     private dialogService: DialogService,
     private toastService: ToastService,
-    private tiposManutencaoService: TiposManutencaoService
+    private categoriasService: CategoriasService
   ) {}
 
   ngOnInit(): void {
@@ -45,31 +45,34 @@ export class TiposManutencaoComponent implements OnInit {
   }
 
   private carregarDados(): void {
-    this.tiposManutencaoService.listar().subscribe({
-      next: (dados) => { this.dados = dados; this.carregando = false; },
-      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os tipos de manutenção.', 'Erro'); }
+    this.categoriasService.listar().subscribe({
+      next: (dados) => {
+        this.dados = dados.map(categoria => ({ ...categoria, opcoesTexto: (categoria.opcoes || []).join(', ') }));
+        this.carregando = false;
+      },
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar as categorias.', 'Erro'); }
     });
   }
 
-  aoAcaoPrimaria(): void { this.router.navigate(['/tipos-manutencao/novo']); }
-  aoAplicarFiltro(filtros: any): void {}
+  aoAcaoPrimaria(): void { this.router.navigate(['/categorias/novo']); }
+  aoFiltroAplicado(filtros: any): void {}
 
-  aoClicarEditar(linha: any): void {
-    this.router.navigate(['/tipos-manutencao', linha.id, 'editar']);
+  aoEditar(linha: any): void {
+    this.router.navigate(['/categorias', linha.id, 'editar']);
   }
 
-  async aoClicarExcluir(linha: any): Promise<void> {
-    const confirmado = await this.dialogService.confirmar(`Deseja excluir o tipo ${linha.nome}?`, 'Excluir tipo de manutenção');
+  async aoExcluir(linha: any): Promise<void> {
+    const confirmado = await this.dialogService.confirmar(`Deseja excluir a categoria ${linha.nome}?`, 'Excluir categoria');
     if (!confirmado) {
       return;
     }
 
-    this.tiposManutencaoService.excluir(linha.id).subscribe({
+    this.categoriasService.excluir(linha.id).subscribe({
       next: () => {
         this.carregarDados();
-        this.toastService.sucesso('Tipo de manutenção excluído.', 'Sucesso');
+        this.toastService.sucesso('Categoria excluída.', 'Sucesso');
       },
-      error: () => this.toastService.erro('Não foi possível excluir o tipo de manutenção.', 'Erro')
+      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível excluir a categoria.', 'Erro')
     });
   }
 }

@@ -17,7 +17,8 @@ export interface Notificacao {
 
 export const CATEGORIAS_NOTIFICACAO: CategoriaNotificacao[] = ['Manutenção', 'Checklist', 'Documento', 'Viagem', 'Sistema'];
 
-interface AlertaApi {
+export interface AlertaApi {
+  id: number;
   tipo: string;
   titulo: string;
   detalhe: string;
@@ -35,14 +36,20 @@ export class NotificationService {
   constructor(private http: HttpClient) {}
 
   listar(): Observable<Notificacao[]> {
-    return this.http.get<AlertaApi[]>(this.urlBase).pipe(
-      map(alertas => alertas.map((alerta, indice) => this.mapearAlerta(alerta, indice)))
+    return this.listarBruto().pipe(
+      map(alertas => alertas.map(alerta => this.mapearAlerta(alerta)))
     );
   }
 
-  private mapearAlerta(alerta: AlertaApi, indice: number): Notificacao {
+  listarBruto(): Observable<AlertaApi[]> {
+    return this.http.get<Omit<AlertaApi, 'id'>[]>(this.urlBase).pipe(
+      map(alertas => alertas.map((alerta, indice) => ({ id: indice + 1, ...alerta })))
+    );
+  }
+
+  private mapearAlerta(alerta: AlertaApi): Notificacao {
     return {
-      id: indice + 1,
+      id: alerta.id,
       titulo: alerta.titulo,
       mensagem: alerta.detalhe,
       data: alerta.data,

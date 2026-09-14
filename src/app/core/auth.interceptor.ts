@@ -13,13 +13,18 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(requisicao).pipe(
     catchError((erro: HttpErrorResponse) => {
-      if (erro.status === 401) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.navigate(['/login']);
+      if (erro.status === 401 || erro.status === 403) {
+        encerrarSessao(router);
       }
 
       return throwError(() => erro);
     })
   );
 };
+
+function encerrarSessao(router: Router): void {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('user');
+  localStorage.removeItem('unidade');
+  router.navigate(['/login']);
+}

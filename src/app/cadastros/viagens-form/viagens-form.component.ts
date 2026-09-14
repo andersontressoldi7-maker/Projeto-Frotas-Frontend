@@ -35,6 +35,7 @@ export class ViagensFormComponent implements OnInit {
   idEmEdicao: number | null = null;
   abaSelecionada = 'dados';
   abaCustosSelecionada = 'fretes';
+  carregando = false;
 
   formulario = {
     veiculo: '',
@@ -135,8 +136,10 @@ export class ViagensFormComponent implements OnInit {
   }
 
   private carregarViagem(id: number): void {
+    this.carregando = true;
     this.viagensService.obter(id).subscribe({
       next: (viagem) => {
+        this.carregando = false;
         this.formulario = {
           veiculo: viagem.veiculo_id,
           motorista: viagem.motorista_id,
@@ -160,7 +163,7 @@ export class ViagensFormComponent implements OnInit {
           abastecimentos: (viagem.abastecimentos || []).map((a: any) => ({ data: a.data_abastecimento, local: '', tipo: a.tipo_abastecimento, combustivel: a.combustivel, quantidadeLitros: a.qt_litros, valor: a.valor_litro, observacao: a.observacao }))
         };
       },
-      error: () => this.toastService.erro('Não foi possível carregar a viagem.', 'Erro')
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar a viagem.', 'Erro'); }
     });
   }
 

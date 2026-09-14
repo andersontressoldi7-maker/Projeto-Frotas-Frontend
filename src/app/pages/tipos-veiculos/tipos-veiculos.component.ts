@@ -31,6 +31,7 @@ export class TiposVeiculosComponent implements OnInit {
   ];
 
   dados: any[] = [];
+  carregando = true;
 
   constructor(
     private router: Router,
@@ -45,8 +46,8 @@ export class TiposVeiculosComponent implements OnInit {
 
   private carregarDados(): void {
     this.tiposVeiculosService.listar().subscribe({
-      next: (dados) => this.dados = dados,
-      error: () => this.toastService.erro('Não foi possível carregar os tipos de veículos.', 'Erro')
+      next: (dados) => { this.dados = dados; this.carregando = false; },
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os tipos de veículos.', 'Erro'); }
     });
   }
 

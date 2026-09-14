@@ -1,10 +1,10 @@
-import { Component, computed, ElementRef, HostListener, signal } from '@angular/core';
+import { Component, computed, ElementRef, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { NotificationService, Notificacao, CategoriaNotificacao, CATEGORIAS_NOTIFICACAO } from '../../services/notification.service';
 import { ToastService } from '../toast.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, EmpresaAcesso } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -13,10 +13,14 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   usuarioLogado: ReturnType<AuthService['obterUsuarioLogado']>;
   emailUsuario = '';
   iniciaisUsuario = '';
+
+  empresas = signal<EmpresaAcesso[]>([]);
+  empresaMenuAberto = false;
+  trocandoEmpresa = signal(false);
 
   notificacoes = signal<Notificacao[]>([]);
   notificacoesAbertas = false;
@@ -46,8 +50,23 @@ export class HeaderComponent {
     this.iniciaisUsuario = this.calcularIniciais(this.usuarioLogado?.nome || this.emailUsuario);
   }
 
+  ngOnInit(): void {
+    this.authService.listarMinhasEmpresas().subscribe({
+      next: (empresas) => this.empresas.set(empresas),
+      error: () => this.empresas.set([])
+    });
+  }
+
   get notificacoesNaoLidas(): number {
     return this.notificacoes().filter(n => !n.lida).length;
+  }
+
+  get empresaAtiva(): EmpresaAcesso | undefined {
+    return this.empresas().find(e => e.ativa);
+  }
+
+  get temMultiplasEmpresas(): boolean {
+    return this.empresas().length > 1;
   }
 
   private calcularIniciais(nomeOuEmail: string): string {
@@ -72,6 +91,7 @@ export class HeaderComponent {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.notificacoesAbertas = false;
       this.menuUsuarioAberto = false;
+      this.empresaMenuAberto = false;
     }
   }
 
@@ -100,6 +120,31 @@ export class HeaderComponent {
   alternarMenuUsuario(): void {
     this.menuUsuarioAberto = !this.menuUsuarioAberto;
     this.notificacoesAbertas = false;
+    this.empresaMenuAberto = false;
+  }
+
+  alternarMenuEmpresa(): void {
+    this.empresaMenuAberto = !this.empresaMenuAberto;
+    this.notificacoesAbertas = false;
+    this.menuUsuarioAberto = false;
+  }
+
+  selecionarEmpresa(empresa: EmpresaAcesso): void {
+    if (empresa.ativa || this.trocandoEmpresa()) {
+      return;
+    }
+
+    this.trocandoEmpresa.set(true);
+    this.authService.trocarEmpresa(empresa.id).subscribe({
+      next: () => {
+        window.location.reload();
+      },
+      error: (err) => {
+        this.trocandoEmpresa.set(false);
+        this.empresaMenuAberto = false;
+        this.toastService.erro(err?.error?.message || 'Você não tem acesso a esta empresa.');
+      }
+    });
   }
 
   abrirSuporte(): void {

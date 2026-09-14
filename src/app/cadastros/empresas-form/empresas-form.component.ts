@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
 import { EmpresasService } from '../../services/empresas.service';
+import { aplicarMascaraCnpj } from '../../shared/mascaras.util';
 
 @Component({
   selector: 'app-empresas-form',
@@ -17,6 +18,7 @@ import { EmpresasService } from '../../services/empresas.service';
 export class EmpresasFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
+  carregando = false;
 
   formulario: any = {
     nome: '',
@@ -32,7 +34,7 @@ export class EmpresasFormComponent implements OnInit {
         titulo: 'Dados',
         campos: [
           { nome: 'nome', label: 'Nome', tipo: 'text', obrigatorio: true, tamanho: 'full' },
-          { nome: 'cnpj', label: 'CNPJ', tipo: 'text', tamanho: '1/2' },
+          { nome: 'cnpj', label: 'CNPJ', tipo: 'text', tamanho: '1/2', mascara: aplicarMascaraCnpj },
           { nome: 'telefone', label: 'Telefone', tipo: 'text', tamanho: '1/2' }
         ]
       }
@@ -52,10 +54,14 @@ export class EmpresasFormComponent implements OnInit {
         this.modoEdicao = true;
         this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Empresa';
+        this.carregando = true;
 
         this.empresasService.obter(this.idEmEdicao).subscribe({
-          next: (empresa) => this.formulario = { nome: empresa.nome, cnpj: empresa.cnpj, telefone: empresa.telefone },
-          error: () => this.toastService.erro('Não foi possível carregar a empresa.', 'Erro')
+          next: (empresa) => {
+            this.formulario = { nome: empresa.nome, cnpj: empresa.cnpj, telefone: empresa.telefone };
+            this.carregando = false;
+          },
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar a empresa.', 'Erro'); }
         });
       }
     });

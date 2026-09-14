@@ -17,6 +17,7 @@ import { TiposVeiculosService } from '../../services/tipos-veiculos.service';
 export class TiposVeiculosFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
+  carregando = false;
 
   formulario: any = {
     nome: '',
@@ -50,10 +51,11 @@ export class TiposVeiculosFormComponent implements OnInit {
         this.modoEdicao = true;
         this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Tipo de Veículo';
+        this.carregando = true;
 
         this.tiposVeiculosService.obter(this.idEmEdicao).subscribe({
-          next: (tipo) => this.formulario = { nome: tipo.nome, descricao: tipo.descricao },
-          error: () => this.toastService.erro('Não foi possível carregar o tipo de veículo.', 'Erro')
+          next: (tipo) => { this.formulario = { nome: tipo.nome, descricao: tipo.descricao }; this.carregando = false; },
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar o tipo de veículo.', 'Erro'); }
         });
       }
     });

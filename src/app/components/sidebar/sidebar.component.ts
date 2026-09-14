@@ -34,7 +34,8 @@ export class SidebarComponent implements OnInit {
       icon: 'bi-card-checklist', label: 'Checklist', children: [
         { icon: 'bi-clipboard-check', label: 'Preenchimentos', route: '/checklists' },
         { icon: 'bi-folder', label: 'Modelos', route: '/modelos' },
-        { icon: 'bi-list-check', label: 'Itens', route: '/itens' }
+        { icon: 'bi-list-check', label: 'Itens', route: '/itens' },
+        { icon: 'bi-tag', label: 'Categorias', route: '/categorias' }
       ]
     },
     {

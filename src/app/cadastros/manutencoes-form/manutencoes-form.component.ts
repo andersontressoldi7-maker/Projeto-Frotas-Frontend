@@ -23,6 +23,7 @@ export class ManutencoesFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
   abaAtiva = 'geral';
+  carregando = false;
 
   formulario: any = {
     origem: '',
@@ -103,6 +104,7 @@ export class ManutencoesFormComponent implements OnInit {
         this.modoEdicao = true;
         this.idEmEdicao = Number(params['id']);
         this.configFormulario.titulo = 'Editar Manutenção';
+        this.carregando = true;
 
         this.manutencoesService.obter(this.idEmEdicao).subscribe({
           next: (manutencao) => {
@@ -119,8 +121,9 @@ export class ManutencoesFormComponent implements OnInit {
             this.listaMaoDeObra = (manutencao.servicos || []).map((s: any) => ({ descricao: s.descricao, valor: s.valor }));
             this.listaProdutos = (manutencao.produtos || []).map((p: any) => ({ descricao: p.descricao, quantidade: p.quantidade, valorUnitario: p.valor_unitario }));
             this.listaChecklists = manutencao.checklists || [];
+            this.carregando = false;
           },
-          error: () => this.toastService.erro('Não foi possível carregar a manutenção.', 'Erro')
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar a manutenção.', 'Erro'); }
         });
       }
     });

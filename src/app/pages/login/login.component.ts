@@ -16,6 +16,7 @@ import { ToastService } from '../../components/toast.service';
 export class LoginComponent {
   email = '';
   senha = '';
+  unidade: number | null = null;
   lembrarDeMim = false;
   mostrarSenha = false;
   carregando = false;
@@ -33,7 +34,7 @@ export class LoginComponent {
 
   entrar(): void {
     this.carregando = true;
-    this.authService.login(this.email, this.senha).subscribe({
+    this.authService.login(this.email, this.senha, this.unidade!).subscribe({
       next: () => {
         this.carregando = false;
         this.router.navigate(['/dashboard']);

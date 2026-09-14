@@ -7,6 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
 import { VeiculosService } from '../../services/veiculos.service';
+import { aplicarMascaraPlaca } from '../../shared/mascaras.util';
 
 @Component({
   selector: 'app-veiculos-form',
@@ -19,6 +20,8 @@ export class VeiculosFormComponent implements OnInit {
   idEmEdicao: number | null = null;
   retornoUrl: string | null = null;
   retornoCampo: string | null = null;
+  salvando = false;
+  carregando = false;
 
   formulario: any = {
     placa: '',
@@ -36,7 +39,7 @@ export class VeiculosFormComponent implements OnInit {
       {
         titulo: 'Dados Básicos',
         campos: [
-          { nome: 'placa', label: 'Placa', tipo: 'text', obrigatorio: true, tamanho: '1/2' },
+          { nome: 'placa', label: 'Placa', tipo: 'text', obrigatorio: true, tamanho: '1/2', mascara: aplicarMascaraPlaca },
           { nome: 'modelo', label: 'Modelo', tipo: 'text', tamanho: '1/2' },
           { nome: 'nroFrota', label: 'Nº da Frota', tipo: 'text', tamanho: '1/3' },
           { nome: 'ano', label: 'Ano', tipo: 'number', tamanho: '1/3' },
@@ -69,27 +72,37 @@ export class VeiculosFormComponent implements OnInit {
         this.modoEdicao = true;
         this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Veículo';
+        this.carregando = true;
 
         this.veiculosService.obter(this.idEmEdicao).subscribe({
-          next: (veiculo) => this.formulario = {
-            placa: veiculo.placa,
-            modelo: veiculo.modelo,
-            nroFrota: veiculo.nro_frota,
-            ano: veiculo.ano,
-            km: veiculo.km,
-            status: veiculo.status || 'Disponível'
+          next: (veiculo) => {
+            this.formulario = {
+              placa: veiculo.placa,
+              modelo: veiculo.modelo,
+              nroFrota: veiculo.nro_frota,
+              ano: veiculo.ano,
+              km: veiculo.km,
+              status: veiculo.status || 'Disponível'
+            };
+            this.carregando = false;
           },
-          error: () => this.toastService.erro('Não foi possível carregar o veículo.', 'Erro')
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar o veículo.', 'Erro'); }
         });
       }
     });
   }
 
   onSalvar(dados: any): void {
+    if (this.salvando) {
+      return;
+    }
+
     if (!this.podeSalvar()) {
       this.toastService.erro('Preencha os campos obrigatórios antes de salvar.', 'Erro');
       return;
     }
+
+    this.salvando = true;
 
     const payload = {
       placa: dados.placa,
@@ -114,7 +127,10 @@ export class VeiculosFormComponent implements OnInit {
           this.router.navigate(['/veiculos']);
         }
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o veículo.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o veículo.', 'Erro');
+      }
     });
   }
 

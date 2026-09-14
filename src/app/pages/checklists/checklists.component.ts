@@ -52,6 +52,7 @@ export class ChecklistsComponent implements OnInit {
 
   allData: any[] = [];
   data: any[] = [];
+  carregando = true;
 
   ngOnInit(): void {
     this.checklistService.listar().subscribe({
@@ -65,8 +66,9 @@ export class ChecklistsComponent implements OnInit {
           status: checklist.status
         }));
         this.aplicarFiltroDaRota();
+        this.carregando = false;
       },
-      error: () => this.toastService.erro('Não foi possível carregar os checklists.', 'Erro')
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os checklists.', 'Erro'); }
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());

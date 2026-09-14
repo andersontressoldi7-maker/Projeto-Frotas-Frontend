@@ -46,6 +46,24 @@
       <i class="bi" [class.bi-sun-fill]="themeService.estaEscuro()" [class.bi-moon-fill]="!themeService.estaEscuro()"></i>
     </button>
 
+    <div class="position-relative" *ngIf="temMultiplasEmpresas">
+      <button class="btn d-flex align-items-center gap-2 p-1 px-2 empresa-toggle-btn" (click)="alternarMenuEmpresa()" [disabled]="trocandoEmpresa()">
+        <i class="bi bi-building"></i>
+        <span class="small fw-medium d-none d-sm-inline">{{ empresaAtiva?.fantasia || empresaAtiva?.razaoSocial }}</span>
+        <i class="bi bi-chevron-down small"></i>
+      </button>
+
+      <div class="dropdown-panel empresa-panel shadow-sm" *ngIf="empresaMenuAberto">
+        <div class="px-3 py-2 border-bottom">
+          <span class="fw-bold small">Trocar empresa</span>
+        </div>
+        <button class="dropdown-panel-item" *ngFor="let empresa of empresas()" [class.ativa]="empresa.ativa" [disabled]="trocandoEmpresa()" (click)="selecionarEmpresa(empresa)">
+          <i class="bi me-2" [class.bi-check-circle-fill]="empresa.ativa" [class.bi-circle]="!empresa.ativa"></i>
+          {{ empresa.fantasia || empresa.razaoSocial }}
+        </button>
+      </div>
+    </div>
+
     <div class="position-relative">
       <button class="btn d-flex align-items-center gap-2 p-1" (click)="alternarMenuUsuario()">
         <div class="avatar bg-success text-white fw-bold d-flex align-items-center justify-content-center">

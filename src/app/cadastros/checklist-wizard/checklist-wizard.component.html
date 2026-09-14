@@ -44,25 +44,7 @@
         </div>
       </div>
 
-      <div class="tabs-container mb-4">
-        <div class="nav-tabs-custom">
-          <button
-            class="nav-tab-item"
-            [class.ativo]="abaAtiva === 'preenchimento'"
-            (click)="abaAtiva = 'preenchimento'">
-            <i class="bi bi-list-check"></i> Preenchimento
-          </button>
-          <button
-            class="nav-tab-item"
-            [class.ativo]="abaAtiva === 'tempo'"
-            (click)="abaAtiva = 'tempo'">
-            <i class="bi bi-clock-history"></i> Tempo de Preenchimento
-          </button>
-        </div>
-      </div>
-
       <div class="wizard-content">
-        <ng-container *ngIf="abaAtiva === 'preenchimento'">
           <ng-container *ngIf="faseAtual === 'saida'">
             <div *ngIf="passoAtual === 1" class="passo-container">
               <div class="card border-0 shadow-sm">
@@ -311,48 +293,6 @@
               </div>
             </div>
           </ng-container>
-        </ng-container>
-
-        <ng-container *ngIf="abaAtiva === 'tempo'">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-              <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-                <div>
-                  <h5 class="card-title mb-1">Tempo de Preenchimento</h5>
-                  <p class="text-muted small mb-0">Estrutura pronta para ser substituída por dados reais do backend.</p>
-                </div>
-                <span class="badge bg-info-subtle text-info-emphasis">Dados mockados</span>
-              </div>
-
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <div class="p-3 bg-body-tertiary rounded border h-100">
-                    <small class="text-muted d-block mb-2">Saída</small>
-                    <div class="mb-2"><strong>Abertura:</strong> {{ tempoPreenchimento.aberturaSaida }}</div>
-                    <div class="mb-2"><strong>Encerramento:</strong> {{ tempoPreenchimento.encerramentoSaida }}</div>
-                    <div><strong>Tempo total:</strong> {{ formatarTempo(tempoPreenchimento.tempoSaidaMinutos) }}</div>
-                  </div>
-                </div>
-
-                <div *ngIf="eModeloCompleto()" class="col-md-6">
-                  <div class="p-3 bg-body-tertiary rounded border h-100">
-                    <small class="text-muted d-block mb-2">Retorno</small>
-                    <div class="mb-2"><strong>Abertura:</strong> {{ tempoPreenchimento.aberturaRetorno }}</div>
-                    <div class="mb-2"><strong>Encerramento:</strong> {{ tempoPreenchimento.encerramentoRetorno }}</div>
-                    <div><strong>Tempo total:</strong> {{ formatarTempo(tempoPreenchimento.tempoRetornoMinutos) }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-4 p-3 border rounded">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                  <span class="fw-semibold">Tempo total do checklist</span>
-                  <span class="fs-5 fw-bold">{{ formatarTempo(tempoPreenchimento.tempoTotalMinutos) }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ng-container>
       </div>
 
       <input 

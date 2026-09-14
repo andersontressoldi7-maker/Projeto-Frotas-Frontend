@@ -3,7 +3,7 @@
 <div class="dashboard-wrapper">
   <main class="content-layout">
     <div class="container-fluid p-4">
-      <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" (salvar)="onSalvar($event)" (cancelar)="onCancelar()"></app-shared-form>
+      <app-shared-form [config]="config" [dadosFormulario]="formulario" [funcaoValidacaoExtra]="podeSalvar" [carregando]="carregando" (salvar)="onSalvar($event)" (cancelar)="onCancelar()"></app-shared-form>
     </div>
   </main>
 </div>

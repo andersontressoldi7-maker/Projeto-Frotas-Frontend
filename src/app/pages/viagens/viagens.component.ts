@@ -37,6 +37,7 @@ export class ViagensComponent implements OnInit {
 
   todosDados: any[] = [];
   dados: any[] = [];
+  carregando = true;
 
   ngOnInit(): void {
     this.viagensService.listar().subscribe({
@@ -49,8 +50,9 @@ export class ViagensComponent implements OnInit {
           status: viagem.status
         }));
         this.aplicarFiltroDaRota();
+        this.carregando = false;
       },
-      error: () => this.toastService.erro('Não foi possível carregar as viagens.', 'Erro')
+      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar as viagens.', 'Erro'); }
     });
 
     this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());

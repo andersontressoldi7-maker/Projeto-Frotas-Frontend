@@ -8,6 +8,7 @@ import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { MotoristasService } from '../../services/motoristas.service';
+import { aplicarMascaraCpf } from '../../shared/mascaras.util';
 
 export interface DocumentoMotorista {
   id: number;
@@ -49,9 +50,11 @@ export class MotoristasFormComponent implements OnInit {
   retornoCampo: string | null = null;
   abaAtiva: 'dados' | 'controle' = 'dados';
   abaDocumentos: 'cnh' | 'cursos' | 'exames' = 'cnh';
+  carregando = false;
 
   formulario: any = {
     nome: '',
+    cpf: '',
     cnh: '',
     validade: '',
     telefone: ''
@@ -80,6 +83,7 @@ export class MotoristasFormComponent implements OnInit {
         titulo: 'Dados Pessoais',
         campos: [
           { nome: 'nome', label: 'Nome', tipo: 'text', obrigatorio: true, tamanho: 'full' },
+          { nome: 'cpf', label: 'CPF', tipo: 'text', tamanho: '1/2', mascara: aplicarMascaraCpf },
           { nome: 'cnh', label: 'CNH', tipo: 'text', tamanho: '1/2' },
           { nome: 'validade', label: 'Validade CNH', tipo: 'date', tamanho: '1/2' },
           { nome: 'telefone', label: 'Telefone', tipo: 'text', tamanho: '1/2' }
@@ -107,24 +111,27 @@ export class MotoristasFormComponent implements OnInit {
         this.modoEdicao = true;
         this.idEmEdicao = Number(params['id']);
         this.config.titulo = 'Editar Motorista';
+        this.carregando = true;
 
         this.motoristasService.obter(this.idEmEdicao).subscribe({
           next: (motorista) => {
             this.formulario = {
               nome: motorista.nome,
+              cpf: motorista.cpf,
               cnh: motorista.cnh,
               validade: motorista.validade_cnh,
               telefone: motorista.telefone
             };
+            this.carregando = false;
           },
-          error: () => this.toastService.erro('Não foi possível carregar o motorista.', 'Erro')
+          error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar o motorista.', 'Erro'); }
         });
 
         this.carregarDocumentos();
       } else {
         this.modoEdicao = false;
         this.config.titulo = 'Novo Motorista';
-        this.formulario = { nome: '', cnh: '', validade: '', telefone: '' };
+        this.formulario = { nome: '', cpf: '', cnh: '', validade: '', telefone: '' };
       }
     });
   }
@@ -180,6 +187,7 @@ export class MotoristasFormComponent implements OnInit {
 
     const payload = {
       nome: dados.nome,
+      cpf: dados.cpf,
       cnh: dados.cnh,
       validade_cnh: dados.validade,
       telefone: dados.telefone

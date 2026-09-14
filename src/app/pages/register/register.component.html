@@ -33,11 +33,11 @@
 
         <div class="form-group mb-3">
           <label class="form-label" for="cnpj">CNPJ</label>
-          <input id="cnpj" type="text" name="cnpj" class="form-control" [(ngModel)]="cnpj" placeholder="00.000.000/0000-00" maxlength="18" required>
+          <input id="cnpj" type="text" name="cnpj" class="form-control" [ngModel]="cnpj" (ngModelChange)="onCnpjAlterado($event)" placeholder="00.000.000/0000-00" maxlength="18" required>
         </div>
 
         <div class="form-group mb-3">
-          <label class="form-label" for="usuario">Usuário</label>
+          <label class="form-label" for="usuario">Email</label>
           <input id="usuario" type="text" name="usuario" class="form-control" [(ngModel)]="usuario" placeholder="Nome de usuário" autocomplete="username" required>
         </div>
 

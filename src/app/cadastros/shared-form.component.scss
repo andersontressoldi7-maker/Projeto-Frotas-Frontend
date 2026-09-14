@@ -72,6 +72,25 @@
   }
 }
 
+.atalhos-cadastro {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-atalho-cadastro {
+  border: none;
+  background: none;
+  color: #40916c;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .pills-container {
   display: flex;
   flex-wrap: wrap;
