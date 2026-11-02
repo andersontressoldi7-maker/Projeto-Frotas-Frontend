@@ -112,5 +112,14 @@
 .ia-opcao-grande span { font-size: .83rem; color: var(--bs-secondary-color); }
 .ia-opcao-grande small { margin-top: auto; color: #8b5cf6; font-weight: 700; }
 .ia-entendi { display: block; margin-left: auto; border: 0; border-radius: 8px; padding: .6rem 1.2rem; background: #7c3aed; color: #fff; font-weight: 700; }
-@media (max-width: 620px) { .ia-dialog-opcoes { grid-template-columns: 1fr; } .ia-opcao-grande { min-height: 140px; } .ia-botao span { display: none; } }
+@media (max-width: 620px) {
+  .ia-botao { max-width: calc(100vw - 32px); }
+  .ia-opcoes {
+    left: 0;
+    right: auto;
+    width: min(265px, calc(100vw - 32px));
+  }
+  .ia-dialog-opcoes { grid-template-columns: 1fr; }
+  .ia-opcao-grande { min-height: 140px; }
+}
 @media (prefers-reduced-motion: reduce) { .ia-botao-novo::after { animation: none; } }
