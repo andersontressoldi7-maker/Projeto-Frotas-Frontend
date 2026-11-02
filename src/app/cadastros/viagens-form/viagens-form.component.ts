@@ -281,8 +281,8 @@ export class ViagensFormComponent implements OnInit {
     this.abastecimentoAtual = { data: '', local: '', tipo: 'Interno', combustivel: '', quantidadeLitros: '', valor: '', observacao: '' };
   }
 
-  removerAbastecimento(index: number): void {
-    this.formulario.abastecimentos.splice(index, 1);
+  removerAbastecimento(indice: number): void {
+    this.formulario.abastecimentos.splice(indice, 1);
   }
 
   onSalvar(): void {
@@ -290,7 +290,26 @@ export class ViagensFormComponent implements OnInit {
       return;
     }
 
-    const payload = {
+    const dadosViagem = this.obterDadosViagem();
+    const requisicao = this.modoEdicao && this.idEmEdicao !== null
+      ? this.viagensService.atualizar(this.idEmEdicao, dadosViagem)
+      : this.viagensService.criar(dadosViagem);
+
+    this.salvando = true;
+    requisicao.subscribe({
+      next: () => {
+        this.toastService.sucesso('Viagem salva com sucesso.', 'Sucesso');
+        this.router.navigate(['/viagens']);
+      },
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a viagem.', 'Erro');
+      }
+    });
+  }
+
+  private obterDadosViagem(): Record<string, unknown> {
+    return {
       veiculo_id: this.formulario.veiculo,
       motorista_id: this.formulario.motorista,
       origem: this.formulario.origem,
@@ -322,22 +341,6 @@ export class ViagensFormComponent implements OnInit {
         observacao: a.observacao
       }))
     };
-
-    const requisicao = this.modoEdicao && this.idEmEdicao !== null
-      ? this.viagensService.atualizar(this.idEmEdicao, payload)
-      : this.viagensService.criar(payload);
-
-    this.salvando = true;
-    requisicao.subscribe({
-      next: () => {
-        this.toastService.sucesso('Viagem salva com sucesso.', 'Sucesso');
-        this.router.navigate(['/viagens']);
-      },
-      error: (erro) => {
-        this.salvando = false;
-        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a viagem.', 'Erro');
-      }
-    });
   }
 
   async onCancelar(): Promise<void> {
