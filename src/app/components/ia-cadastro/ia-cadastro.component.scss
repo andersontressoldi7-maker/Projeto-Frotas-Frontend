@@ -19,6 +19,24 @@
 
 .ia-botao i { font-size: 1rem; }
 .ia-botao:hover { border-color: #8b5cf6; box-shadow: 0 5px 18px rgba(139, 92, 246, .3); }
+
+:host-context([data-bs-theme='dark']) .ia-botao {
+  border-color: #a845ee;
+  color: #bf6cff;
+  background: linear-gradient(135deg, rgba(100, 33, 150, .2), rgba(139, 60, 205, .28), rgba(82, 30, 125, .2));
+  box-shadow: 0 3px 16px rgba(133, 49, 195, .18), inset 0 0 12px rgba(160, 75, 220, .08);
+}
+
+:host-context([data-bs-theme='dark']) .ia-botao:hover {
+  border-color: #c477ff;
+  background: linear-gradient(135deg, rgba(113, 42, 166, .28), rgba(153, 70, 218, .36), rgba(98, 37, 145, .28));
+  box-shadow: 0 5px 20px rgba(160, 70, 225, .3);
+}
+
+:host-context([data-bs-theme='dark']) .ia-botao-novo::after {
+  background: linear-gradient(90deg, transparent, rgba(226, 183, 255, .55), transparent);
+}
+
 .ia-botao-novo::after {
   content: '';
   position: absolute;
