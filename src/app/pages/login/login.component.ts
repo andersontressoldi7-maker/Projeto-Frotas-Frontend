@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../components/toast.service';
@@ -56,9 +57,15 @@ export class LoginComponent {
         this.carregando = false;
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (erro: HttpErrorResponse) => {
         this.carregando = false;
-        this.toastService.erro('Usuário ou senha inválidos.', 'Erro');
+        if (erro.status === 0) {
+          this.toastService.erro('Não foi possível conectar ao servidor. Tente novamente em instantes.', 'Falha de conexão');
+        } else if (erro.status === 401 || erro.status === 403) {
+          this.toastService.erro('Usuário ou senha inválidos.', 'Erro');
+        } else {
+          this.toastService.erro('Não foi possível entrar agora. Tente novamente em instantes.', 'Erro');
+        }
       }
     });
   }

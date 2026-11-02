@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../components/toast.service';
@@ -56,9 +57,14 @@ export class ForgotPasswordComponent {
         this.toastService.sucesso('Código enviado para o seu email.', 'Sucesso');
         this.etapa = 'redefinir';
       },
-      error: () => {
+      error: (erro: HttpErrorResponse) => {
         this.carregando = false;
-        this.toastService.erro('Não foi possível enviar o código. Tente novamente.', 'Erro');
+        this.toastService.erro(
+          erro.status === 0
+            ? 'Não foi possível conectar ao servidor. Tente novamente em instantes.'
+            : 'Não foi possível enviar o código. Tente novamente.',
+          'Erro'
+        );
       }
     });
   }
@@ -88,9 +94,16 @@ export class ForgotPasswordComponent {
         this.toastService.sucesso('Senha redefinida com sucesso.', 'Sucesso');
         this.router.navigate(['/login']);
       },
-      error: () => {
+      error: (erro: HttpErrorResponse) => {
         this.carregando = false;
-        this.toastService.erro('Código inválido ou expirado.', 'Erro');
+        this.toastService.erro(
+          erro.status === 0
+            ? 'Não foi possível conectar ao servidor. Tente novamente em instantes.'
+            : erro.status === 400 || erro.status === 401
+              ? 'Código inválido ou expirado.'
+              : 'Não foi possível redefinir a senha agora. Tente novamente.',
+          'Erro'
+        );
       }
     });
   }
