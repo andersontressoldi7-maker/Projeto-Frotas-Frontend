@@ -33,6 +33,8 @@ import { TiposDespesasComponent } from './pages/tipos-despesas/tipos-despesas.co
 import { TiposDespesasFormComponent } from './cadastros/tipos-despesas-form/tipos-despesas-form.component';
 import { AbastecimentosComponent } from './pages/abastecimentos/abastecimentos.component';
 import { AbastecimentoWizardComponent } from './cadastros/abastecimento-wizard/abastecimento-wizard.component';
+import { FinanceiroComponent } from './pages/financeiro/financeiro.component';
+import { FinanceiroFormComponent } from './cadastros/financeiro-form/financeiro-form.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -70,6 +72,9 @@ export const routes: Routes = [
   { path: 'abastecimentos', component: AbastecimentosComponent },
   { path: 'abastecimentos/novo', component: AbastecimentoWizardComponent },
   { path: 'abastecimentos/:id/editar', component: AbastecimentoWizardComponent },
+  { path: 'financeiro', component: FinanceiroComponent },
+  { path: 'financeiro/novo', component: FinanceiroFormComponent },
+  { path: 'financeiro/:id/editar', component: FinanceiroFormComponent },
   { path: 'manutencoes', component: ManutencoesComponent },
   { path: 'manutencoes/novo', component: ManutencoesFormComponent },
   { path: 'manutencoes/:id/editar', component: ManutencoesFormComponent },

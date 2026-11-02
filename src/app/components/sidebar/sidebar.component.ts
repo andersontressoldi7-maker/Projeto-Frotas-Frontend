@@ -63,6 +63,7 @@ export class SidebarComponent implements OnInit {
       ]
     },
     { icon: 'bi-fuel-pump', label: 'Abastecimentos', route: '/abastecimentos' },
+    { icon: 'bi-currency-dollar', label: 'Financeiro', route: '/financeiro' },
     { icon: 'bi-wallet2', label: 'Tipos de Despesas', route: '/tipos-despesas' },
     { icon: 'bi-building', label: 'Empresas', route: '/empresas' },
     { icon: 'bi-bell', label: 'Alertas e Notificações', route: '/alertas' },

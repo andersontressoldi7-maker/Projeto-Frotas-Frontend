@@ -55,6 +55,14 @@ const PALETA_PADRAO: Record<string, Record<string, TokenCor>> = {
   tipoAbastecimento: {
     'Interno': 'info',
     'Externo': 'secondary'
+  },
+  tipoFinanceiro: {
+    'Receita': 'success',
+    'Despesa': 'danger'
+  },
+  situacaoFinanceira: {
+    'Pago': 'success',
+    'Em aberto': 'warning'
   }
 };
 

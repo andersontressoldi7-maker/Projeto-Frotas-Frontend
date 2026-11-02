@@ -1,0 +1,53 @@
+<app-sidebar></app-sidebar>
+<app-header></app-header>
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+          <h1 class="h4 fw-bold mb-1">Financeiro</h1>
+          <p class="text-muted small mb-0">Gerencie receitas, despesas e o fluxo financeiro da frota.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="btn btn-outline-success" (click)="criar('Despesa')"><i class="bi bi-plus-lg me-1"></i>Nova despesa</button>
+          <button type="button" class="btn btn-success" (click)="criar('Receita')"><i class="bi bi-plus-lg me-1"></i>Nova receita</button>
+        </div>
+      </div>
+
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-4">
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-success small">Receitas no período</span><strong class="text-success">{{ formatarMoeda(resumo.receitasPeriodo) }}</strong><small class="text-muted">Total de receitas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-danger small">Despesas no período</span><strong class="text-danger">{{ formatarMoeda(resumo.despesasPeriodo) }}</strong><small class="text-muted">Total de despesas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-info small">A receber</span><strong class="text-info">{{ formatarMoeda(resumo.aReceber) }}</strong><small class="text-muted">Receitas em aberto</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-primary small">Recebido</span><strong class="text-primary">{{ formatarMoeda(resumo.pagos) }}</strong><small class="text-muted">Receitas pagas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-warning small">Saldo no período</span><strong class="text-warning">{{ formatarMoeda(resumo.saldoPeriodo) }}</strong><small class="text-muted">Receitas menos despesas</small></div></div>
+      </div>
+
+      <form class="card filtros-rapidos p-3 mb-3" (ngSubmit)="carregarDados()">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-3 col-xl-2"><label for="tipo" class="form-label small">Filtro rápido</label><select id="tipo" name="tipo" class="form-select" [(ngModel)]="tipo"><option value="">Todos</option><option value="Receita">Receitas</option><option value="Despesa">Despesas</option></select></div>
+          <div class="col-6 col-md-3 col-xl-2"><label for="inicio" class="form-label small">Vencimento inicial</label><input id="inicio" name="inicio" type="date" class="form-control" [(ngModel)]="inicio"></div>
+          <div class="col-6 col-md-3 col-xl-2"><label for="fim" class="form-label small">Vencimento final</label><input id="fim" name="fim" type="date" class="form-control" [(ngModel)]="fim"></div>
+          <div class="col-12 col-md-6 col-xl-3"><label for="busca" class="form-label small">Buscar</label><input id="busca" name="busca" type="search" class="form-control" [(ngModel)]="busca" placeholder="Título, origem ou categoria"></div>
+          <div class="col-12 col-md-6 col-xl-3 d-flex gap-2"><button type="submit" class="btn btn-success flex-fill">Filtrar</button><button type="button" class="btn btn-outline-secondary flex-fill" (click)="limparFiltros()">Limpar</button></div>
+        </div>
+      </form>
+    </div>
+
+    <app-shared-grid
+      title="Movimentações financeiras"
+      subtitle="Receitas e despesas registradas"
+      [columns]="colunas"
+      [data]="dados"
+      [carregando]="carregando"
+      [filtragemNoServidor]="true"
+      [opcoesFiltrosRemotas]="opcoesFiltrosRemotas"
+      [paginaAtual]="paginaAtual"
+      [temProximaPagina]="temProximaPagina"
+      emptyMessage="Nenhuma movimentação encontrada para os filtros selecionados."
+      (filterApplied)="aplicarFiltrosGrid($event)"
+      (paginaAlterada)="mudarPagina($event)"
+      (editClick)="editar($event)"
+      (deleteClick)="excluir($event)">
+    </app-shared-grid>
+  </main>
+</div>

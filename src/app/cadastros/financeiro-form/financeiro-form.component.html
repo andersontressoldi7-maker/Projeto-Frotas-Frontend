@@ -1,0 +1,28 @@
+<app-sidebar></app-sidebar>
+<app-header></app-header>
+<div class="dashboard-wrapper">
+  <main class="content-layout">
+    <div class="container-fluid p-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div><h1 class="h4 fw-bold mb-1">{{ id ? 'Editar' : 'Nova' }} movimentação</h1><p class="text-muted small mb-0">Registre uma receita ou despesa da frota.</p></div>
+        <button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button>
+      </div>
+      <div class="card border-0 shadow-sm formulario-card">
+        <div class="card-body p-4">
+          <div *ngIf="carregando" class="spinner-border text-success" role="status"></div>
+          <form *ngIf="!carregando" (ngSubmit)="salvar()">
+            <div class="row g-3">
+              <div class="col-12 col-md-4"><label for="tipo" class="form-label">Tipo</label><select id="tipo" name="tipo" class="form-select" [(ngModel)]="dados.tipo"><option value="Receita">Receita</option><option value="Despesa">Despesa</option></select></div>
+              <div class="col-12 col-md-8"><label for="titulo" class="form-label">Título</label><input id="titulo" name="titulo" class="form-control" [(ngModel)]="dados.titulo" maxlength="255" required></div>
+              <div class="col-12 col-md-6"><label for="categoria" class="form-label">Categoria</label><input id="categoria" name="categoria" class="form-control" [(ngModel)]="dados.categoria" maxlength="100"></div>
+              <div class="col-12 col-md-6"><label for="valor" class="form-label">Valor (R$)</label><input id="valor" name="valor" type="number" min="0.01" step="0.01" class="form-control" [(ngModel)]="dados.valor" required></div>
+              <div class="col-12 col-md-6"><label for="vencimento" class="form-label">Vencimento</label><input id="vencimento" name="vencimento" type="date" class="form-control" [(ngModel)]="dados.data_vencimento" required></div>
+              <div class="col-12 col-md-6"><label for="pagamento" class="form-label">Data do pagamento</label><input id="pagamento" name="pagamento" type="date" class="form-control" [(ngModel)]="dados.data_pagamento"><div class="form-text">Deixe vazio para manter em aberto.</div></div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4"><button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button><button type="submit" class="btn btn-success" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
