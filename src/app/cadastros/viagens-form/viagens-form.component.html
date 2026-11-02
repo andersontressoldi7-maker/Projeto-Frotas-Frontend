@@ -7,7 +7,10 @@
       <div class="form-header mb-4">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <h2 class="h4 fw-bold mb-1">{{ modoEdicao ? 'Editar' : 'Nova' }} Viagem</h2>
+            <div class="d-flex align-items-center flex-wrap gap-3 mb-1">
+              <h2 class="h4 fw-bold mb-0">{{ modoEdicao ? 'Editar' : 'Nova' }} Viagem</h2>
+              <app-ia-cadastro></app-ia-cadastro>
+            </div>
             <p class="text-muted small mb-0">Controle simplificado de viagens e rotas</p>
           </div>
           <button class="btn btn-outline-secondary btn-sm" (click)="onCancelar()">
@@ -49,7 +52,7 @@
           <div *ngIf="abaSelecionada === 'dados'" class="tab-pane active">
             <div class="card border-0 shadow-sm">
               <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h5 class="card-title mb-0">A Rota</h5><app-ia-cadastro></app-ia-cadastro></div>
+                <h5 class="card-title mb-4">A Rota</h5>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
@@ -218,7 +221,7 @@
           <div *ngIf="abaSelecionada === 'custos'" class="tab-pane active">
             <div class="card border-0 shadow-sm">
               <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h5 class="card-title mb-0">Finanças da Viagem</h5><app-ia-cadastro></app-ia-cadastro></div>
+                <h5 class="card-title mb-4">Finanças da Viagem</h5>
 
                 <div class="row">
                   <div class="col-md-6 mb-3">
@@ -480,7 +483,7 @@
           <div *ngIf="abaSelecionada === 'abastecimentos'" class="tab-pane active">
             <div class="card border-0 shadow-sm">
               <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h5 class="card-title mb-0">Abastecimentos da Viagem</h5><app-ia-cadastro></app-ia-cadastro></div>
+                <h5 class="card-title mb-4">Abastecimentos da Viagem</h5>
                 <p class="text-muted small mb-4">Registre os abastecimentos realizados durante esta viagem. Ficam vinculados automaticamente ao veículo e motorista selecionados nos Dados Principais.</p>
 
                 <div class="subsection mb-4">

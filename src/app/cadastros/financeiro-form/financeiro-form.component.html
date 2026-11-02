@@ -4,12 +4,17 @@
   <main class="content-layout">
     <div class="container-fluid p-4">
       <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-        <div><h1 class="h4 fw-bold mb-1">{{ id ? 'Editar' : 'Nova' }} movimentação</h1><p class="text-muted small mb-0">Registre uma receita ou despesa da frota.</p></div>
+        <div>
+          <div class="d-flex align-items-center flex-wrap gap-3 mb-1">
+            <h1 class="h4 fw-bold mb-0">{{ id ? 'Editar' : 'Nova' }} movimentação</h1>
+            <app-ia-cadastro></app-ia-cadastro>
+          </div>
+          <p class="text-muted small mb-0">Registre uma receita ou despesa da frota.</p>
+        </div>
         <button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button>
       </div>
       <div class="card border-0 shadow-sm formulario-card">
         <div class="card-body p-4">
-          <div class="d-flex justify-content-end mb-3"><app-ia-cadastro></app-ia-cadastro></div>
           <div *ngIf="carregando" class="spinner-border text-success" role="status"></div>
           <form *ngIf="!carregando" (ngSubmit)="salvar()">
             <div *ngIf="origemTipo" class="d-flex flex-wrap align-items-center gap-3 mb-3">

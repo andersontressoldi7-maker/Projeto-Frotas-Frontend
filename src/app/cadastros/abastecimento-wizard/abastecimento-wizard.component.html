@@ -7,7 +7,10 @@
       <div class="wizard-header mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
           <div>
-            <h2 class="h4 fw-bold mb-1">{{ modoEdicao ? 'Editar Abastecimento' : 'Novo Abastecimento de Veículo' }}</h2>
+            <div class="d-flex align-items-center flex-wrap gap-3 mb-1">
+              <h2 class="h4 fw-bold mb-0">{{ modoEdicao ? 'Editar Abastecimento' : 'Novo Abastecimento de Veículo' }}</h2>
+              <app-ia-cadastro></app-ia-cadastro>
+            </div>
             <p class="text-muted small mb-0">Passo {{ passoAtual }} de {{ totalPassos }}</p>
           </div>
           <button class="btn btn-outline-secondary btn-sm" (click)="cancelar()">
@@ -47,7 +50,7 @@
         <div *ngIf="passoAtual === 1" class="passo-container">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h5 class="card-title mb-0">Dados do Abastecimento</h5><app-ia-cadastro></app-ia-cadastro></div>
+              <h5 class="card-title mb-4">Dados do Abastecimento</h5>
 
               <div class="row">
                 <div class="col-md-6 form-group mb-3">
@@ -153,7 +156,7 @@
         <div *ngIf="passoAtual === 2" class="passo-container">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h5 class="card-title mb-0">Combustível</h5><app-ia-cadastro></app-ia-cadastro></div>
+              <h5 class="card-title mb-4">Combustível</h5>
 
               <div class="form-group mb-3">
                 <label class="form-label required">Combustível</label>
@@ -214,7 +217,7 @@
         <div *ngIf="passoAtual === 3" class="passo-container">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h5 class="card-title mb-0">Dados Complementares</h5><app-ia-cadastro></app-ia-cadastro></div>
+              <h5 class="card-title mb-4">Dados Complementares</h5>
 
               <div class="row">
                 <div class="col-md-6 form-group mb-3">

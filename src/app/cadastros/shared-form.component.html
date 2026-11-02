@@ -1,7 +1,10 @@
 <div class="form-wrapper">
   <div class="form-header">
     <div>
-      <h2 class="h4 fw-bold mb-1">{{ config.titulo }}</h2>
+      <div class="d-flex align-items-center flex-wrap gap-3 mb-1">
+        <h2 class="h4 fw-bold mb-0">{{ config.titulo }}</h2>
+        <app-ia-cadastro></app-ia-cadastro>
+      </div>
       <p *ngIf="config.subtitulo" class="text-muted small mb-0">{{ config.subtitulo }}</p>
     </div>
     <button class="btn btn-outline-secondary btn-sm" (click)="onCancelar()">
@@ -14,12 +17,9 @@
   </div>
 
   <div class="form-container" *ngIf="!carregando">
-    <div *ngFor="let secao of config.secoes; let indice = index" class="card border-0 shadow-sm mb-3">
+    <div *ngFor="let secao of config.secoes" class="card border-0 shadow-sm mb-3">
       <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-          <h5 class="card-title mb-0">{{ secao.titulo }}</h5>
-          <app-ia-cadastro *ngIf="indice === 0"></app-ia-cadastro>
-        </div>
+        <h5 class="card-title mb-4">{{ secao.titulo }}</h5>
 
         <div class="form-row">
           <ng-container *ngFor="let campo of secao.campos">

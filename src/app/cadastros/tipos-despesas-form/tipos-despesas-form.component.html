@@ -6,7 +6,10 @@
       <div class="form-header mb-4">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <h2 class="h4 fw-bold mb-1">{{ modoEdicao ? 'Editar' : 'Novo' }} tipo de despesa</h2>
+            <div class="d-flex align-items-center flex-wrap gap-3 mb-1">
+              <h2 class="h4 fw-bold mb-0">{{ modoEdicao ? 'Editar' : 'Novo' }} tipo de despesa</h2>
+              <app-ia-cadastro></app-ia-cadastro>
+            </div>
             <p class="text-muted small mb-0">Cadastro simples para organizar as despesas da viagem</p>
           </div>
           <button class="btn btn-outline-secondary btn-sm" (click)="onCancelar()">
@@ -17,7 +20,6 @@
 
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-          <div class="d-flex justify-content-end mb-3"><app-ia-cadastro></app-ia-cadastro></div>
           <div *ngIf="carregando" class="d-flex justify-content-center align-items-center py-5">
             <div class="spinner-border text-success" role="status"></div>
           </div>
