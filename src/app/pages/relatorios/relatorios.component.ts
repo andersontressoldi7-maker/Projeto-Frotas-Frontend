@@ -40,6 +40,20 @@ export class RelatoriosComponent {
 
   categorias = [
     {
+      id: 'financeiro',
+      titulo: 'Financeiro',
+      descricao: 'Receitas, despesas e situação por origem',
+      icon: 'bi-currency-dollar text-success',
+      itens: [
+        {
+          id: 'fluxo-financeiro',
+          nome: 'Fluxo financeiro por origem',
+          desc: 'Consolida os lançamentos do período por origem, tipo e situação.',
+          endpoint: 'financeiro/fluxo'
+        }
+      ]
+    },
+    {
       id: 'manutencao',
       titulo: 'Manutenções',
       descricao: 'Custos, históricos, preventivas e corretivas',

@@ -16,6 +16,9 @@ import { DadosMovimentacao, FinanceiroService } from '../../services/financeiro.
 })
 export class FinanceiroFormComponent implements OnInit {
   id: number | null = null;
+  origem = '';
+  origemTipo: string | null = null;
+  origemId: number | null = null;
   carregando = false;
   salvando = false;
   dados: DadosMovimentacao = {
@@ -43,6 +46,9 @@ export class FinanceiroFormComponent implements OnInit {
     this.carregando = true;
     this.financeiro.obter(id).subscribe({
       next: item => {
+        this.origem = item.origem;
+        this.origemTipo = item.origem_tipo;
+        this.origemId = item.origem_id;
         this.dados = {
           tipo: item.tipo,
           titulo: item.titulo,
@@ -87,4 +93,12 @@ export class FinanceiroFormComponent implements OnInit {
   }
 
   voltar(): void { this.navegador.navigate(['/financeiro']); }
+
+  abrirOrigem(): void {
+    if (!this.origemTipo || !this.origemId) return;
+    const modulo = this.origemTipo.startsWith('Viagem') || this.origemTipo === 'AbastecimentoViagem'
+      ? 'viagens'
+      : this.origemTipo === 'Manutencao' ? 'manutencoes' : 'abastecimentos';
+    this.navegador.navigate([`/${modulo}`, this.origemId, 'editar']);
+  }
 }

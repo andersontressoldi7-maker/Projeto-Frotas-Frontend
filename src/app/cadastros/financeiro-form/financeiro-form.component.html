@@ -11,15 +11,19 @@
         <div class="card-body p-4">
           <div *ngIf="carregando" class="spinner-border text-success" role="status"></div>
           <form *ngIf="!carregando" (ngSubmit)="salvar()">
+            <div *ngIf="origemTipo" class="d-flex flex-wrap align-items-center gap-3 mb-3">
+              <p class="text-muted small mb-0">Lançamento vinculado a {{ origem }}. O valor acompanha o registro de origem.</p>
+              <button type="button" class="btn btn-sm btn-outline-success" (click)="abrirOrigem()">Abrir registro de origem</button>
+            </div>
             <div class="row g-3">
               <div class="col-12 col-md-4"><label for="tipo" class="form-label">Tipo</label><select id="tipo" name="tipo" class="form-select" [(ngModel)]="dados.tipo"><option value="Receita">Receita</option><option value="Despesa">Despesa</option></select></div>
-              <div class="col-12 col-md-8"><label for="titulo" class="form-label">Título</label><input id="titulo" name="titulo" class="form-control" [(ngModel)]="dados.titulo" maxlength="255" required></div>
+              <div class="col-12 col-md-8"><label for="titulo" class="form-label">Título</label><input id="titulo" name="titulo" class="form-control" [(ngModel)]="dados.titulo" [readonly]="!!origemTipo" maxlength="255" required></div>
               <div class="col-12 col-md-6"><label for="categoria" class="form-label">Categoria</label><input id="categoria" name="categoria" class="form-control" [(ngModel)]="dados.categoria" maxlength="100"></div>
-              <div class="col-12 col-md-6"><label for="valor" class="form-label">Valor (R$)</label><input id="valor" name="valor" type="number" min="0.01" step="0.01" class="form-control" [(ngModel)]="dados.valor" required></div>
-              <div class="col-12 col-md-6"><label for="vencimento" class="form-label">Vencimento</label><input id="vencimento" name="vencimento" type="date" class="form-control" [(ngModel)]="dados.data_vencimento" required></div>
+              <div class="col-12 col-md-6"><label for="valor" class="form-label">Valor (R$)</label><input id="valor" name="valor" type="number" min="0.01" step="0.01" class="form-control" [(ngModel)]="dados.valor" [readonly]="!!origemTipo" required></div>
+              <div class="col-12 col-md-6"><label for="vencimento" class="form-label">Vencimento</label><input id="vencimento" name="vencimento" type="date" class="form-control" [(ngModel)]="dados.data_vencimento" [readonly]="!!origemTipo" required></div>
               <div class="col-12 col-md-6"><label for="pagamento" class="form-label">Data do pagamento</label><input id="pagamento" name="pagamento" type="date" class="form-control" [(ngModel)]="dados.data_pagamento"><div class="form-text">Deixe vazio para manter em aberto.</div></div>
             </div>
-            <div class="d-flex justify-content-end gap-2 mt-4"><button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button><button type="submit" class="btn btn-success" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button></div>
+            <div class="d-flex justify-content-end gap-2 mt-auto pt-4"><button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button><button type="submit" class="btn btn-success" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button></div>
           </form>
         </div>
       </div>

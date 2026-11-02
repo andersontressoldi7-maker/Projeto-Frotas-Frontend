@@ -85,6 +85,9 @@ export class FinanceiroComponent implements OnInit {
       next: resposta => {
         this.dados = resposta.data.map(item => ({
           id: item.id,
+          origemTipo: item.origem_tipo,
+          origemId: item.origem_id,
+          podeExcluir: !item.origem_tipo,
           origem: item.origem,
           tipo: item.tipo,
           titulo: item.titulo,
@@ -132,6 +135,10 @@ export class FinanceiroComponent implements OnInit {
 
   criar(tipo: 'Receita' | 'Despesa'): void {
     this.router.navigate(['/financeiro/novo'], { queryParams: { tipo } });
+  }
+
+  abrirRelatorios(): void {
+    this.router.navigate(['/relatorios']);
   }
 
   editar(linha: Record<string, unknown>): void {

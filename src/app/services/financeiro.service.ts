@@ -7,6 +7,8 @@ import { criarParametrosPaginacao, FiltrosPaginados, RespostaPaginadaComFiltros 
 export interface MovimentacaoFinanceira {
   id: number;
   origem: string;
+  origem_tipo: string | null;
+  origem_id: number | null;
   tipo: 'Receita' | 'Despesa';
   titulo: string;
   categoria: string | null;

@@ -110,7 +110,7 @@
                   <button class="btn btn-link text-secondary p-1 hover-success" type="button" title="Editar" (click)="editClick.emit(row)">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button class="btn btn-link text-danger p-1 hover-danger-dark" type="button" title="Excluir" (click)="deleteClick.emit(row)">
+                  <button *ngIf="row.podeExcluir !== false" class="btn btn-link text-danger p-1 hover-danger-dark" type="button" title="Excluir" (click)="deleteClick.emit(row)">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>

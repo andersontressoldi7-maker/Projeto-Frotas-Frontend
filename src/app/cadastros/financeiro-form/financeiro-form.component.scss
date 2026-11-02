@@ -1,1 +1,12 @@
-.formulario-card { background: var(--bs-tertiary-bg); max-width: 900px; }
+.formulario-card {
+  background: var(--bs-tertiary-bg);
+  width: 100%;
+  min-height: calc(100vh - 200px);
+}
+
+.formulario-card .card-body,
+.formulario-card form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
