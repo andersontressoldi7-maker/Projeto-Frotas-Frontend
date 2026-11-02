@@ -31,10 +31,8 @@ export class FinanceiroComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  readonly resumoVazio: ResumoFinanceiro = {
-    receitasPeriodo: 0, despesasPeriodo: 0, aReceber: 0, pagos: 0, saldoPeriodo: 0
-  };
-  resumo = { ...this.resumoVazio };
+  resumo: ResumoFinanceiro | null = null;
+  erroCarregamento = false;
   dados: Record<string, unknown>[] = [];
   opcoesFiltrosRemotas: Record<string, string[]> = {};
   filtrosGrid: FiltrosPaginados = {};
@@ -79,6 +77,7 @@ export class FinanceiroComponent implements OnInit {
       return;
     }
     this.carregando = true;
+    this.erroCarregamento = false;
     this.financeiro.listar({
       pagina, porPagina: this.porPagina, inicio: this.inicio, fim: this.fim,
       busca: this.busca.trim(), tipo: this.tipo, filtros: this.filtrosGrid
@@ -102,6 +101,9 @@ export class FinanceiroComponent implements OnInit {
       },
       error: () => {
         this.carregando = false;
+        this.erroCarregamento = true;
+        this.resumo = null;
+        this.dados = [];
         this.avisos.erro('Não foi possível carregar as movimentações financeiras.', 'Erro');
       }
     });

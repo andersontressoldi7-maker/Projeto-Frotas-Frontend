@@ -14,12 +14,17 @@
         </div>
       </div>
 
+      <div class="alert alert-danger d-flex align-items-center justify-content-between gap-3 mb-4" *ngIf="erroCarregamento" role="alert">
+        <span>Não foi possível consultar o financeiro. Verifique o backend e tente novamente.</span>
+        <button type="button" class="btn btn-sm btn-outline-danger" (click)="carregarDados()">Tentar novamente</button>
+      </div>
+
       <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-4">
-        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-success small">Receitas no período</span><strong class="text-success">{{ formatarMoeda(resumo.receitasPeriodo) }}</strong><small class="text-muted">Total de receitas</small></div></div>
-        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-danger small">Despesas no período</span><strong class="text-danger">{{ formatarMoeda(resumo.despesasPeriodo) }}</strong><small class="text-muted">Total de despesas</small></div></div>
-        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-info small">A receber</span><strong class="text-info">{{ formatarMoeda(resumo.aReceber) }}</strong><small class="text-muted">Receitas em aberto</small></div></div>
-        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-primary small">Recebido</span><strong class="text-primary">{{ formatarMoeda(resumo.pagos) }}</strong><small class="text-muted">Receitas pagas</small></div></div>
-        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-warning small">Saldo no período</span><strong class="text-warning">{{ formatarMoeda(resumo.saldoPeriodo) }}</strong><small class="text-muted">Receitas menos despesas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-success small">Receitas no período</span><strong class="text-success">{{ resumo ? formatarMoeda(resumo.receitasPeriodo) : '—' }}</strong><small class="text-muted">Total de receitas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-danger small">Despesas no período</span><strong class="text-danger">{{ resumo ? formatarMoeda(resumo.despesasPeriodo) : '—' }}</strong><small class="text-muted">Total de despesas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-info small">A receber</span><strong class="text-info">{{ resumo ? formatarMoeda(resumo.aReceber) : '—' }}</strong><small class="text-muted">Receitas em aberto</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-primary small">Recebido</span><strong class="text-primary">{{ resumo ? formatarMoeda(resumo.pagos) : '—' }}</strong><small class="text-muted">Receitas pagas</small></div></div>
+        <div class="col"><div class="card resumo-card h-100 p-3"><span class="text-warning small">Saldo no período</span><strong class="text-warning">{{ resumo ? formatarMoeda(resumo.saldoPeriodo) : '—' }}</strong><small class="text-muted">Receitas menos despesas</small></div></div>
       </div>
 
       <form class="card filtros-rapidos p-3 mb-3" (ngSubmit)="carregarDados()">
