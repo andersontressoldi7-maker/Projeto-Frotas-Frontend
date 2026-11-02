@@ -1,0 +1,16 @@
+<div class="tour-layer" *ngIf="active">
+  <div class="tour-spotlight" *ngIf="targetRect" [style.top.px]="targetRect.top"
+    [style.left.px]="targetRect.left" [style.width.px]="targetRect.width"
+    [style.height.px]="targetRect.height"></div>
+  <section class="tour-card" [style.top.px]="cardTop" [style.left.px]="cardLeft"
+    role="region" aria-label="Tour do sistema" aria-live="polite">
+    <div class="tour-progress">{{ index + 1 }} de {{ steps.length }}</div>
+    <h2>{{ step.title }}</h2>
+    <p>{{ step.description }}</p>
+    <div class="tour-actions">
+      <button type="button" class="tour-exit" (click)="exit()">Sair</button>
+      <button type="button" class="tour-secondary" (click)="previous()" [disabled]="index === 0">Anterior</button>
+      <button type="button" class="tour-primary" (click)="next()">{{ index === steps.length - 1 ? 'Concluir' : 'Próximo' }}</button>
+    </div>
+  </section>
+</div>

@@ -4,10 +4,11 @@ import { filter } from 'rxjs';
 import { ToastsComponent } from './components/toasts.component';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { StatusColorService } from './services/status-color.service';
+import { TourComponent } from './components/tour/tour.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ToastsComponent, DialogComponent],
+  imports: [RouterOutlet, ToastsComponent, DialogComponent, TourComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

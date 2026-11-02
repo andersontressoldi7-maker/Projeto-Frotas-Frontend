@@ -5,7 +5,7 @@
       <h2 class="h4 fw-bold mb-1 text-body">{{ title }}</h2>
       <p class="text-muted small mb-0">{{ subtitle }}</p>
     </div>
-    <button *ngIf="primaryBtnLabel" class="btn btn-success d-flex align-items-center gap-2 px-3 fw-medium" (click)="primaryBtnClick.emit()">
+    <button *ngIf="primaryBtnLabel" class="btn btn-success d-flex align-items-center gap-2 px-3 fw-medium" data-tour="primary-action" (click)="primaryBtnClick.emit()">
       <i class="bi bi-plus-lg"></i>
       {{ primaryBtnLabel }}
     </button>
