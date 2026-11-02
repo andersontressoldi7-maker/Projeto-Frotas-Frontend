@@ -23,7 +23,7 @@
               <div class="col-12 col-md-6"><label for="vencimento" class="form-label">Vencimento</label><input id="vencimento" name="vencimento" type="date" class="form-control" [(ngModel)]="dados.data_vencimento" [readonly]="!!origemTipo" required></div>
               <div class="col-12 col-md-6"><label for="pagamento" class="form-label">Data do pagamento</label><input id="pagamento" name="pagamento" type="date" class="form-control" [(ngModel)]="dados.data_pagamento"><div class="form-text">Deixe vazio para manter em aberto.</div></div>
             </div>
-            <div class="d-flex justify-content-end gap-2 mt-auto pt-4"><button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button><button type="submit" class="btn btn-success" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button></div>
+            <div class="d-flex justify-content-end gap-2 mt-4"><button type="button" class="btn btn-outline-secondary" (click)="voltar()">Cancelar</button><button type="submit" class="btn btn-success" [disabled]="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button></div>
           </form>
         </div>
       </div>

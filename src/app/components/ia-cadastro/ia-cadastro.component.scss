@@ -1,0 +1,98 @@
+.ia-cadastro { position: relative; }
+
+.ia-botao {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  overflow: hidden;
+  border: 1px solid rgba(139, 92, 246, .35);
+  border-radius: 9px;
+  padding: .45rem .8rem;
+  color: #6d28d9;
+  background: linear-gradient(135deg, #fff 15%, #f5f0ff 55%, #fff 100%);
+  box-shadow: 0 3px 14px rgba(139, 92, 246, .18);
+  font-size: .82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ia-botao i { font-size: 1rem; }
+.ia-botao:hover { border-color: #8b5cf6; box-shadow: 0 5px 18px rgba(139, 92, 246, .3); }
+.ia-botao-novo::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .92), transparent);
+  transform: skewX(-20deg);
+  animation: reflexo-ia 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes reflexo-ia {
+  0%, 25% { right: -45%; opacity: 0; }
+  35% { opacity: 1; }
+  65% { right: 110%; opacity: 1; }
+  75%, 100% { right: 110%; opacity: 0; }
+}
+
+.ia-opcoes {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 265px;
+  padding: .65rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  background: var(--bs-body-bg);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
+  z-index: 1060;
+}
+.ia-opcoes-titulo { margin: .2rem .5rem .5rem; font-size: .75rem; font-weight: 700; color: var(--bs-secondary-color); }
+.ia-opcoes button {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: .65rem .5rem;
+  background: transparent;
+  color: var(--bs-body-color);
+  text-align: left;
+  font-size: .82rem;
+}
+.ia-opcoes button i { color: #8b5cf6; }
+.ia-voz-icone { width: 1rem; height: 1rem; flex: none; color: #8b5cf6; }
+.ia-opcoes button small { margin-left: auto; color: var(--bs-secondary-color); }
+.ia-opcoes button:disabled, .ia-opcao-grande:disabled { opacity: .82; cursor: not-allowed; }
+
+.ia-dialog {
+  width: min(850px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 18px;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .35);
+}
+.ia-dialog::backdrop { background: rgba(4, 13, 27, .68); backdrop-filter: blur(3px); }
+.ia-dialog-conteudo { position: relative; padding: clamp(20px, 4vw, 34px); }
+.ia-fechar { position: absolute; top: 18px; right: 18px; border: 0; background: transparent; color: var(--bs-secondary-color); }
+.ia-dialog-icone { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; background: #ede9fe; color: #7c3aed; font-size: 1.4rem; margin-bottom: 15px; }
+.ia-dialog h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 9px; }
+.ia-dialog-descricao, .ia-dialog-exemplo { font-size: .9rem; line-height: 1.55; }
+.ia-dialog-exemplo { padding: 12px 14px; border-left: 3px solid #a78bfa; border-radius: 6px; background: rgba(139, 92, 246, .09); }
+.ia-dialog-opcoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 22px 0; }
+.ia-opcao-grande { display: flex; flex-direction: column; align-items: flex-start; min-height: 190px; gap: 9px; border: 1px solid var(--bs-border-color); border-radius: 13px; padding: 20px; background: var(--bs-tertiary-bg); color: var(--bs-body-color); text-align: left; }
+.ia-opcao-grande i { color: #8b5cf6; font-size: 1.6rem; }
+.ia-opcao-grande .ia-voz-icone { width: 1.6rem; height: 1.6rem; }
+.ia-opcao-grande span { font-size: .83rem; color: var(--bs-secondary-color); }
+.ia-opcao-grande small { margin-top: auto; color: #8b5cf6; font-weight: 700; }
+.ia-entendi { display: block; margin-left: auto; border: 0; border-radius: 8px; padding: .6rem 1.2rem; background: #7c3aed; color: #fff; font-weight: 700; }
+@media (max-width: 620px) { .ia-dialog-opcoes { grid-template-columns: 1fr; } .ia-opcao-grande { min-height: 140px; } .ia-botao span { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ia-botao-novo::after { animation: none; } }
