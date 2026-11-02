@@ -14,9 +14,12 @@
   </div>
 
   <div class="form-container" *ngIf="!carregando">
-    <div *ngFor="let secao of config.secoes" class="card border-0 shadow-sm mb-3">
+    <div *ngFor="let secao of config.secoes; let indice = index" class="card border-0 shadow-sm mb-3">
       <div class="card-body p-4">
-        <h5 class="card-title mb-4">{{ secao.titulo }}</h5>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+          <h5 class="card-title mb-0">{{ secao.titulo }}</h5>
+          <app-ia-cadastro *ngIf="indice === 0"></app-ia-cadastro>
+        </div>
 
         <div class="form-row">
           <ng-container *ngFor="let campo of secao.campos">

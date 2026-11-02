@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
 import { ToastService } from '../../components/toast.service';
 import { RascunhoService } from '../../services/rascunho.service';
 import { VeiculosService } from '../../services/veiculos.service';
@@ -17,7 +18,7 @@ import { extrairMensagemErro } from '../../utils';
 @Component({
   selector: 'app-checklist-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, IaCadastroComponent],
   templateUrl: './checklist-wizard.component.html',
   styleUrls: ['./checklist-wizard.component.scss']
 })

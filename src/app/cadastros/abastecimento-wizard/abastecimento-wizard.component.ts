@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
 import { ToastService } from '../../components/toast.service';
 import { RascunhoService } from '../../services/rascunho.service';
 import { VeiculosService } from '../../services/veiculos.service';
@@ -13,7 +14,7 @@ import { AbastecimentosService } from '../../services/abastecimentos.service';
 @Component({
   selector: 'app-abastecimento-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, IaCadastroComponent],
   templateUrl: './abastecimento-wizard.component.html',
   styleUrls: ['./abastecimento-wizard.component.scss']
 })

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { ContextoIaCadastro } from './ia-cadastro.config';
+import { ContextoIaCadastro, obterContextoIaCadastro } from './ia-cadastro.config';
 
 @Component({
   selector: 'app-ia-cadastro',
@@ -11,13 +12,19 @@ import { ContextoIaCadastro } from './ia-cadastro.config';
   styleUrl: './ia-cadastro.component.scss'
 })
 export class IaCadastroComponent implements OnInit {
-  @Input({ required: true }) contexto!: ContextoIaCadastro;
+  readonly contexto: ContextoIaCadastro;
   @ViewChild('avisoDialog') avisoDialog!: ElementRef<HTMLDialogElement>;
 
   avisoVisto = false;
   opcoesAbertas = false;
 
-  constructor(private autenticacao: AuthService, private elemento: ElementRef<HTMLElement>) {}
+  constructor(private autenticacao: AuthService, private elemento: ElementRef<HTMLElement>, router: Router) {
+    this.contexto = obterContextoIaCadastro(router.url) ?? {
+      modulo: 'cadastro',
+      nomeRegistro: 'este cadastro',
+      exemploFoto: 'os campos do formulário legíveis'
+    };
+  }
 
   ngOnInit(): void {
     try {

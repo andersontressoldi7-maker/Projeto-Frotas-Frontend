@@ -20,6 +20,7 @@
 
         <div class="card border-0 shadow-sm mb-3" *ngIf="!carregando">
           <div class="card-body p-4">
+            <div class="d-flex justify-content-end mb-3"><app-ia-cadastro></app-ia-cadastro></div>
             <div class="mb-3">
               <label class="form-label required">Nome</label>
               <input type="text" class="form-control" [(ngModel)]="formulario.nome" placeholder="Ex.: Situação">

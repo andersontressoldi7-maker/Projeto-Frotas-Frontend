@@ -9,6 +9,7 @@
       </div>
       <div class="card border-0 shadow-sm formulario-card">
         <div class="card-body p-4">
+          <div class="d-flex justify-content-end mb-3"><app-ia-cadastro></app-ia-cadastro></div>
           <div *ngIf="carregando" class="spinner-border text-success" role="status"></div>
           <form *ngIf="!carregando" (ngSubmit)="salvar()">
             <div *ngIf="origemTipo" class="d-flex flex-wrap align-items-center gap-3 mb-3">

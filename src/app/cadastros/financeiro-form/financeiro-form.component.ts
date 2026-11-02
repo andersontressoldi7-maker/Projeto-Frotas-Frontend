@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
+import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { ToastService } from '../../components/toast.service';
 import { DadosMovimentacao, FinanceiroService } from '../../services/financeiro.service';
@@ -10,7 +11,7 @@ import { DadosMovimentacao, FinanceiroService } from '../../services/financeiro.
 @Component({
   selector: 'app-financeiro-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, IaCadastroComponent],
   templateUrl: './financeiro-form.component.html',
   styleUrl: './financeiro-form.component.scss'
 })

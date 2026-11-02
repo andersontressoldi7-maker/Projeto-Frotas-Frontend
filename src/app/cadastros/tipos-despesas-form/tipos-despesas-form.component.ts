@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
 import { ToastService } from '../../components/toast.service';
 import { TiposDespesasService } from '../../services/tipos-despesas.service';
 
 @Component({
   selector: 'app-tipos-despesas-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, IaCadastroComponent],
   templateUrl: './tipos-despesas-form.component.html',
   styleUrls: ['./tipos-despesas-form.component.scss']
 })

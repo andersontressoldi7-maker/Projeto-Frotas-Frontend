@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
+import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
 import { ToastService } from '../../components/toast.service';
 import { CategoriasService } from '../../services/categorias.service';
 
 @Component({
   selector: 'app-categorias-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, IaCadastroComponent],
   templateUrl: './categorias-form.component.html'
 })
 export class CategoriasFormComponent implements OnInit {

@@ -5,18 +5,15 @@ import { ThemeService } from '../../services/theme.service';
 import { NotificationService, Notificacao, CategoriaNotificacao, CATEGORIAS_NOTIFICACAO } from '../../services/notification.service';
 import { ToastService } from '../toast.service';
 import { AuthService, EmpresaAcesso } from '../../services/auth.service';
-import { IaCadastroComponent } from '../ia-cadastro/ia-cadastro.component';
-import { ContextoIaCadastro, obterContextoIaCadastro } from '../ia-cadastro/ia-cadastro.config';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, IaCadastroComponent],
+  imports: [CommonModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-  readonly contextoIaCadastro: ContextoIaCadastro | null;
   usuarioLogado: ReturnType<AuthService['obterUsuarioLogado']>;
   emailUsuario = '';
   iniciaisUsuario = '';
@@ -48,7 +45,6 @@ export class HeaderComponent implements OnInit {
     private toastService: ToastService,
     private authService: AuthService
   ) {
-    this.contextoIaCadastro = obterContextoIaCadastro(this.router.url);
     this.usuarioLogado = this.authService.obterUsuarioLogado();
     this.emailUsuario = this.usuarioLogado?.email || '';
     this.iniciaisUsuario = this.calcularIniciais(this.usuarioLogado?.nome || this.emailUsuario);

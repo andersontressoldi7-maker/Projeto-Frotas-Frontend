@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { IaCadastroComponent } from '../components/ia-cadastro/ia-cadastro.component';
 
 export interface FormCampo {
   nome: string;
@@ -40,7 +41,7 @@ export interface FormConfig {
 @Component({
   selector: 'app-shared-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IaCadastroComponent],
   templateUrl: './shared-form.component.html',
   styleUrls: ['./shared-form.component.scss']
 })
