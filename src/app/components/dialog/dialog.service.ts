@@ -27,6 +27,10 @@ export class DialogService {
     return this.abrir('confirmar', titulo, mensagem);
   }
 
+  confirmarSaida(): Promise<boolean> {
+    return this.confirmar('Deseja realmente sair? As alterações não salvas serão perdidas.', 'Sair do cadastro');
+  }
+
   responder(valor: boolean): void {
     this.estado.set(null);
     const resolver = this.resolver;

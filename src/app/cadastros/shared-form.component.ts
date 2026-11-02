@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IaCadastroComponent } from '../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../components/dialog/dialog.service';
 
 export interface FormCampo {
   nome: string;
@@ -46,6 +47,8 @@ export interface FormConfig {
   styleUrls: ['./shared-form.component.scss']
 })
 export class SharedFormComponent implements OnChanges {
+  constructor(private dialogService: DialogService) {}
+
   @Input() config!: FormConfig;
   @Input() dadosFormulario: any = {};
   @Input() funcaoValidacaoExtra?: () => boolean;
@@ -183,7 +186,9 @@ export class SharedFormComponent implements OnChanges {
     this.salvar.emit(this.dadosFormulario);
   }
 
-  onCancelar(): void {
-    this.cancelar.emit();
+  async onCancelar(): Promise<void> {
+    if (await this.dialogService.confirmarSaida()) {
+      this.cancelar.emit();
+    }
   }
 }

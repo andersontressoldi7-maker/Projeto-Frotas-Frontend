@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { CategoriasService } from '../../services/categorias.service';
 
@@ -33,7 +34,8 @@ export class CategoriasFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService,
-    private categoriasService: CategoriasService
+    private categoriasService: CategoriasService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -118,7 +120,8 @@ export class CategoriasFormComponent implements OnInit {
     });
   }
 
-  onCancelar(): void {
+  async onCancelar(): Promise<void> {
+    if (!await this.dialogService.confirmarSaida()) return;
     if (this.retornoUrl) {
       this.router.navigate([this.retornoUrl]);
     } else {

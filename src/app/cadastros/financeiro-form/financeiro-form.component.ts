@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
 import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../../components/dialog/dialog.service';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { ToastService } from '../../components/toast.service';
 import { DadosMovimentacao, FinanceiroService } from '../../services/financeiro.service';
@@ -30,7 +31,8 @@ export class FinanceiroFormComponent implements OnInit {
     private rota: ActivatedRoute,
     private navegador: Router,
     private financeiro: FinanceiroService,
-    private avisos: ToastService
+    private avisos: ToastService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -94,6 +96,12 @@ export class FinanceiroFormComponent implements OnInit {
   }
 
   voltar(): void { this.navegador.navigate(['/financeiro']); }
+
+  async cancelar(): Promise<void> {
+    if (await this.dialogService.confirmarSaida()) {
+      this.voltar();
+    }
+  }
 
   abrirOrigem(): void {
     if (!this.origemTipo || !this.origemId) return;

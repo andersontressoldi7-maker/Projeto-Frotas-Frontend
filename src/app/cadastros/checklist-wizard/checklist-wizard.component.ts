@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { RascunhoService } from '../../services/rascunho.service';
 import { VeiculosService } from '../../services/veiculos.service';
@@ -75,7 +76,8 @@ export class ChecklistWizardComponent implements OnInit {
     private modelosService: ModelosService,
     private motoristasService: MotoristasService,
     private checklistService: ChecklistService,
-    private configuracoesService: ConfiguracoesService
+    private configuracoesService: ConfiguracoesService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -523,7 +525,9 @@ export class ChecklistWizardComponent implements OnInit {
     });
   }
 
-  cancelar(): void {
-    this.router.navigate(['/checklists']);
+  async cancelar(): Promise<void> {
+    if (await this.dialogService.confirmarSaida()) {
+      this.router.navigate(['/checklists']);
+    }
   }
 }

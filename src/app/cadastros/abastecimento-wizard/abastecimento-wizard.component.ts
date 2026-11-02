@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { RascunhoService } from '../../services/rascunho.service';
 import { VeiculosService } from '../../services/veiculos.service';
@@ -55,7 +56,8 @@ export class AbastecimentoWizardComponent implements OnInit {
     private rascunhoService: RascunhoService,
     private veiculosService: VeiculosService,
     private motoristasService: MotoristasService,
-    private abastecimentosService: AbastecimentosService
+    private abastecimentosService: AbastecimentosService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -232,7 +234,9 @@ export class AbastecimentoWizardComponent implements OnInit {
     });
   }
 
-  cancelar(): void {
-    this.router.navigate(['/abastecimentos']);
+  async cancelar(): Promise<void> {
+    if (await this.dialogService.confirmarSaida()) {
+      this.router.navigate(['/abastecimentos']);
+    }
   }
 }

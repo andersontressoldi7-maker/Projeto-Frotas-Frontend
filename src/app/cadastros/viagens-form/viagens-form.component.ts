@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { RascunhoService } from '../../services/rascunho.service';
 import { VeiculosService } from '../../services/veiculos.service';
@@ -114,7 +115,8 @@ export class ViagensFormComponent implements OnInit {
     private motoristasService: MotoristasService,
     private tiposDespesasService: TiposDespesasService,
     private viagensService: ViagensService,
-    private configuracoesService: ConfiguracoesService
+    private configuracoesService: ConfiguracoesService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -338,8 +340,10 @@ export class ViagensFormComponent implements OnInit {
     });
   }
 
-  onCancelar(): void {
-    this.router.navigate(['/viagens']);
+  async onCancelar(): Promise<void> {
+    if (await this.dialogService.confirmarSaida()) {
+      this.router.navigate(['/viagens']);
+    }
   }
 
   validarFormulario(): boolean {

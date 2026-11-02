@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { IaCadastroComponent } from '../../components/ia-cadastro/ia-cadastro.component';
+import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { TiposDespesasService } from '../../services/tipos-despesas.service';
 
@@ -26,7 +27,8 @@ export class TiposDespesasFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private toastService: ToastService,
-    private tiposDespesasService: TiposDespesasService
+    private tiposDespesasService: TiposDespesasService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -72,7 +74,9 @@ export class TiposDespesasFormComponent implements OnInit {
     });
   }
 
-  onCancelar(): void {
-    this.router.navigate(['/tipos-despesas']);
+  async onCancelar(): Promise<void> {
+    if (await this.dialogService.confirmarSaida()) {
+      this.router.navigate(['/tipos-despesas']);
+    }
   }
 }
