@@ -34,7 +34,10 @@
 
             <div class="form-actions">
               <button type="button" class="btn btn-light" (click)="onCancelar()">Cancelar</button>
-              <button type="button" class="btn btn-success" (click)="onSalvar()">Salvar</button>
+              <button type="button" class="btn btn-success" (click)="onSalvar()" [disabled]="salvando">
+                <span *ngIf="salvando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ salvando ? 'Salvando...' : 'Salvar' }}
+              </button>
             </div>
           </ng-container>
         </div>

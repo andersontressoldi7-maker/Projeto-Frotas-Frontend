@@ -22,6 +22,7 @@ export class ItensFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
   carregando = false;
+  salvando = false;
 
   formulario: any = {
     nome: '',
@@ -132,6 +133,10 @@ export class ItensFormComponent implements OnInit {
   }
 
   onSalvar(dados: any): void {
+    if (this.salvando) {
+      return;
+    }
+
     if (!this.podeSalvar()) {
       this.toastService.erro('Nome e categoria são obrigatórios.', 'Erro');
       return;
@@ -151,12 +156,16 @@ export class ItensFormComponent implements OnInit {
       ? this.itensService.atualizar(this.idEmEdicao, payload)
       : this.itensService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Item salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/itens']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o item.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o item.', 'Erro');
+      }
     });
   }
 

@@ -43,6 +43,9 @@
         </div>
 
         <div class="tab-content">
+          <div class="alert alert-danger small" *ngIf="mensagemErroValidacao">
+            {{ mensagemErroValidacao }}
+          </div>
           <div *ngIf="abaSelecionada === 'dados'" class="tab-pane active">
             <div class="card border-0 shadow-sm">
               <div class="card-body p-4">
@@ -157,7 +160,9 @@
                       type="number" 
                       class="form-control" 
                       [(ngModel)]="formulario.kmInicial"
-                      placeholder="KM de partida (opcional)">
+                      placeholder="KM de partida (opcional)"
+                      min="0"
+                      step="any">
                     <small class="text-muted">Pode ser preenchido do último checklist</small>
                   </div>
 
@@ -171,6 +176,19 @@
                   </div>
                 </div>
 
+                <div class="alert alert-warning small" *ngIf="deveExigirBafometro">
+                  <div class="form-check">
+                    <input
+                      id="testeBafometroAprovado"
+                      type="checkbox"
+                      class="form-check-input"
+                      [(ngModel)]="formulario.testeBafometroAprovado">
+                    <label class="form-check-label fw-semibold" for="testeBafometroAprovado">
+                      Teste de bafômetro realizado e aprovado
+                    </label>
+                  </div>
+                  <div class="mt-1">A aprovação é obrigatória para iniciar a viagem.</div>
+                </div>
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label">% Comissão</label>
@@ -180,7 +198,8 @@
                       [(ngModel)]="formulario.percentualComissao"
                       placeholder="0"
                       step="0.01"
-                      min="0">
+                      min="0"
+                      max="100">
                   </div>
 
                   <div class="col-md-6 mb-3">
@@ -418,7 +437,8 @@
                       [(ngModel)]="formulario.percentualComissao"
                       placeholder="0"
                       step="0.01"
-                      min="0">
+                      min="0"
+                      max="100">
                   </div>
                 </div>
 
@@ -500,7 +520,7 @@
                     </div>
                     <div class="col-md-3 mb-3">
                       <label class="form-label">Qt. Litros</label>
-                      <input type="number" class="form-control" [(ngModel)]="abastecimentoAtual.quantidadeLitros" placeholder="0,00" step="0.01" min="0">
+                      <input type="number" class="form-control" [(ngModel)]="abastecimentoAtual.quantidadeLitros" placeholder="0,00" step="0.01" min="0.01">
                     </div>
                     <div class="col-md-3 mb-3">
                       <label class="form-label">Valor</label>
@@ -568,8 +588,10 @@
         <button
           class="btn btn-success"
           (click)="onSalvar()"
-          [disabled]="!validarFormulario()">
-          <i class="bi bi-check-circle"></i> {{ modoEdicao ? 'Atualizar' : 'Criar' }} Viagem
+          [disabled]="!validarFormulario() || salvando || carregandoConfiguracoes">
+          <span *ngIf="salvando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <i *ngIf="!salvando" class="bi bi-check-circle"></i>
+          {{ salvando ? 'Salvando...' : (modoEdicao ? 'Atualizar' : 'Criar') }} Viagem
         </button>
       </div>
     </div>

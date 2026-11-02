@@ -95,6 +95,14 @@
       background-color: rgba(79, 70, 229, 0.08);
     }
   }
+
+  .notif-item-link {
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--bs-tertiary-bg);
+    }
+  }
 }
 
 .user-panel {

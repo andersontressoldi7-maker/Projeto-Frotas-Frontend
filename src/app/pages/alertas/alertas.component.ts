@@ -5,6 +5,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { NotificationService, AlertaApi } from '../../services/notification.service';
 import { ToastService } from '../../components/toast.service';
+import { Router } from '@angular/router';
 
 interface AlertaExibicao extends AlertaApi {
   icone: string;
@@ -45,7 +46,8 @@ export class AlertasComponent implements OnInit {
 
   constructor(
     private notificationService: NotificationService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -105,5 +107,19 @@ export class AlertasComponent implements OnInit {
 
   obterFiltrosDisponiveis() {
     return this.opcoesFiltro.filter(opt => !this.filtrosAtivos.some(f => f.key === opt.key));
+  }
+
+  obterDestinoRegistro(alerta: AlertaApi): { rota: string[]; texto: string } | null {
+    const rota = this.notificationService.obterRotaRegistro(alerta);
+    return rota
+      ? { rota, texto: rota.length > 1 ? 'Abrir registro' : 'Ver registros' }
+      : null;
+  }
+
+  abrirRegistro(alerta: AlertaApi): void {
+    const destino = this.obterDestinoRegistro(alerta);
+    if (destino) {
+      this.router.navigate(destino.rota);
+    }
   }
 }

@@ -8,6 +8,7 @@ import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { AbastecimentosService } from '../../services/abastecimentos.service';
+import { FiltrosPaginados } from '../../services/paginacao.utils';
 
 @Component({
   selector: 'app-abastecimentos',
@@ -33,9 +34,13 @@ export class AbastecimentosComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  allData: any[] = [];
   data: any[] = [];
+  opcoesFiltrosRemotas: Record<string, string[]> = {};
+  private filtrosGrid: FiltrosPaginados = {};
   carregando = true;
+  paginaAtual = 1;
+  temProximaPagina = false;
+  private readonly porPagina = 50;
 
   constructor(
     private router: Router,
@@ -46,9 +51,17 @@ export class AbastecimentosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.abastecimentosService.listar().subscribe({
-      next: (dados) => {
-        this.allData = dados.map(abastecimento => ({
+    this.route.queryParams.subscribe(() => this.carregarDados(1));
+  }
+
+  private carregarDados(pagina = this.paginaAtual): void {
+    this.carregando = true;
+    this.abastecimentosService.listar(pagina, this.porPagina, this.obterFiltrosApi()).subscribe({
+      next: (resposta) => {
+        this.paginaAtual = resposta.current_page;
+        this.temProximaPagina = resposta.next_page_url !== null;
+        this.opcoesFiltrosRemotas = resposta.filter_options || {};
+        this.data = resposta.data.map(abastecimento => ({
           id: abastecimento.id,
           nroFrota: abastecimento.veiculo?.nro_frota,
           placa: abastecimento.veiculo?.placa,
@@ -59,31 +72,42 @@ export class AbastecimentosComponent implements OnInit {
           valorTotal: abastecimento.valor_total,
           tipoAbastecimento: abastecimento.tipo_abastecimento
         }));
-        this.aplicarFiltroDaRota();
         this.carregando = false;
       },
-      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os abastecimentos.', 'Erro'); }
+      error: () => {
+        this.carregando = false;
+        this.toastService.erro('Não foi possível carregar os abastecimentos.', 'Erro');
+      }
     });
-
-    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
   }
 
-  private aplicarFiltroDaRota(): void {
+  mudarPagina(pagina: number): void {
+    if (pagina < 1 || (pagina > this.paginaAtual && !this.temProximaPagina) || pagina === this.paginaAtual || this.carregando) {
+      return;
+    }
+    this.carregarDados(pagina);
+  }
+
+  private obterFiltrosApi(): FiltrosPaginados {
+    const filtros: FiltrosPaginados = { ...this.filtrosGrid };
     const tipo = this.route.snapshot.queryParams['tipo'];
     if (tipo) {
-      this.data = this.allData.filter(item => (item.tipoAbastecimento || '').toLowerCase() === String(tipo).toLowerCase());
-      this.subtitle = `Filtrando por: ${tipo}`;
-    } else {
-      this.data = [...this.allData];
-      this.subtitle = 'Controle de abastecimentos da frota';
+      filtros['tipoAbastecimento'] = String(tipo);
     }
+    this.subtitle = tipo
+      ? `Filtrando por: ${tipo}`
+      : 'Controle de abastecimentos da frota';
+    return filtros;
   }
 
   onPrimaryAction(): void {
     this.router.navigate(['/abastecimentos/novo']);
   }
 
-  onFilterApplied(filters: any): void {}
+  onFilterApplied(filters: any): void {
+    this.filtrosGrid = filters as FiltrosPaginados;
+    this.carregarDados(1);
+  }
 
   onEditClick(row: any): void {
     this.router.navigate(['/abastecimentos', row.id, 'editar']);
@@ -97,9 +121,10 @@ export class AbastecimentosComponent implements OnInit {
 
     this.abastecimentosService.excluir(row.id).subscribe({
       next: () => {
-        this.allData = this.allData.filter(item => item.id !== row.id);
-        this.aplicarFiltroDaRota();
         this.toastService.sucesso('Abastecimento excluído.', 'Sucesso');
+        this.carregarDados(this.data.length === 1 && this.paginaAtual > 1
+          ? this.paginaAtual - 1
+          : this.paginaAtual);
       },
       error: () => this.toastService.erro('Não foi possível excluir o abastecimento.', 'Erro')
     });

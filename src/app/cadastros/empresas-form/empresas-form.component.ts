@@ -19,6 +19,7 @@ export class EmpresasFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
   carregando = false;
+  salvando = false;
 
   formulario: any = {
     nome: '',
@@ -68,6 +69,10 @@ export class EmpresasFormComponent implements OnInit {
   }
 
   onSalvar(dados: any): void {
+    if (this.salvando) {
+      return;
+    }
+
     if (!this.podeSalvar()) {
       this.toastService.erro('Nome é obrigatório.', 'Erro');
       return;
@@ -77,12 +82,16 @@ export class EmpresasFormComponent implements OnInit {
       ? this.empresasService.atualizar(this.idEmEdicao, dados)
       : this.empresasService.criar(dados);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Empresa salva com sucesso.', 'Sucesso');
         this.router.navigate(['/empresas']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a empresa.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a empresa.', 'Erro');
+      }
     });
   }
 

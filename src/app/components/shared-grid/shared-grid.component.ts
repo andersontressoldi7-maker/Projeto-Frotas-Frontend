@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
@@ -11,7 +11,7 @@ import { StatusColorService } from '../../services/status-color.service';
   templateUrl: './shared-grid.component.html',
   styleUrls: ['./shared-grid.component.scss']
 })
-export class SharedGridComponent implements OnInit {
+export class SharedGridComponent implements OnChanges {
   constructor(private statusColorService: StatusColorService) {}
 
   obterClassesBadge(col: GridColumn, valor: any): string {
@@ -25,11 +25,16 @@ export class SharedGridComponent implements OnInit {
   @Input() data: any[] = [];
   @Input() emptyMessage: string = 'Nenhum registro encontrado.';
   @Input() carregando: boolean = false;
+  @Input() paginaAtual?: number;
+  @Input() temProximaPagina?: boolean;
+  @Input() filtragemNoServidor = false;
+  @Input() opcoesFiltrosRemotas: Record<string, string[]> = {};
 
   @Output() primaryBtnClick = new EventEmitter<void>();
   @Output() filterApplied = new EventEmitter<any>();
   @Output() editClick = new EventEmitter<any>();
   @Output() deleteClick = new EventEmitter<any>();
+  @Output() paginaAlterada = new EventEmitter<number>();
 
   opcoesFiltro: GridFilterOption[] = [];
   filtrosAtivos: { option: GridFilterOption }[] = [];
@@ -38,6 +43,10 @@ export class SharedGridComponent implements OnInit {
   filtroExpandido: boolean = false;
 
   get dadosFiltrados(): any[] {
+    if (this.filtragemNoServidor) {
+      return this.data;
+    }
+
     const chaves = Object.keys(this.modeloFiltrosAplicados);
     if (chaves.length === 0) {
       return this.data;
@@ -76,11 +85,16 @@ export class SharedGridComponent implements OnInit {
     return String(valorLinha ?? '').toLowerCase().includes(String(valorFiltro).toLowerCase());
   }
 
-  ngOnInit(): void {
-    this.gerarFiltrosDasColunas();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['columns'] || changes['data'] || changes['opcoesFiltrosRemotas']) {
+      this.gerarFiltrosDasColunas();
+    }
   }
 
   gerarFiltrosDasColunas(): void {
+    const opcoesAnteriores = this.opcoesFiltro;
+    const ativosAnteriores = this.filtrosAtivos.map(filtro => filtro.option.key);
+
     this.opcoesFiltro = this.columns
       .filter(col => col.key !== 'acoes')
       .map(col => {
@@ -92,13 +106,33 @@ export class SharedGridComponent implements OnInit {
           if (col.type === 'badge') type = 'multi-select';
         }
 
-        let options = col.filterOptions;
+        let options = col.filterOptions || this.opcoesFiltrosRemotas[col.key];
         if (!options && (type === 'select' || type === 'multi-select')) {
           options = this.extrairValoresUnicos(col.key);
         }
 
-        return { key: col.key, label: col.label, type, options };
+        return { key: col.key, label: col.label, type, options: options ? [...options] : undefined };
       });
+
+    this.filtrosAtivos = ativosAnteriores
+      .map(key => this.opcoesFiltro.find(option => option.key === key))
+      .filter((option): option is GridFilterOption => option !== undefined)
+      .map(option => ({ option }));
+
+    const chavesValidas = new Set(this.opcoesFiltro.map(option => option.key));
+    for (const key of Object.keys(this.modeloFiltrosAtuais)) {
+      if (!chavesValidas.has(key)) {
+        delete this.modeloFiltrosAtuais[key];
+        delete this.modeloFiltrosAplicados[key];
+      }
+    }
+
+    for (const option of this.opcoesFiltro) {
+      const anterior = opcoesAnteriores.find(item => item.key === option.key);
+      if (anterior && this.modeloFiltrosAtuais[option.key] === undefined) {
+        this.modeloFiltrosAtuais[option.key] = option.type === 'multi-select' ? [] : '';
+      }
+    }
   }
 
   extrairValoresUnicos(key: string): string[] {
@@ -150,6 +184,6 @@ export class SharedGridComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.modeloFiltrosAplicados = { ...this.modeloFiltrosAtuais };
-    this.filterApplied.emit(this.modeloFiltrosAtuais);
+    this.filterApplied.emit({ ...this.modeloFiltrosAtuais });
   }
 }

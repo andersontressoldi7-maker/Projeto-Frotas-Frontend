@@ -10,6 +10,24 @@
         <p class="text-muted small mb-0">{{ subtitulo }}</p>
       </div>
 
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-sm-5 col-lg-3">
+              <label for="dataInicio" class="form-label small fw-semibold">Data inicial</label>
+              <input id="dataInicio" type="date" class="form-control" [(ngModel)]="dataInicio">
+            </div>
+            <div class="col-12 col-sm-5 col-lg-3">
+              <label for="dataFim" class="form-label small fw-semibold">Data final</label>
+              <input id="dataFim" type="date" class="form-control" [(ngModel)]="dataFim">
+            </div>
+            <div class="col-12 col-lg-auto text-muted small">
+              O período padrão considera os últimos 30 dias.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="accordion d-flex flex-column gap-3" id="accordionRelatorios">
         <div class="accordion-item report-accordion-item border-0 shadow-sm" *ngFor="let cat of categorias">
           
@@ -36,12 +54,64 @@
                       <h6 class="fw-bold text-body small mb-1">{{ item.nome }}</h6>
                       <p class="text-muted text-xs mb-3">{{ item.desc }}</p>
                     </div>
-                    <button class="btn btn-sm btn-outline-success border-0 d-flex align-items-center gap-1 mt-auto p-0 small fw-semibold">
-                      <i class="bi bi-file-earmark-bar-graph"></i> Gerar Relatório
-                    </button>
+                    <div class="d-flex align-items-center gap-3 mt-auto">
+                      <button type="button"
+                        class="btn btn-sm btn-outline-success border-0 d-flex align-items-center gap-1 p-0 small fw-semibold"
+                        [disabled]="carregandoRelatorio || exportandoRelatorio"
+                        (click)="gerarRelatorio(item)">
+                        <i class="bi bi-file-earmark-bar-graph"></i> Gerar Relatório
+                      </button>
+                      <button type="button"
+                        class="btn btn-sm btn-link text-success d-flex align-items-center gap-1 p-0 small fw-semibold"
+                        [disabled]="exportandoRelatorio"
+                        (click)="exportarCsv(item)">
+                        <i class="bi bi-download"></i> CSV
+                      </button>
+                    </div>
                   </div>
+
                 </div>
               </div>
+
+              <section class="report-results card border-0 shadow-sm mt-4"
+                *ngIf="relatorioAtivo && categoriaRelatorioAtiva === cat.id"
+                aria-live="polite">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start gap-3 mb-1">
+                    <h5 class="fw-bold text-body mb-0">{{ relatorioAtivo.nome }}</h5>
+                    <button type="button" class="btn-close" aria-label="Fechar relatório"
+                      (click)="fecharRelatorio()"></button>
+                  </div>
+                  <p class="text-muted small mb-3">
+                    Período: {{ dataInicio }} a {{ dataFim }}
+                  </p>
+
+                  <div *ngIf="carregandoRelatorio" class="d-flex align-items-center gap-2 text-muted small py-2">
+                    <span class="spinner-border spinner-border-sm text-success" role="status"></span>
+                    Carregando relatório...
+                  </div>
+                  <div *ngIf="erroRelatorio" class="alert alert-danger small mb-0" role="alert">
+                    Não foi possível carregar os dados: {{ erroRelatorio }}
+                  </div>
+                  <div class="table-responsive" *ngIf="resposta && resposta.data.length > 0">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th scope="col" *ngFor="let coluna of colunas">{{ formatarColuna(coluna) }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let linha of resposta.data">
+                          <td *ngFor="let coluna of colunas">{{ formatarValor(linha[coluna]) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="text-muted small mb-0" *ngIf="resposta && resposta.data.length === 0">
+                    Nenhum registro encontrado para o período selecionado.
+                  </p>
+                </div>
+              </section>
             </div>
           </div>
 

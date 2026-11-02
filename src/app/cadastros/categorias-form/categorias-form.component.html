@@ -44,8 +44,9 @@
 
         <div class="form-actions d-flex justify-content-end gap-2" *ngIf="!carregando">
           <button class="btn btn-light border" (click)="onCancelar()">Cancelar</button>
-          <button class="btn btn-success" (click)="onSalvar()" [disabled]="!podeSalvar()">
-            <i class="bi bi-check-circle"></i> {{ modoEdicao ? 'Atualizar' : 'Criar' }}
+          <button class="btn btn-success" (click)="onSalvar()" [disabled]="!podeSalvar() || salvando">
+            <span *ngIf="salvando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <i *ngIf="!salvando" class="bi bi-check-circle"></i> {{ salvando ? 'Salvando...' : (modoEdicao ? 'Atualizar' : 'Criar') }}
           </button>
         </div>
       </div>

@@ -10,6 +10,8 @@ import { VeiculosService } from '../../services/veiculos.service';
 import { MotoristasService } from '../../services/motoristas.service';
 import { TiposDespesasService } from '../../services/tipos-despesas.service';
 import { ViagensService } from '../../services/viagens.service';
+import { ConfiguracoesService } from '../../services/configuracoes.service';
+import { extrairMensagemErro } from '../../utils';
 import {
   calcularComissao,
   calcularSaldoViagem,
@@ -36,6 +38,10 @@ export class ViagensFormComponent implements OnInit {
   abaSelecionada = 'dados';
   abaCustosSelecionada = 'fretes';
   carregando = false;
+  carregandoConfiguracoes = true;
+  falhaConfiguracoes = false;
+  salvando = false;
+  exigirBafometro = false;
 
   formulario = {
     veiculo: '',
@@ -54,6 +60,7 @@ export class ViagensFormComponent implements OnInit {
     adiantamentoPago: '',
     percentualComissao: '',
     statusComissao: 'Pendente',
+    testeBafometroAprovado: false,
     observacoesGerais: '',
     fretes: [] as ViagemFreteItem[],
     despesas: [] as ViagemDespesaItem[],
@@ -105,10 +112,27 @@ export class ViagensFormComponent implements OnInit {
     private veiculosService: VeiculosService,
     private motoristasService: MotoristasService,
     private tiposDespesasService: TiposDespesasService,
-    private viagensService: ViagensService
+    private viagensService: ViagensService,
+    private configuracoesService: ConfiguracoesService
   ) {}
 
   ngOnInit(): void {
+    this.configuracoesService.carregar().subscribe({
+      next: resposta => {
+        const configuracao = resposta.configuracoes['exigir_bafometro'];
+        this.exigirBafometro = configuracao === true || configuracao === 1 || configuracao === '1';
+        this.carregandoConfiguracoes = false;
+      },
+      error: erro => {
+        this.carregandoConfiguracoes = false;
+        this.falhaConfiguracoes = true;
+        this.toastService.erro(
+          `Não foi possível carregar as configurações de viagem: ${extrairMensagemErro(erro)}`,
+          'Erro'
+        );
+      }
+    });
+
     this.veiculosService.listar().subscribe(dados => this.veiculos = dados);
     this.motoristasService.listar().subscribe(dados => this.motoristas = dados);
     this.tiposDespesasService.listar().subscribe(dados => this.tiposDespesa = dados.map(t => t.nome));
@@ -147,7 +171,7 @@ export class ViagensFormComponent implements OnInit {
           destino: viagem.destino,
           dataSaida: viagem.data_saida,
           horaSaida: viagem.hora_saida,
-          previsaoChegada: viagem.previsao_chegada,
+          previsaoChegada: this.formatarDataHoraLocal(viagem.previsao_chegada),
           kmInicial: viagem.km_inicial,
           status: viagem.status,
           tipoCarga: viagem.tipo_carga,
@@ -157,6 +181,9 @@ export class ViagensFormComponent implements OnInit {
           adiantamentoPago: viagem.adiantamento_pago,
           percentualComissao: viagem.percentual_comissao,
           statusComissao: viagem.status_comissao,
+          testeBafometroAprovado: viagem.teste_bafometro_aprovado === true ||
+            viagem.teste_bafometro_aprovado === 1 ||
+            viagem.teste_bafometro_aprovado === '1',
           observacoesGerais: viagem.observacoes_gerais,
           fretes: (viagem.fretes || []).map((f: any) => ({ descricao: f.descricao, valor: f.valor, origem: f.origem, destino: f.destino, data: f.data, observacao: f.observacao })),
           despesas: (viagem.despesas || []).map((d: any) => ({ tipo: d.tipo, valor: d.valor, pagador: d.pagador, observacao: d.observacao })),
@@ -197,6 +224,13 @@ export class ViagensFormComponent implements OnInit {
       return;
     }
 
+    if (!this.freteAtual.descricao.trim() ||
+      this.freteAtual.valor === '' ||
+      !this.numeroValido(this.freteAtual.valor)) {
+      this.toastService.avisar('Informe a descrição e um valor de frete igual ou maior que zero.', 'Dados inválidos');
+      return;
+    }
+
     this.formulario.fretes.push({ ...this.freteAtual });
     this.freteAtual = { descricao: '', valor: '', origem: '', destino: '', data: '', observacao: '' };
   }
@@ -207,6 +241,13 @@ export class ViagensFormComponent implements OnInit {
 
   adicionarDespesa(): void {
     if (!this.despesaAtual.tipo?.trim() && !this.despesaAtual.valor && !this.despesaAtual.observacao?.trim()) {
+      return;
+    }
+
+    if (!this.despesaAtual.tipo.trim() ||
+      this.despesaAtual.valor === '' ||
+      !this.numeroValido(this.despesaAtual.valor)) {
+      this.toastService.avisar('Informe o tipo e um valor de despesa igual ou maior que zero.', 'Dados inválidos');
       return;
     }
 
@@ -223,6 +264,16 @@ export class ViagensFormComponent implements OnInit {
       return;
     }
 
+    if (
+      !this.abastecimentoAtual.data ||
+      !this.abastecimentoAtual.combustivel ||
+      !this.numeroValido(this.abastecimentoAtual.valor) ||
+      !this.numeroValido(this.abastecimentoAtual.quantidadeLitros, true)
+    ) {
+      this.toastService.avisar('Informe data, combustível, valor não negativo e quantidade de litros maior que zero.', 'Dados inválidos');
+      return;
+    }
+
     this.formulario.abastecimentos.push({ ...this.abastecimentoAtual });
     this.abastecimentoAtual = { data: '', local: '', tipo: 'Interno', combustivel: '', quantidadeLitros: '', valor: '', observacao: '' };
   }
@@ -232,7 +283,7 @@ export class ViagensFormComponent implements OnInit {
   }
 
   onSalvar(): void {
-    if (!this.validarFormulario()) {
+    if (this.salvando || this.carregandoConfiguracoes || this.falhaConfiguracoes || !this.validarFormulario()) {
       return;
     }
 
@@ -246,6 +297,9 @@ export class ViagensFormComponent implements OnInit {
       previsao_chegada: this.formulario.previsaoChegada || null,
       km_inicial: this.formulario.kmInicial || null,
       status: this.formulario.status,
+      ...(this.deveExigirBafometro
+        ? { teste_bafometro_aprovado: this.formulario.testeBafometroAprovado }
+        : {}),
       tipo_carga: this.formulario.tipoCarga || null,
       descricao_carga: this.formulario.descricaoCarga || null,
       peso_volume: this.formulario.pesoVolume || null,
@@ -270,12 +324,16 @@ export class ViagensFormComponent implements OnInit {
       ? this.viagensService.atualizar(this.idEmEdicao, payload)
       : this.viagensService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Viagem salva com sucesso.', 'Sucesso');
         this.router.navigate(['/viagens']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a viagem.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a viagem.', 'Erro');
+      }
     });
   }
 
@@ -285,13 +343,89 @@ export class ViagensFormComponent implements OnInit {
 
   validarFormulario(): boolean {
     return (
+      !this.carregandoConfiguracoes &&
+      !this.falhaConfiguracoes &&
       this.formulario.veiculo !== '' &&
       this.formulario.motorista !== '' &&
       this.formulario.origem.trim() !== '' &&
       this.formulario.destino.trim() !== '' &&
       this.formulario.dataSaida !== '' &&
-      this.formulario.horaSaida !== ''
+      this.formulario.horaSaida !== '' &&
+      this.validarCamposNumericos() &&
+      this.validarItensAdicionados() &&
+      (!this.deveExigirBafometro || this.formulario.testeBafometroAprovado)
     );
+  }
+
+  get mensagemErroValidacao(): string | null {
+    if (this.falhaConfiguracoes) {
+      return 'Não foi possível carregar as configurações da empresa. Tente novamente antes de salvar.';
+    }
+    if (!this.formulario.veiculo || !this.formulario.motorista) {
+      return 'Selecione o veículo e o motorista.';
+    }
+    if (!this.formulario.origem.trim() || !this.formulario.destino.trim()) {
+      return 'Informe a origem e o destino da viagem.';
+    }
+    if (!this.formulario.dataSaida || !this.formulario.horaSaida) {
+      return 'Informe a data e a hora de saída.';
+    }
+    if (this.formulario.kmInicial !== '' && !this.numeroValido(this.formulario.kmInicial)) {
+      return 'A quilometragem inicial deve ser maior ou igual a zero.';
+    }
+    if (this.formulario.adiantamentoPago !== '' && !this.numeroValido(this.formulario.adiantamentoPago)) {
+      return 'O adiantamento deve ser maior ou igual a zero.';
+    }
+    const comissao = this.formulario.percentualComissao === ''
+      ? 0
+      : Number(this.formulario.percentualComissao);
+    if (!Number.isFinite(comissao) || comissao < 0 || comissao > 100) {
+      return 'A comissão deve estar entre 0% e 100%.';
+    }
+    if (!this.validarItensAdicionados()) {
+      return 'Confira os fretes, despesas e abastecimentos: os campos preenchidos devem estar completos e os valores não podem ser negativos.';
+    }
+    if (this.deveExigirBafometro && !this.formulario.testeBafometroAprovado) {
+      return 'Confirme a aprovação do teste do bafômetro para iniciar a viagem.';
+    }
+    if (!this.validarFormulario()) {
+      return 'Revise os campos da viagem antes de salvar.';
+    }
+    return null;
+  }
+
+  get deveExigirBafometro(): boolean {
+    return this.exigirBafometro && this.formulario.status === 'Em Rota';
+  }
+
+  private validarCamposNumericos(): boolean {
+    return (this.formulario.kmInicial === '' || this.numeroValido(this.formulario.kmInicial)) &&
+      (this.formulario.adiantamentoPago === '' || this.numeroValido(this.formulario.adiantamentoPago)) &&
+      (this.formulario.percentualComissao === '' ||
+        (Number.isFinite(Number(this.formulario.percentualComissao)) &&
+          Number(this.formulario.percentualComissao) >= 0 &&
+          Number(this.formulario.percentualComissao) <= 100));
+  }
+
+  private validarItensAdicionados(): boolean {
+    return this.formulario.fretes.every(item =>
+      Boolean(item.descricao.trim()) && item.valor !== '' && this.numeroValido(item.valor)
+    ) && this.formulario.despesas.every(item =>
+      Boolean(item.tipo.trim()) && item.valor !== '' && this.numeroValido(item.valor)
+    ) && this.formulario.abastecimentos.every(item =>
+      Boolean(item.data) &&
+      Boolean(item.combustivel) &&
+      this.numeroValido(item.valor) &&
+      this.numeroValido(item.quantidadeLitros, true)
+    );
+  }
+
+  private numeroValido(valor: string | number, maiorQueZero = false): boolean {
+    if (valor === '') {
+      return !maiorQueZero;
+    }
+    const numero = Number(valor);
+    return Number.isFinite(numero) && (maiorQueZero ? numero > 0 : numero >= 0);
   }
 
   obterValorFrete(): number {
@@ -327,5 +461,23 @@ export class ViagensFormComponent implements OnInit {
   obterValorFormatado(valor: string | number): string {
     const numero = typeof valor === 'number' ? valor : parseFloat(valor) || 0;
     return numero.toFixed(2);
+  }
+
+  private formatarDataHoraLocal(valor: string | null | undefined): string {
+    if (!valor) {
+      return '';
+    }
+
+    if (!/(Z|[+-]\d{2}:\d{2})$/i.test(valor)) {
+      return valor.replace(' ', 'T').slice(0, 16);
+    }
+
+    const data = new Date(valor);
+    if (Number.isNaN(data.getTime())) {
+      return '';
+    }
+
+    const doisDigitos = (parte: number): string => String(parte).padStart(2, '0');
+    return `${data.getFullYear()}-${doisDigitos(data.getMonth() + 1)}-${doisDigitos(data.getDate())}T${doisDigitos(data.getHours())}:${doisDigitos(data.getMinutes())}`;
   }
 }

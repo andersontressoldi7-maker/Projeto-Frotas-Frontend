@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface RegistroConta {
@@ -42,6 +42,10 @@ export interface RespostaTrocaEmpresa {
 })
 export class AuthService {
   private urlBase = `${environment.apiBaseUrl}/auth`;
+  private minhasEmpresasCache: {
+    token: string;
+    resposta: Observable<EmpresaAcesso[]>;
+  } | null = null;
 
   constructor(private http: HttpClient) {}
 
@@ -74,7 +78,26 @@ export class AuthService {
   }
 
   listarMinhasEmpresas(): Observable<EmpresaAcesso[]> {
-    return this.http.get<EmpresaAcesso[]>(`${this.urlBase}/minhas-empresas`);
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      return this.http.get<EmpresaAcesso[]>(`${this.urlBase}/minhas-empresas`);
+    }
+
+    if (this.minhasEmpresasCache?.token === token) {
+      return this.minhasEmpresasCache.resposta;
+    }
+
+    const resposta = this.http.get<EmpresaAcesso[]>(`${this.urlBase}/minhas-empresas`).pipe(
+      catchError(erro => {
+        if (this.minhasEmpresasCache?.resposta === resposta) {
+          this.minhasEmpresasCache = null;
+        }
+        return throwError(() => erro);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    this.minhasEmpresasCache = { token, resposta };
+    return resposta;
   }
 
   trocarEmpresa(empresaId: number): Observable<RespostaTrocaEmpresa> {
@@ -99,22 +122,29 @@ export class AuthService {
   }
 
   limparSessao(): void {
+    this.invalidarMinhasEmpresasCache();
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     localStorage.removeItem('unidade');
   }
 
   private atualizarUsuario(usuario: UsuarioLogado): void {
+    this.invalidarMinhasEmpresasCache();
     try {
       localStorage.setItem('user', JSON.stringify(usuario));
     } catch {}
   }
 
   private salvarSessao(resposta: RespostaAutenticacao): void {
+    this.invalidarMinhasEmpresasCache();
     try {
       localStorage.setItem('authToken', resposta.token);
       localStorage.setItem('user', JSON.stringify(resposta.usuario));
       localStorage.setItem('unidade', String(resposta.unidade));
     } catch {}
+  }
+
+  private invalidarMinhasEmpresasCache(): void {
+    this.minhasEmpresasCache = null;
   }
 }

@@ -41,13 +41,16 @@ export class ForgotPasswordComponent {
   }
 
   onSolicitarCodigo(): void {
-    if (!this.email.trim()) {
-      this.toastService.erro('Informe seu email.', 'Erro');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) {
+      this.toastService.erro('Informe um email válido.', 'Dados inválidos');
+      return;
+    }
+    if (this.carregando) {
       return;
     }
 
     this.carregando = true;
-    this.authService.solicitarCodigoRecuperacao(this.email).subscribe({
+    this.authService.solicitarCodigoRecuperacao(this.email.trim()).subscribe({
       next: () => {
         this.carregando = false;
         this.toastService.sucesso('Código enviado para o seu email.', 'Sucesso');
@@ -61,13 +64,20 @@ export class ForgotPasswordComponent {
   }
 
   onRedefinirSenha(): void {
-    if (!this.codigo.trim() || !this.novaSenha) {
-      this.toastService.erro('Preencha o código e a nova senha.', 'Erro');
+    if (!/^\d{6}$/.test(this.codigo.trim())) {
+      this.toastService.erro('Informe o código de verificação com 6 dígitos.', 'Dados inválidos');
+      return;
+    }
+    if (!this.novaSenha) {
+      this.toastService.erro('Informe a nova senha.', 'Dados inválidos');
       return;
     }
 
     if (this.novaSenha !== this.confirmarNovaSenha) {
       this.toastService.erro('As senhas não coincidem.', 'Erro');
+      return;
+    }
+    if (this.carregando) {
       return;
     }
 

@@ -51,6 +51,7 @@ export class MotoristasFormComponent implements OnInit {
   abaAtiva: 'dados' | 'controle' = 'dados';
   abaDocumentos: 'cnh' | 'cursos' | 'exames' = 'cnh';
   carregando = false;
+  salvando = false;
 
   formulario: any = {
     nome: '',
@@ -180,6 +181,10 @@ export class MotoristasFormComponent implements OnInit {
   }
 
   onSalvar(dados: any): void {
+    if (this.salvando) {
+      return;
+    }
+
     if (!this.podeSalvar()) {
       this.toastService.erro('Preencha o nome do motorista antes de salvar.', 'Erro');
       return;
@@ -197,6 +202,7 @@ export class MotoristasFormComponent implements OnInit {
       ? this.motoristasService.atualizar(this.idEmEdicao, payload)
       : this.motoristasService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: (motorista) => {
         this.toastService.sucesso('Motorista salvo com sucesso.', 'Sucesso');
@@ -209,7 +215,10 @@ export class MotoristasFormComponent implements OnInit {
           this.router.navigate(['/motoristas']);
         }
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o motorista.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o motorista.', 'Erro');
+      }
     });
   }
 

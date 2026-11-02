@@ -17,6 +17,7 @@ export class CategoriasFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
   carregando = false;
+  salvando = false;
   retornoUrl: string | null = null;
   retornoCampo: string | null = null;
 
@@ -80,6 +81,10 @@ export class CategoriasFormComponent implements OnInit {
   }
 
   onSalvar(): void {
+    if (this.salvando) {
+      return;
+    }
+
     if (!this.podeSalvar()) {
       this.toastService.erro('Informe o nome e ao menos 2 opções preenchidas.', 'Erro');
       return;
@@ -94,6 +99,7 @@ export class CategoriasFormComponent implements OnInit {
       ? this.categoriasService.atualizar(this.idEmEdicao, payload)
       : this.categoriasService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: (categoria) => {
         this.toastService.sucesso('Categoria salva com sucesso.', 'Sucesso');
@@ -104,7 +110,10 @@ export class CategoriasFormComponent implements OnInit {
           this.router.navigate(['/categorias']);
         }
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a categoria.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a categoria.', 'Erro');
+      }
     });
   }
 

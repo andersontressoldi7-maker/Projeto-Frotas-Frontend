@@ -117,6 +117,24 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  abrirNotificacao(notificacao: Notificacao): void {
+    const rota = this.notificationService.obterRotaRegistro(notificacao);
+    if (!rota) {
+      return;
+    }
+
+    this.notificacoesAbertas = false;
+    this.router.navigate(rota);
+  }
+
+  obterRotaNotificacao(notificacao: Notificacao): string[] | null {
+    return this.notificationService.obterRotaRegistro(notificacao);
+  }
+
+  obterAcaoNotificacao(notificacao: Notificacao): string {
+    return this.obterRotaNotificacao(notificacao)?.length === 1 ? 'Ver registros' : 'Abrir registro';
+  }
+
   alternarMenuUsuario(): void {
     this.menuUsuarioAberto = !this.menuUsuarioAberto;
     this.notificacoesAbertas = false;

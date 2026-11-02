@@ -33,8 +33,25 @@ export class LoginComponent {
   }
 
   entrar(): void {
+    const emailNormalizado = this.email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado)) {
+      this.toastService.avisar('Informe um endereço de email válido.', 'Dados inválidos');
+      return;
+    }
+    if (!this.senha) {
+      this.toastService.avisar('Informe sua senha.', 'Dados inválidos');
+      return;
+    }
+    if (!Number.isInteger(this.unidade) || !this.unidade || this.unidade < 1) {
+      this.toastService.avisar('Informe um número de unidade inteiro maior que zero.', 'Dados inválidos');
+      return;
+    }
+    if (this.carregando) {
+      return;
+    }
+
     this.carregando = true;
-    this.authService.login(this.email, this.senha, this.unidade!).subscribe({
+    this.authService.login(emailNormalizado, this.senha, this.unidade).subscribe({
       next: () => {
         this.carregando = false;
         this.router.navigate(['/dashboard']);

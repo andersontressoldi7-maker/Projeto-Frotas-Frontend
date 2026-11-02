@@ -37,3 +37,9 @@ export function aplicarMascaraPlaca(valor: string | null | undefined): string {
 
   return limpo;
 }
+
+export function validarPlaca(valor: string | null | undefined): boolean {
+  const limpa = (valor || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return /^[A-Z]{3}[0-9]{4}$/.test(limpa)
+    || /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(limpa);
+}

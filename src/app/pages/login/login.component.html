@@ -42,7 +42,7 @@
 
         <div class="form-group mb-3">
           <label class="form-label" for="unidade">Unidade</label>
-          <input id="unidade" type="number" name="unidade" class="form-control" [(ngModel)]="unidade" placeholder="Número da unidade" required>
+          <input id="unidade" type="number" name="unidade" class="form-control" [(ngModel)]="unidade" placeholder="Número da unidade" min="1" step="1" required>
         </div>
 
         <div class="form-check mb-4">

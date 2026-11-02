@@ -152,8 +152,8 @@ export class DashboardComponent implements OnInit {
   }
 
   private carregarChecklistsRecentes(): void {
-    this.checklistService.listar().subscribe(dados => {
-      this.checklistsFinalizados = dados.slice(0, 5).map(checklist => ({
+    this.checklistService.listar().subscribe(resposta => {
+      this.checklistsFinalizados = resposta.data.slice(0, 5).map(checklist => ({
         veiculo: checklist.veiculo?.placa,
         data: checklist.created_at,
         motorista: checklist.motorista?.nome,
@@ -163,8 +163,8 @@ export class DashboardComponent implements OnInit {
   }
 
   private carregarManutencoesPendentes(): void {
-    this.manutencoesService.listar().subscribe(dados => {
-      this.manutencoesPendentes = dados
+    this.manutencoesService.listar().subscribe(resposta => {
+      this.manutencoesPendentes = resposta.data
         .filter(item => item.status !== 'Finalizada')
         .slice(0, 5)
         .map(item => ({
@@ -202,8 +202,8 @@ export class DashboardComponent implements OnInit {
         break;
     }
 
-    this.viagensService.listar().subscribe(dados => {
-      this.viagensFinalizadas = dados
+    this.viagensService.listar().subscribe(resposta => {
+      this.viagensFinalizadas = resposta.data
         .filter(viagem => {
           if (viagem.status !== 'Finalizada') {
             return false;

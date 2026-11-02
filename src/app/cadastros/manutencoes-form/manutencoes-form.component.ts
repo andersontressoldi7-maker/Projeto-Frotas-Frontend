@@ -11,6 +11,8 @@ import { VeiculosService } from '../../services/veiculos.service';
 import { MotoristasService } from '../../services/motoristas.service';
 import { TiposManutencaoService } from '../../services/tipos-manutencao.service';
 import { ChecklistService } from '../../services/checklist.service';
+import { ConfiguracoesService } from '../../services/configuracoes.service';
+import { extrairMensagemErro } from '../../utils';
 
 @Component({
   selector: 'app-manutencoes-form',
@@ -20,10 +22,20 @@ import { ChecklistService } from '../../services/checklist.service';
   styleUrls: ['./manutencoes-form.component.scss']
 })
 export class ManutencoesFormComponent implements OnInit {
+  readonly validarRegrasManutencao = (): boolean =>
+    !this.carregandoConfiguracoes &&
+    !this.carregandoChecklists &&
+    this.validarItensFinanceiros() &&
+    (!this.checklistObrigatorio || this.listaChecklists.length > 0);
+
   modoEdicao = false;
   idEmEdicao: number | null = null;
   abaAtiva = 'geral';
   carregando = false;
+  carregandoConfiguracoes = true;
+  carregandoChecklists = true;
+  permitirManutencaoSemChecklist = false;
+  salvando = false;
 
   formulario: any = {
     origem: '',
@@ -81,10 +93,27 @@ export class ManutencoesFormComponent implements OnInit {
     private veiculosService: VeiculosService,
     private motoristasService: MotoristasService,
     private tiposManutencaoService: TiposManutencaoService,
-    private checklistService: ChecklistService
+    private checklistService: ChecklistService,
+    private configuracoesService: ConfiguracoesService
   ) {}
 
   ngOnInit(): void {
+    this.configuracoesService.carregar().subscribe({
+      next: resposta => {
+        const configuracao = resposta.configuracoes['permitir_manutencao_sem_checklist'];
+        this.permitirManutencaoSemChecklist =
+          configuracao === true || configuracao === 1 || configuracao === '1';
+        this.carregandoConfiguracoes = false;
+      },
+      error: erro => {
+        this.carregandoConfiguracoes = false;
+        this.toastService.erro(
+          `Não foi possível carregar as configurações de manutenção: ${extrairMensagemErro(erro)}`,
+          'Erro'
+        );
+      }
+    });
+
     this.veiculosService.listar().subscribe(dados => {
       this.configFormulario.secoes[0].campos[1].opcoes = dados.map(v => ({ id: v.id, label: `${v.placa} - ${v.modelo || ''}` }));
     });
@@ -97,7 +126,19 @@ export class ManutencoesFormComponent implements OnInit {
       this.configFormulario.secoes[0].campos[3].opcoes = dados.map(t => ({ id: t.id, label: t.nome }));
     });
 
-    this.checklistService.listar().subscribe(dados => this.checklistsDisponiveis = dados);
+    this.checklistService.listar().subscribe({
+      next: resposta => {
+        this.checklistsDisponiveis = resposta.data;
+        this.carregandoChecklists = false;
+      },
+      error: erro => {
+        this.carregandoChecklists = false;
+        this.toastService.erro(
+          `Não foi possível carregar os checklists disponíveis: ${extrairMensagemErro(erro)}`,
+          'Erro'
+        );
+      }
+    });
 
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -136,7 +177,12 @@ export class ManutencoesFormComponent implements OnInit {
   }
 
   adicionarServico(): void {
-    if (this.novoServico.descricao && this.novoServico.valor > 0) {
+    if (!this.novoServico.descricao.trim() || !this.numeroValido(this.novoServico.valor)) {
+      this.toastService.avisar('Informe a descrição do serviço e um valor maior ou igual a zero.', 'Dados inválidos');
+      return;
+    }
+
+    if (this.novoServico.descricao && this.novoServico.valor !== null) {
       this.listaMaoDeObra.push({ ...this.novoServico });
       this.novoServico = { descricao: '', valor: null };
     }
@@ -147,7 +193,16 @@ export class ManutencoesFormComponent implements OnInit {
   }
 
   adicionarProduto(): void {
-    if (this.novoProduto.descricao && this.novoProduto.valorUnitario > 0 && this.novoProduto.quantidade > 0) {
+    if (
+      !this.novoProduto.descricao.trim() ||
+      !this.numeroValido(this.novoProduto.quantidade, true) ||
+      !this.numeroValido(this.novoProduto.valorUnitario)
+    ) {
+      this.toastService.avisar('Informe a descrição, quantidade maior que zero e valor não negativo.', 'Dados inválidos');
+      return;
+    }
+
+    if (this.novoProduto.descricao && this.novoProduto.valorUnitario !== null) {
       this.listaProdutos.push({ ...this.novoProduto });
       this.novoProduto = { descricao: '', quantidade: 1, valorUnitario: null };
     }
@@ -171,7 +226,30 @@ export class ManutencoesFormComponent implements OnInit {
     this.listaChecklists.splice(index, 1);
   }
 
+  get checklistObrigatorio(): boolean {
+    return !this.permitirManutencaoSemChecklist && this.formulario.status !== 'Finalizada';
+  }
+
   onSalvar(dadosGerais: any): void {
+    if (this.salvando || this.carregandoConfiguracoes || this.carregandoChecklists) {
+      return;
+    }
+
+    if (!this.validarItensFinanceiros()) {
+      this.abaAtiva = 'servicos';
+      this.toastService.avisar('Verifique descrições, quantidades e valores de serviços e produtos.', 'Dados inválidos');
+      return;
+    }
+
+    if (this.checklistObrigatorio && this.listaChecklists.length === 0) {
+      this.abaAtiva = 'checklists';
+      this.toastService.avisar(
+        'Vincule ao menos um checklist para abrir ou reabrir esta manutenção.',
+        'Checklist obrigatório'
+      );
+      return;
+    }
+
     const payload = {
       origem: dadosGerais.origem,
       veiculo_id: dadosGerais.veiculo,
@@ -190,13 +268,35 @@ export class ManutencoesFormComponent implements OnInit {
       ? this.manutencoesService.atualizar(this.idEmEdicao, payload)
       : this.manutencoesService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Manutenção salva com sucesso.', 'Sucesso');
         this.router.navigate(['/manutencoes']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a manutenção.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar a manutenção.', 'Erro');
+      }
     });
+  }
+
+  private validarItensFinanceiros(): boolean {
+    return this.listaMaoDeObra.every(item =>
+      Boolean(item.descricao?.trim()) && this.numeroValido(item.valor)
+    ) && this.listaProdutos.every(item =>
+      Boolean(item.descricao?.trim()) &&
+      this.numeroValido(item.quantidade, true) &&
+      this.numeroValido(item.valorUnitario)
+    );
+  }
+
+  private numeroValido(valor: number | string | null, maiorQueZero = false): boolean {
+    if (valor === null || valor === '') {
+      return false;
+    }
+    const numero = Number(valor);
+    return Number.isFinite(numero) && (maiorQueZero ? numero > 0 : numero >= 0);
   }
 
   onCancelar(): void {

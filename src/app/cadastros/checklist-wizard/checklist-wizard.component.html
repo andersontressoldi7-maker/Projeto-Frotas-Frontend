@@ -4,10 +4,10 @@
 <div class="dashboard-wrapper">
   <main class="content-layout">
     <div class="container-fluid p-4">
-      <div class="wizard-header mb-4">
+      <div *ngIf="!modoEdicao || (!carregandoChecklist && !falhaAoCarregarChecklist)" class="wizard-header mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
           <div>
-            <h2 class="h4 fw-bold mb-1">{{ faseAtual === 'saida' ? 'Nova Vistoria (Saída)' : 'Finalizar Vistoria (Retorno)' }}</h2>
+            <h2 class="h4 fw-bold mb-1">{{ tituloAtual }}</h2>
             <p class="text-muted small mb-0">Passo {{ passoAtual }} de {{ faseAtual === 'saida' ? 2 : 1 }}</p>
           </div>
           <div class="d-flex align-items-center gap-2">
@@ -15,6 +15,27 @@
               <i class="bi bi-x-lg"></i> Cancelar
             </button>
           </div>
+        </div>
+
+        <div *ngIf="modoEdicao" class="btn-group mb-3" role="group" aria-label="Fase do checklist">
+          <button
+            type="button"
+            class="btn"
+            [class.btn-success]="faseAtual === 'saida'"
+            [class.btn-outline-success]="faseAtual !== 'saida'"
+            [attr.aria-pressed]="faseAtual === 'saida'"
+            (click)="mudarFase('saida')">
+            Abertura
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-success]="faseAtual === 'retorno'"
+            [class.btn-outline-success]="faseAtual !== 'retorno'"
+            [attr.aria-pressed]="faseAtual === 'retorno'"
+            (click)="mudarFase('retorno')">
+            Fechamento
+          </button>
         </div>
 
         <div class="progress-bar-wizard">
@@ -45,7 +66,18 @@
       </div>
 
       <div class="wizard-content">
-          <ng-container *ngIf="faseAtual === 'saida'">
+          <div *ngIf="modoEdicao && carregandoChecklist" class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Carregando</span>
+            </div>
+          </div>
+
+          <div *ngIf="modoEdicao && falhaAoCarregarChecklist" class="alert alert-danger">
+            <p>Não foi possível carregar o checklist para edição.</p>
+            <button type="button" class="btn btn-outline-danger" (click)="cancelar()">Voltar para os checklists</button>
+          </div>
+
+          <ng-container *ngIf="(!modoEdicao || (!carregandoChecklist && !falhaAoCarregarChecklist)) && faseAtual === 'saida'">
             <div *ngIf="passoAtual === 1" class="passo-container">
               <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
@@ -117,6 +149,8 @@
                       class="form-control" 
                       [(ngModel)]="formulario.kmAtual" 
                       placeholder="Digite a quilometragem de saída"
+                      min="0"
+                      step="any"
                       required>
                   </div>
 
@@ -168,6 +202,12 @@
 
                   <input *ngIf="item.tipo === 'texto'" type="text" class="form-control" [(ngModel)]="item.valor" placeholder="Digite a resposta" />
 
+                  <img
+                    *ngIf="item.foto"
+                    class="foto-preview mb-3"
+                    [src]="obterUrlFoto(item.foto)"
+                    [alt]="'Foto do item ' + item.nome">
+
                   <div class="item-actions">
                     <button 
                       class="btn-icon-action" 
@@ -193,14 +233,15 @@
                 <button 
                   class="btn btn-success" 
                   (click)="finalizarSaida()"
-                  [disabled]="!validarPasso()">
-                  <i class="bi bi-check-lg"></i> Finalizar Saída
+                  [disabled]="!validarPasso() || salvando">
+                  <span *ngIf="salvando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <i *ngIf="!salvando" class="bi bi-check-lg"></i> {{ salvando ? 'Salvando...' : (modoEdicao ? 'Salvar alterações da abertura' : 'Finalizar Saída') }}
                 </button>
               </div>
             </div>
           </ng-container>
 
-          <ng-container *ngIf="faseAtual === 'retorno'">
+          <ng-container *ngIf="(!modoEdicao || (!carregandoChecklist && !falhaAoCarregarChecklist)) && faseAtual === 'retorno'">
             <div *ngIf="passoAtual === 1" class="passo-container">
               <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
@@ -230,6 +271,8 @@
                       class="form-control" 
                       [(ngModel)]="formulario.kmRetorno"
                       placeholder="Digite a quilometragem atualizada"
+                      [min]="formulario.kmAtual || 0"
+                      step="any"
                       required>
                   </div>
 
@@ -240,6 +283,30 @@
                       [(ngModel)]="formulario.observacaoRetorno"
                       rows="3"
                       placeholder="Observações do final da operação..."></textarea>
+                  </div>
+
+                  <div class="mt-4" *ngIf="exigirAssinaturaMotorista">
+                    <label class="form-label required">Assinatura do motorista</label>
+                    <p *ngIf="assinaturaMotorista" class="text-muted small mb-2">
+                      Assinatura registrada. Desenhe no campo para substituí-la.
+                    </p>
+                    <canvas
+                      #assinaturaCanvas
+                      class="assinatura-canvas"
+                      width="600"
+                      height="180"
+                      aria-label="Área para desenhar a assinatura do motorista"
+                      (pointerdown)="iniciarAssinatura($event)"
+                      (pointermove)="desenharAssinatura($event)"
+                      (pointerup)="concluirAssinatura($event)"
+                      (pointercancel)="concluirAssinatura($event)">
+                    </canvas>
+                    <div class="d-flex justify-content-end mt-2">
+                      <button type="button" class="btn btn-sm btn-outline-secondary"
+                        (click)="limparAssinatura(assinaturaCanvas)">
+                        Limpar assinatura
+                      </button>
+                    </div>
                   </div>
 
                   <div *ngIf="eModeloCompleto()" class="mt-4">
@@ -265,6 +332,12 @@
                           </button>
                         </div>
 
+                        <img
+                          *ngIf="item.foto"
+                          class="foto-preview mb-3"
+                          [src]="obterUrlFoto(item.foto)"
+                          [alt]="'Foto do item ' + item.nome">
+
                         <div class="item-actions">
                           <button 
                             class="btn-icon-action" 
@@ -287,8 +360,9 @@
               </div>
 
               <div class="wizard-actions mt-4">
-                <button class="btn btn-danger" (click)="finalizarRetorno()" [disabled]="!validarPasso()">
-                  <i class="bi bi-check-circle"></i> Encerrar Vistoria
+                <button class="btn btn-danger" (click)="finalizarRetorno()" [disabled]="!validarPasso() || salvando">
+                  <span *ngIf="salvando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <i *ngIf="!salvando" class="bi bi-check-circle"></i> {{ salvando ? 'Salvando...' : (modoEdicao && retornoConcluido ? 'Salvar alterações do fechamento' : 'Encerrar Vistoria') }}
                 </button>
               </div>
             </div>

@@ -7,12 +7,17 @@
       [subtitle]="subtitulo"
       [columns]="colunas"
       [data]="dados"
+      [filtragemNoServidor]="true"
+      [opcoesFiltrosRemotas]="opcoesFiltrosRemotas"
       [carregando]="carregando"
+      [paginaAtual]="paginaAtual"
+      [temProximaPagina]="temProximaPagina"
       [primaryBtnLabel]="rotuloBotaoPrimario"
       (primaryBtnClick)="aoClicarBotaoPrimario()"
       (filterApplied)="aoAplicarFiltro($event)"
       (editClick)="aoClicarEditar($event)"
-      (deleteClick)="aoClicarExcluir($event)">
+      (deleteClick)="aoClicarExcluir($event)"
+      (paginaAlterada)="mudarPagina($event)">
     </app-shared-grid>
   </main>
 </div>

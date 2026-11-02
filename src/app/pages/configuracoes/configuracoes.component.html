@@ -10,6 +10,13 @@
         <p class="text-muted small mb-0">{{ subtitulo }}</p>
       </div>
 
+      <div class="alert alert-info small mt-3" *ngIf="!podeEditar && !carregando">
+        Somente usuários administradores podem alterar as configurações desta empresa.
+      </div>
+      <div class="text-muted small mt-3" *ngIf="carregando" role="status">
+        Carregando configurações...
+      </div>
+
       <div class="accordion d-flex flex-column gap-3" id="accordionConfig">
         <div class="accordion-item config-accordion-item border-0 shadow-sm">
           <h2 class="accordion-header">
@@ -28,7 +35,9 @@
               <div class="cores-grupo pt-4" *ngFor="let grupo of gruposCores">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h6 class="fw-bold mb-0 text-body fs-6">{{ nomeGrupo(grupo) }}</h6>
-                  <button type="button" class="btn btn-sm btn-link text-decoration-none" (click)="restaurarPadraoGrupo(grupo)">
+                  <button type="button" class="btn btn-sm btn-link text-decoration-none"
+                    [disabled]="!podeEditar || salvandoCores"
+                    (click)="restaurarPadraoGrupo(grupo)">
                     <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar padrão
                   </button>
                 </div>
@@ -50,6 +59,7 @@
                               [class.selecionada]="corAtual(grupo, valor) === cor.token"
                               [class]="'swatch-' + cor.token"
                               [title]="cor.label"
+                              [disabled]="!podeEditar || salvandoCores"
                               (click)="selecionarCor(grupo, valor, cor.token)">
                       </button>
                     </div>
@@ -80,18 +90,38 @@
                   
                   <div *ngIf="campo.tipo === 'text' || campo.tipo === 'number'" class="mb-2">
                     <label class="form-label small fw-medium text-muted mb-1">{{ campo.label }}</label>
-                    <input [type]="campo.tipo" class="form-control" [placeholder]="campo.placeholder || ''"/>
+                    <input [type]="campo.tipo" class="form-control"
+                      [placeholder]="campo.placeholder || ''"
+                      [min]="campo.tipo === 'number' ? 0 : null"
+                      [step]="campo.tipo === 'number' ? 1 : null"
+                      [ngModel]="valoresConfiguracao[campo.chave]"
+                      (ngModelChange)="atualizarValor(campo.chave, $event)"
+                      [ngModelOptions]="{standalone: true}"
+                      [class.is-invalid]="mensagemErro(campo.chave)"
+                      [disabled]="!podeEditar || carregando || salvando"/>
+                    <div *ngIf="mensagemErro(campo.chave)" class="invalid-feedback d-block">
+                      {{ mensagemErro(campo.chave) }}
+                    </div>
                   </div>
 
                   <div *ngIf="campo.tipo === 'select'" class="mb-2">
                     <label class="form-label small fw-medium text-muted mb-1">{{ campo.label }}</label>
-                    <select class="form-select">
+                    <select class="form-select"
+                      [ngModel]="valoresConfiguracao[campo.chave]"
+                      (ngModelChange)="atualizarValor(campo.chave, $event)"
+                      [ngModelOptions]="{standalone: true}"
+                      [disabled]="!podeEditar || carregando || salvando">
+                      <option [ngValue]="null">Selecione...</option>
                       <option *ngFor="let opt of campo.options" [value]="opt">{{ opt }}</option>
                     </select>
                   </div>
 
                   <div *ngIf="campo.tipo === 'switch'" class="form-check form-switch pt-3 d-flex align-items-center">
-                    <input type="checkbox" class="form-check-input config-switch me-2" [checked]="campo.value || false"/>
+                    <input type="checkbox" class="form-check-input config-switch me-2"
+                      [ngModel]="valoresConfiguracao[campo.chave]"
+                      (ngModelChange)="atualizarValor(campo.chave, $event)"
+                      [ngModelOptions]="{standalone: true}"
+                      [disabled]="!podeEditar || carregando || salvando"/>
                     <label class="form-check-label small fw-medium text-muted">{{ campo.label }}</label>
                   </div>
 
@@ -104,7 +134,11 @@
       </div>
 
       <div class="d-flex justify-content-end gap-2 mt-4">
-        <button type="button" class="btn btn-success px-4 fw-medium shadow-sm">Salvar Todas as Configurações</button>
+        <button type="button" class="btn btn-success px-4 fw-medium shadow-sm"
+          [disabled]="!podeEditar || carregando || salvando"
+          (click)="salvarConfiguracoes()">
+          {{ salvando ? 'Salvando...' : 'Salvar Todas as Configurações' }}
+        </button>
       </div>
 
     </div>

@@ -24,6 +24,7 @@ export class AbastecimentoWizardComponent implements OnInit {
   idEmEdicao: number | null = null;
   passoAtual = 1;
   totalPassos = 3;
+  salvando = false;
 
   formulario = {
     veiculo: '',
@@ -162,18 +163,40 @@ export class AbastecimentoWizardComponent implements OnInit {
         this.formulario.motorista !== '' &&
         this.formulario.dataAbastecimento !== '' &&
         this.formulario.tipoAbastecimento !== '' &&
-        this.formulario.km !== '';
+        this.numeroValido(this.formulario.km);
     }
     if (this.passoAtual === 2) {
       return this.formulario.combustivel !== '' &&
-        this.formulario.valorLitro !== '' &&
-        this.formulario.qtLitros !== '';
+        this.numeroValido(this.formulario.valorLitro) &&
+        this.numeroValido(this.formulario.qtLitros, true);
     }
     return true;
   }
 
+  private validarFormularioCompleto(): boolean {
+    return Boolean(this.formulario.veiculo) &&
+      Boolean(this.formulario.motorista) &&
+      Boolean(this.formulario.dataAbastecimento) &&
+      Boolean(this.formulario.tipoAbastecimento) &&
+      this.numeroValido(this.formulario.km) &&
+      Boolean(this.formulario.combustivel) &&
+      this.numeroValido(this.formulario.valorLitro) &&
+      this.numeroValido(this.formulario.qtLitros, true);
+  }
+
+  private numeroValido(valor: string | number, maiorQueZero = false): boolean {
+    if (valor === '') {
+      return false;
+    }
+    const numero = Number(valor);
+    return Number.isFinite(numero) && (maiorQueZero ? numero > 0 : numero >= 0);
+  }
+
   finalizar(): void {
-    if (!this.validarPasso()) {
+    if (this.salvando || !this.validarFormularioCompleto()) {
+      if (!this.salvando) {
+        this.toastService.avisar('Revise os dados obrigatórios, a quilometragem e os valores do abastecimento.', 'Dados inválidos');
+      }
       return;
     }
 
@@ -195,12 +218,16 @@ export class AbastecimentoWizardComponent implements OnInit {
       ? this.abastecimentosService.atualizar(this.idEmEdicao, payload)
       : this.abastecimentosService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Abastecimento salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/abastecimentos']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o abastecimento.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o abastecimento.', 'Erro');
+      }
     });
   }
 

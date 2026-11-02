@@ -18,6 +18,7 @@ export class TiposVeiculosFormComponent implements OnInit {
   modoEdicao = false;
   idEmEdicao: number | null = null;
   carregando = false;
+  salvando = false;
 
   formulario: any = {
     nome: '',
@@ -62,6 +63,10 @@ export class TiposVeiculosFormComponent implements OnInit {
   }
 
   onSalvar(dados: any): void {
+    if (this.salvando) {
+      return;
+    }
+
     if (!this.podeSalvar()) {
       this.toastService.erro('Nome é obrigatório.', 'Erro');
       return;
@@ -71,12 +76,16 @@ export class TiposVeiculosFormComponent implements OnInit {
       ? this.tiposVeiculosService.atualizar(this.idEmEdicao, dados)
       : this.tiposVeiculosService.criar(dados);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Tipo de veículo salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/tipos-veiculos']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o tipo de veículo.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o tipo de veículo.', 'Erro');
+      }
     });
   }
 

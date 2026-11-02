@@ -7,7 +7,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { SharedFormComponent, FormConfig } from '../shared-form.component';
 import { ToastService } from '../../components/toast.service';
 import { VeiculosService } from '../../services/veiculos.service';
-import { aplicarMascaraPlaca } from '../../shared/mascaras.util';
+import { aplicarMascaraPlaca, validarPlaca } from '../../shared/mascaras.util';
 
 @Component({
   selector: 'app-veiculos-form',
@@ -39,11 +39,22 @@ export class VeiculosFormComponent implements OnInit {
       {
         titulo: 'Dados Básicos',
         campos: [
-          { nome: 'placa', label: 'Placa', tipo: 'text', obrigatorio: true, tamanho: '1/2', mascara: aplicarMascaraPlaca },
+          {
+            nome: 'placa',
+            label: 'Placa',
+            tipo: 'text',
+            obrigatorio: true,
+            tamanho: '1/2',
+            placeholder: 'ABC-1234 ou ABC1D23',
+            helpText: 'Formatos aceitos: antigo ABC-1234 ou Mercosul ABC1D23.',
+            mensagemErro: 'Informe uma placa no formato ABC-1234 (antigo) ou ABC1D23 (Mercosul).',
+            validacao: validarPlaca,
+            mascara: aplicarMascaraPlaca
+          },
           { nome: 'modelo', label: 'Modelo', tipo: 'text', tamanho: '1/2' },
           { nome: 'nroFrota', label: 'Nº da Frota', tipo: 'text', tamanho: '1/3' },
-          { nome: 'ano', label: 'Ano', tipo: 'number', tamanho: '1/3' },
-          { nome: 'km', label: 'KM', tipo: 'number', tamanho: '1/3' },
+          { nome: 'ano', label: 'Ano', tipo: 'number', tamanho: '1/3', min: 1886, max: new Date().getFullYear() + 1, mensagemErro: 'Informe um ano válido.' },
+          { nome: 'km', label: 'KM', tipo: 'number', tamanho: '1/3', min: 0, mensagemErro: 'A quilometragem não pode ser negativa.' },
           { nome: 'status', label: 'Status', tipo: 'select', tamanho: '1/3', opcoes: [
             { id: 'Disponível', label: 'Disponível' },
             { id: 'Em viagem', label: 'Em viagem' },
@@ -77,7 +88,7 @@ export class VeiculosFormComponent implements OnInit {
         this.veiculosService.obter(this.idEmEdicao).subscribe({
           next: (veiculo) => {
             this.formulario = {
-              placa: veiculo.placa,
+              placa: aplicarMascaraPlaca(veiculo.placa),
               modelo: veiculo.modelo,
               nroFrota: veiculo.nro_frota,
               ano: veiculo.ano,

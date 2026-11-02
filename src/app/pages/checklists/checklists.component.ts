@@ -8,6 +8,7 @@ import { GridColumn, GridFilterOption } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { ChecklistService } from '../../services/checklist.service';
+import { FiltrosPaginados } from '../../services/paginacao.utils';
 
 @Component({
   selector: 'app-checklists',
@@ -50,14 +51,26 @@ export class ChecklistsComponent implements OnInit {
     ]}
   ];
 
-  allData: any[] = [];
   data: any[] = [];
+  opcoesFiltroRemotas: Record<string, string[]> = {};
+  private filtrosGrid: FiltrosPaginados = {};
   carregando = true;
+  paginaAtual = 1;
+  temProximaPagina = false;
+  private readonly porPagina = 50;
 
   ngOnInit(): void {
-    this.checklistService.listar().subscribe({
-      next: (dados) => {
-        this.allData = dados.map(checklist => ({
+    this.route.queryParams.subscribe(() => this.carregarDados(1));
+  }
+
+  private carregarDados(pagina = this.paginaAtual): void {
+    this.carregando = true;
+    this.checklistService.listar(pagina, this.porPagina, this.obterFiltrosApi()).subscribe({
+      next: (resposta) => {
+        this.paginaAtual = resposta.current_page;
+        this.temProximaPagina = resposta.next_page_url !== null;
+        this.opcoesFiltroRemotas = resposta.filter_options || {};
+        this.data = resposta.data.map(checklist => ({
           id: checklist.id,
           modelo: checklist.modelo?.nome,
           veiculo: checklist.veiculo?.placa,
@@ -65,24 +78,32 @@ export class ChecklistsComponent implements OnInit {
           data: checklist.created_at,
           status: checklist.status
         }));
-        this.aplicarFiltroDaRota();
         this.carregando = false;
       },
-      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar os checklists.', 'Erro'); }
+      error: () => {
+        this.carregando = false;
+        this.toastService.erro('Não foi possível carregar os checklists.', 'Erro');
+      }
     });
-
-    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
   }
 
-  private aplicarFiltroDaRota(): void {
+  mudarPagina(pagina: number): void {
+    if (pagina < 1 || (pagina > this.paginaAtual && !this.temProximaPagina) || pagina === this.paginaAtual || this.carregando) {
+      return;
+    }
+    this.carregarDados(pagina);
+  }
+
+  private obterFiltrosApi(): FiltrosPaginados {
+    const filtros: FiltrosPaginados = { ...this.filtrosGrid };
     const status = this.route.snapshot.queryParams['status'];
     if (status) {
-      this.data = this.allData.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
+      filtros['status'] = String(status);
       this.subtitle = `Filtrando por: ${status}`;
     } else {
-      this.data = [...this.allData];
       this.subtitle = 'Histórico de checklists preenchidos';
     }
+    return filtros;
   }
 
   onPrimaryAction(): void {
@@ -90,6 +111,8 @@ export class ChecklistsComponent implements OnInit {
   }
 
   onFilterApplied(filters: any): void {
+    this.filtrosGrid = filters as FiltrosPaginados;
+    this.carregarDados(1);
   }
 
   onEditClick(row: any): void {
@@ -104,9 +127,10 @@ export class ChecklistsComponent implements OnInit {
 
     this.checklistService.excluir(row.id).subscribe({
       next: () => {
-        this.allData = this.allData.filter(item => item.id !== row.id);
-        this.aplicarFiltroDaRota();
         this.toastService.sucesso('Checklist excluído.', 'Sucesso');
+        this.carregarDados(this.data.length === 1 && this.paginaAtual > 1
+          ? this.paginaAtual - 1
+          : this.paginaAtual);
       },
       error: () => this.toastService.erro('Não foi possível excluir o checklist.', 'Erro')
     });

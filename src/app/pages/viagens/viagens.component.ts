@@ -8,6 +8,7 @@ import { GridColumn } from '../../interfaces/grid.interface';
 import { DialogService } from '../../components/dialog/dialog.service';
 import { ToastService } from '../../components/toast.service';
 import { ViagensService } from '../../services/viagens.service';
+import { FiltrosPaginados } from '../../services/paginacao.utils';
 
 @Component({
   selector: 'app-viagens',
@@ -35,44 +36,67 @@ export class ViagensComponent implements OnInit {
     { key: 'acoes', label: 'Ações', type: 'acoes' }
   ];
 
-  todosDados: any[] = [];
   dados: any[] = [];
+  opcoesFiltrosRemotas: Record<string, string[]> = {};
+  private filtrosGrid: FiltrosPaginados = {};
   carregando = true;
+  paginaAtual = 1;
+  temProximaPagina = false;
+  private readonly porPagina = 50;
 
   ngOnInit(): void {
-    this.viagensService.listar().subscribe({
-      next: (dados) => {
-        this.todosDados = dados.map(viagem => ({
+    this.route.queryParams.subscribe(() => this.carregarDados(1));
+  }
+
+  private carregarDados(pagina = this.paginaAtual): void {
+    this.carregando = true;
+    this.viagensService.listar(pagina, this.porPagina, this.obterFiltrosApi()).subscribe({
+      next: (resposta) => {
+        this.paginaAtual = resposta.current_page;
+        this.temProximaPagina = resposta.next_page_url !== null;
+        this.opcoesFiltrosRemotas = resposta.filter_options || {};
+        this.dados = resposta.data.map(viagem => ({
           id: viagem.id,
           origem: viagem.origem,
           destino: viagem.destino,
           saida: viagem.data_saida,
           status: viagem.status
         }));
-        this.aplicarFiltroDaRota();
         this.carregando = false;
       },
-      error: () => { this.carregando = false; this.toastService.erro('Não foi possível carregar as viagens.', 'Erro'); }
+      error: () => {
+        this.carregando = false;
+        this.toastService.erro('Não foi possível carregar as viagens.', 'Erro');
+      }
     });
-
-    this.route.queryParams.subscribe(() => this.aplicarFiltroDaRota());
   }
 
-  private aplicarFiltroDaRota(): void {
+  mudarPagina(pagina: number): void {
+    if (pagina < 1 || (pagina > this.paginaAtual && !this.temProximaPagina) || pagina === this.paginaAtual || this.carregando) {
+      return;
+    }
+    this.carregarDados(pagina);
+  }
+
+  private obterFiltrosApi(): FiltrosPaginados {
+    const filtros: FiltrosPaginados = { ...this.filtrosGrid };
     const status = this.route.snapshot.queryParams['status'];
     if (status) {
-      this.dados = this.todosDados.filter(item => (item.status || '').toLowerCase() === String(status).toLowerCase());
-      this.subtitulo = `Filtrando por: ${status}`;
-    } else {
-      this.dados = [...this.todosDados];
-      this.subtitulo = 'Controle de viagens simplificadas';
+      filtros['status'] = String(status);
     }
+    this.subtitulo = status
+      ? `Filtrando por: ${status}`
+      : 'Controle de viagens simplificadas';
+    return filtros;
   }
 
   aoAcaoPrimaria(): void {
     this.router.navigate(['/viagens/novo']);
   }
-  aoFiltroAplicado(filtros: any): void {}
+  aoFiltroAplicado(filtros: any): void {
+    this.filtrosGrid = filtros as FiltrosPaginados;
+    this.carregarDados(1);
+  }
 
   aoEditar(linha: any): void {
     this.router.navigate(['/viagens', linha.id, 'editar']);
@@ -86,9 +110,10 @@ export class ViagensComponent implements OnInit {
 
     this.viagensService.excluir(linha.id).subscribe({
       next: () => {
-        this.todosDados = this.todosDados.filter(item => item.id !== linha.id);
-        this.aplicarFiltroDaRota();
         this.toastService.sucesso('Viagem excluída.', 'Sucesso');
+        this.carregarDados(this.dados.length === 1 && this.paginaAtual > 1
+          ? this.paginaAtual - 1
+          : this.paginaAtual);
       },
       error: () => this.toastService.erro('Não foi possível excluir a viagem.', 'Erro')
     });

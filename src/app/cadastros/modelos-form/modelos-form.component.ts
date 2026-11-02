@@ -21,6 +21,7 @@ export class ModelosFormComponent implements OnInit {
   retornoUrl: string | null = null;
   retornoCampo: string | null = null;
   carregando = false;
+  salvando = false;
 
   formulario: any = {
     nome: '',
@@ -97,6 +98,10 @@ export class ModelosFormComponent implements OnInit {
   }
 
   aoSalvar(dados: any): void {
+    if (this.salvando) {
+      return;
+    }
+
     this.mensagemErro = '';
     if (!this.itens || this.itens.length === 0) {
       this.mensagemErro = 'O modelo precisa ter ao menos um item de checklist.';
@@ -115,6 +120,7 @@ export class ModelosFormComponent implements OnInit {
       ? this.modelosService.atualizar(this.idEmEdicao, payload)
       : this.modelosService.criar(payload);
 
+    this.salvando = true;
     requisicao.subscribe({
       next: (modelo) => {
         this.toastService.sucesso('Modelo salvo com sucesso.', 'Sucesso');
@@ -125,7 +131,10 @@ export class ModelosFormComponent implements OnInit {
           this.router.navigate(['/modelos']);
         }
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o modelo.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o modelo.', 'Erro');
+      }
     });
   }
 

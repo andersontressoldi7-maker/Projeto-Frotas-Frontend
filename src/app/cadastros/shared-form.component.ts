@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -14,6 +14,8 @@ export interface FormCampo {
   readOnly?: boolean;
   validacao?: (valor: any) => boolean;
   mensagemErro?: string;
+  min?: number;
+  max?: number;
   tamanho?: 'full' | '1/2' | '1/3' | '2/3';
   helpText?: string;
   mascara?: (valor: string) => string;
@@ -42,14 +44,23 @@ export interface FormConfig {
   templateUrl: './shared-form.component.html',
   styleUrls: ['./shared-form.component.scss']
 })
-export class SharedFormComponent {
+export class SharedFormComponent implements OnChanges {
   @Input() config!: FormConfig;
   @Input() dadosFormulario: any = {};
   @Input() funcaoValidacaoExtra?: () => boolean;
   @Input() carregando = false;
+  @Input() salvando = false;
   @Output() salvar = new EventEmitter<any>();
   @Output() cancelar = new EventEmitter<void>();
   @Output() criarNovoCampo = new EventEmitter<{ campo: FormCampo; modo: 'novo' | 'editar' }>();
+
+  private submissaoPendente = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['salvando']?.currentValue === false) {
+      this.submissaoPendente = false;
+    }
+  }
 
   obterClasseTamanho(campo: FormCampo): string {
     const tamanho = campo.tamanho || 'full';
@@ -68,6 +79,34 @@ export class SharedFormComponent {
 
   isCampoValido(campo: FormCampo): boolean {
     const val = this.dadosFormulario[campo.nome];
+    const vazio = val === null || val === undefined || (typeof val === 'string' && val.trim() === '');
+
+    if (campo.obrigatorio && vazio) {
+      return false;
+    }
+
+    if (vazio) {
+      return true;
+    }
+
+    if (campo.tipo === 'number' || campo.tipo === 'currency') {
+      const numero = Number(val);
+      if (!Number.isFinite(numero)) {
+        return false;
+      }
+      const minimo = campo.min ?? 0;
+      if (numero < minimo) {
+        return false;
+      }
+      if (campo.max !== undefined && numero > campo.max) {
+        return false;
+      }
+    }
+
+    if (campo.tipo === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(val).trim())) {
+      return false;
+    }
+
     if (campo.validacao) {
       try {
         return campo.validacao(val);
@@ -76,12 +115,28 @@ export class SharedFormComponent {
       }
     }
 
-    if (campo.obrigatorio) {
-      if (val === null || val === undefined) return false;
-      if (typeof val === 'string' && val.trim() === '') return false;
+    return true;
+  }
+
+  mensagemErroCampo(campo: FormCampo): string {
+    if (campo.mensagemErro) {
+      return campo.mensagemErro;
     }
 
-    return true;
+    const valor = this.dadosFormulario[campo.nome];
+    if (valor === null || valor === undefined || (typeof valor === 'string' && !valor.trim())) {
+      return `${campo.label} é obrigatório.`;
+    }
+    if (campo.tipo === 'email') {
+      return 'Informe um email válido.';
+    }
+    if (campo.tipo === 'number' || campo.tipo === 'currency') {
+      if (campo.max !== undefined && Number(valor) > campo.max) {
+        return `${campo.label} deve ser no máximo ${campo.max}.`;
+      }
+      return `${campo.label} deve ser maior ou igual a ${campo.min ?? 0}.`;
+    }
+    return `Informe um valor válido para ${campo.label.toLocaleLowerCase('pt-BR')}.`;
   }
 
   validarFormulario(): boolean {
@@ -119,9 +174,12 @@ export class SharedFormComponent {
   }
 
   onSalvar(): void {
-    if (this.validarFormulario()) {
-      this.salvar.emit(this.dadosFormulario);
+    if (this.salvando || this.submissaoPendente || !this.validarFormulario()) {
+      return;
     }
+
+    this.submissaoPendente = true;
+    this.salvar.emit(this.dadosFormulario);
   }
 
   onCancelar(): void {

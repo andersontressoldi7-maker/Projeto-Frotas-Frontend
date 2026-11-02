@@ -53,8 +53,22 @@ export class RegisterComponent {
       return;
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.usuario.trim())) {
+      this.toastService.erro('Informe um email válido.', 'Dados inválidos');
+      return;
+    }
+
+    const cnpjNormalizado = this.cnpj.replace(/[^A-Z0-9]/gi, '');
+    if (!/^[A-Z0-9]{14}$/i.test(cnpjNormalizado)) {
+      this.toastService.erro('O CNPJ deve conter 14 caracteres.', 'Dados inválidos');
+      return;
+    }
+
     if (this.senha !== this.confirmarSenha) {
       this.toastService.erro('As senhas não coincidem.', 'Erro');
+      return;
+    }
+    if (this.carregando) {
       return;
     }
 
@@ -63,7 +77,7 @@ export class RegisterComponent {
       razaoSocial: this.razaoSocial,
       fantasia: this.fantasia,
       cnpj: this.cnpj,
-      usuario: this.usuario,
+      usuario: this.usuario.trim(),
       senha: this.senha
     }).subscribe({
       next: async (resposta) => {

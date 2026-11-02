@@ -19,6 +19,7 @@ export class TiposDespesasFormComponent implements OnInit {
   nome = '';
   itemId: number | null = null;
   carregando = false;
+  salvando = false;
 
   constructor(
     private router: Router,
@@ -43,6 +44,10 @@ export class TiposDespesasFormComponent implements OnInit {
   }
 
   onSalvar(): void {
+    if (this.salvando) {
+      return;
+    }
+
     const nomeLimpo = this.nome.trim();
     if (!nomeLimpo) {
       this.toastService.erro('Informe o nome da despesa.', 'Erro');
@@ -53,12 +58,16 @@ export class TiposDespesasFormComponent implements OnInit {
       ? this.tiposDespesasService.atualizar(this.itemId, { nome: nomeLimpo })
       : this.tiposDespesasService.criar({ nome: nomeLimpo });
 
+    this.salvando = true;
     requisicao.subscribe({
       next: () => {
         this.toastService.sucesso('Tipo de despesa salvo com sucesso.', 'Sucesso');
         this.router.navigate(['/tipos-despesas']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o tipo de despesa.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o tipo de despesa.', 'Erro');
+      }
     });
   }
 

@@ -145,6 +145,15 @@
       box-shadow: 0 4px 12px rgba(64, 145, 108, 0.1);
     }
 
+    .foto-preview {
+      display: block;
+      max-width: min(100%, 240px);
+      max-height: 180px;
+      object-fit: contain;
+      border: 1px solid var(--bs-border-color);
+      border-radius: 0.5rem;
+    }
+
     .item-header {
       display: flex;
       justify-content: space-between;
@@ -262,6 +271,18 @@
 .form-label.required::after {
   content: ' *';
   color: #dc3545;
+}
+
+.assinatura-canvas {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: 180px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 8px;
+  background: #fff;
+  touch-action: none;
+  cursor: crosshair;
 }
 
 .atalhos-cadastro {

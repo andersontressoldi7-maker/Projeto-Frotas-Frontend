@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +10,9 @@ import { VeiculosService } from '../../services/veiculos.service';
 import { ModelosService } from '../../services/modelos.service';
 import { MotoristasService } from '../../services/motoristas.service';
 import { ChecklistService } from '../../services/checklist.service';
+import { ConfiguracoesService } from '../../services/configuracoes.service';
+import { environment } from '../../../environments/environment';
+import { extrairMensagemErro } from '../../utils';
 
 @Component({
   selector: 'app-checklist-wizard',
@@ -25,6 +28,21 @@ export class ChecklistWizardComponent implements OnInit {
   passoAtual = 1;
   checklistIdAtual: number | null = null;
   checklistCarregado: any = null;
+  modoEdicao = false;
+  carregandoChecklist = false;
+  falhaAoCarregarChecklist = false;
+  salvando = false;
+  carregandoConfiguracoes = true;
+  exigirAssinaturaMotorista = true;
+  assinaturaMotorista = '';
+  assinaturaEmEdicao = false;
+  private canvasAssinatura?: HTMLCanvasElement;
+
+  @ViewChild('assinaturaCanvas')
+  set assinaturaCanvasRef(referencia: ElementRef<HTMLCanvasElement> | undefined) {
+    this.canvasAssinatura = referencia?.nativeElement;
+    this.renderizarAssinaturaSalva();
+  }
 
   formulario = {
     modelo: '',
@@ -55,10 +73,28 @@ export class ChecklistWizardComponent implements OnInit {
     private veiculosService: VeiculosService,
     private modelosService: ModelosService,
     private motoristasService: MotoristasService,
-    private checklistService: ChecklistService
+    private checklistService: ChecklistService,
+    private configuracoesService: ConfiguracoesService
   ) {}
 
   ngOnInit(): void {
+    this.configuracoesService.carregar().subscribe({
+      next: resposta => {
+        const configuracao = resposta.configuracoes['exigir_assinatura_motorista'];
+        this.exigirAssinaturaMotorista = !(
+          configuracao === false || configuracao === 0 || configuracao === '0'
+        );
+        this.carregandoConfiguracoes = false;
+      },
+      error: erro => {
+        this.carregandoConfiguracoes = false;
+        this.toastService.erro(
+          `Não foi possível carregar as configurações do checklist: ${extrairMensagemErro(erro)}`,
+          'Erro'
+        );
+      }
+    });
+
     this.veiculosService.listar().subscribe({
       next: (dados) => this.veiculos = dados,
       error: () => this.toastService.erro('Não foi possível carregar os veículos.', 'Erro')
@@ -76,10 +112,16 @@ export class ChecklistWizardComponent implements OnInit {
 
     this.route.params.subscribe(params => {
       if (params['id']) {
+        this.modoEdicao = true;
+        this.faseAtual = 'saida';
+        this.carregandoChecklist = true;
+        this.falhaAoCarregarChecklist = false;
         this.carregarParaFinalizar(Number(params['id']));
         return;
       }
 
+      this.modoEdicao = false;
+      this.faseAtual = 'saida';
       const rascunho = this.rascunhoService.obter<typeof this.formulario>(this.chaveRascunho);
       if (rascunho) {
         this.formulario = { ...this.formulario, ...rascunho };
@@ -99,14 +141,46 @@ export class ChecklistWizardComponent implements OnInit {
       next: (checklist) => {
         this.checklistIdAtual = id;
         this.checklistCarregado = checklist;
-        this.faseAtual = 'retorno';
         this.formulario.modelo = String(checklist.modelo_id);
         this.formulario.veiculo = String(checklist.veiculo_id);
+        this.formulario.motorista = checklist.motorista_id ? String(checklist.motorista_id) : '';
         this.formulario.kmAtual = checklist.km_saida;
-
-        this.itensChecklistRetorno = (checklist.modelo?.itens || []).map((item: any) => this.mapearItemModelo(item));
+        this.formulario.observacaoSaida = checklist.observacao_saida || '';
+        this.formulario.kmRetorno = checklist.km_retorno === null ? '' : String(checklist.km_retorno);
+        this.formulario.observacaoRetorno = checklist.observacao_retorno || '';
+        this.assinaturaMotorista = checklist.assinatura_motorista || '';
+        this.renderizarAssinaturaSalva();
+        this.itensChecklistSaida = this.mapearItensDaFase(checklist, 'saida');
+        this.itensChecklistRetorno = this.mapearItensDaFase(checklist, 'retorno');
+        this.carregandoChecklist = false;
       },
-      error: () => this.toastService.erro('Não foi possível carregar o checklist.', 'Erro')
+      error: () => {
+        this.carregandoChecklist = false;
+        this.falhaAoCarregarChecklist = true;
+        this.toastService.erro('Não foi possível carregar o checklist.', 'Erro');
+      }
+    });
+  }
+
+  private mapearItensDaFase(checklist: any, fase: 'saida' | 'retorno'): any[] {
+    const respostas = (checklist.respostas || []).filter((resposta: any) => resposta.fase === fase);
+    const itensDoModelo = checklist.modelo?.itens || [];
+    const itensRespondidos = respostas
+      .map((resposta: any) => resposta.item)
+      .filter((item: any) => item && !itensDoModelo.some((itemModelo: any) => itemModelo.id === item.id));
+    const itens = [...itensDoModelo, ...itensRespondidos];
+
+    return itens.map((item: any) => {
+      const resposta = respostas.find((registro: any) => registro.item_id === item.id);
+      const itemMapeado = this.mapearItemModelo(item);
+
+      return {
+        ...itemMapeado,
+        valor: resposta?.valor || '',
+        temFoto: Boolean(resposta?.foto),
+        foto: resposta?.foto || null,
+        observacao: resposta?.observacao || ''
+      };
     });
   }
 
@@ -160,12 +234,24 @@ export class ChecklistWizardComponent implements OnInit {
 
   eModeloCompleto(): boolean {
     const modeloSelecionado = this.modelos.find(m => m.id.toString() === this.formulario.modelo);
-    return modeloSelecionado?.tipo === 'Completo';
+    return (modeloSelecionado || this.checklistCarregado?.modelo)?.tipo === 'Completo';
   }
 
   eModeloSimples(): boolean {
     const modeloSelecionado = this.modelos.find(m => m.id.toString() === this.formulario.modelo);
-    return modeloSelecionado?.tipo === 'Simples';
+    return (modeloSelecionado || this.checklistCarregado?.modelo)?.tipo === 'Simples';
+  }
+
+  get tituloAtual(): string {
+    if (this.faseAtual === 'saida') {
+      return this.modoEdicao ? 'Editar Vistoria (Abertura)' : 'Nova Vistoria (Saída)';
+    }
+
+    return this.retornoConcluido ? 'Editar Vistoria (Fechamento)' : 'Finalizar Vistoria (Retorno)';
+  }
+
+  get retornoConcluido(): boolean {
+    return this.checklistCarregado?.status === 'Concluído';
   }
 
   proximoPasso(): void {
@@ -181,20 +267,42 @@ export class ChecklistWizardComponent implements OnInit {
   }
 
   validarPasso(): boolean {
+    if (this.carregandoConfiguracoes) {
+      return false;
+    }
+
     if (this.faseAtual === 'saida') {
       if (this.passoAtual === 1) {
-        return this.formulario.modelo !== '' && this.formulario.veiculo !== '' && this.formulario.kmAtual !== '';
+        return this.formulario.modelo !== '' &&
+          this.formulario.veiculo !== '' &&
+          this.validarQuilometragem(this.formulario.kmAtual);
       }
       if (this.passoAtual === 2) {
-        return this.itensChecklistSaida.every(item => item.valor !== '' || item.tipo === 'texto');
+        return this.itensChecklistSaida.every(item =>
+          (item.valor !== '' || item.tipo === 'texto') &&
+          (!item.obrigatoriaFoto || Boolean(item.foto))
+        );
       }
     } else if (this.faseAtual === 'retorno') {
       if (this.eModeloCompleto()) {
-        return this.formulario.kmRetorno !== '' && this.itensChecklistRetorno.every(item => item.valor !== '' || item.tipo === 'texto');
+        return this.validarQuilometragem(this.formulario.kmRetorno) &&
+          Number(this.formulario.kmRetorno) >= Number(this.formulario.kmAtual) &&
+          this.itensChecklistRetorno.every(item =>
+            (item.valor !== '' || item.tipo === 'texto') &&
+            (!item.obrigatoriaFoto || Boolean(item.foto))
+          ) &&
+          (!this.exigirAssinaturaMotorista || Boolean(this.assinaturaMotorista));
       }
-      return this.formulario.kmRetorno !== '';
+      return this.validarQuilometragem(this.formulario.kmRetorno) &&
+        Number(this.formulario.kmRetorno) >= Number(this.formulario.kmAtual) &&
+        (!this.exigirAssinaturaMotorista || Boolean(this.assinaturaMotorista));
     }
-    return true;
+    return false;
+  }
+
+  private validarQuilometragem(valor: string | number): boolean {
+    const quilometragem = Number(valor);
+    return valor !== '' && Number.isFinite(quilometragem) && quilometragem >= 0;
   }
 
   selecionarResposta(item: any, resposta: string): void {
@@ -208,9 +316,116 @@ export class ChecklistWizardComponent implements OnInit {
   }
 
   aoSelecionarFoto(evento: any): void {
-    if (this.itemParaFoto && evento.target.files.length > 0) {
-      this.itemParaFoto.temFoto = true;
+    const arquivo = evento.target.files?.[0] as File | undefined;
+    if (!this.itemParaFoto || !arquivo) {
+      return;
     }
+
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      if (typeof leitor.result === 'string') {
+        this.itemParaFoto.foto = leitor.result;
+        this.itemParaFoto.temFoto = true;
+      }
+    };
+    leitor.onerror = () => this.toastService.erro('Não foi possível ler a foto selecionada.', 'Erro');
+    leitor.readAsDataURL(arquivo);
+    evento.target.value = '';
+  }
+
+  iniciarAssinatura(evento: PointerEvent): void {
+    const canvas = evento.currentTarget as HTMLCanvasElement;
+    const contexto = canvas.getContext('2d');
+    if (!contexto) {
+      this.toastService.erro('Não foi possível iniciar a área de assinatura.', 'Erro');
+      return;
+    }
+
+    if (this.assinaturaMotorista && !this.assinaturaEmEdicao) {
+      contexto.clearRect(0, 0, canvas.width, canvas.height);
+      this.assinaturaMotorista = '';
+    }
+
+    canvas.setPointerCapture(evento.pointerId);
+    const ponto = this.obterPontoCanvas(evento, canvas);
+    contexto.beginPath();
+    contexto.moveTo(ponto.x, ponto.y);
+    contexto.lineWidth = 2;
+    contexto.lineCap = 'round';
+    contexto.strokeStyle = '#212529';
+    this.assinaturaEmEdicao = true;
+  }
+
+  desenharAssinatura(evento: PointerEvent): void {
+    if (!this.assinaturaEmEdicao) {
+      return;
+    }
+
+    const canvas = evento.currentTarget as HTMLCanvasElement;
+    const contexto = canvas.getContext('2d');
+    if (!contexto) {
+      return;
+    }
+
+    const ponto = this.obterPontoCanvas(evento, canvas);
+    contexto.lineTo(ponto.x, ponto.y);
+    contexto.stroke();
+  }
+
+  concluirAssinatura(evento: PointerEvent): void {
+    if (!this.assinaturaEmEdicao) {
+      return;
+    }
+
+    const canvas = evento.currentTarget as HTMLCanvasElement;
+    this.assinaturaEmEdicao = false;
+    this.assinaturaMotorista = canvas.toDataURL('image/png');
+  }
+
+  private renderizarAssinaturaSalva(): void {
+    const assinatura = this.assinaturaMotorista;
+    const canvas = this.canvasAssinatura;
+    const contexto = canvas?.getContext('2d');
+
+    if (!assinatura || !canvas || !contexto || !assinatura.startsWith('data:image/')) {
+      return;
+    }
+
+    const imagem = new Image();
+    imagem.onload = () => {
+      if (this.assinaturaMotorista !== assinatura || this.canvasAssinatura !== canvas) {
+        return;
+      }
+
+      contexto.clearRect(0, 0, canvas.width, canvas.height);
+      contexto.drawImage(imagem, 0, 0, canvas.width, canvas.height);
+    };
+    imagem.onerror = () => this.toastService.erro('Não foi possível exibir a assinatura salva.', 'Erro');
+    imagem.src = assinatura;
+  }
+
+  limparAssinatura(canvas: HTMLCanvasElement): void {
+    const contexto = canvas.getContext('2d');
+    contexto?.clearRect(0, 0, canvas.width, canvas.height);
+    this.assinaturaMotorista = '';
+  }
+
+  private obterPontoCanvas(evento: PointerEvent, canvas: HTMLCanvasElement): { x: number; y: number } {
+    const limites = canvas.getBoundingClientRect();
+    return {
+      x: (evento.clientX - limites.left) * canvas.width / limites.width,
+      y: (evento.clientY - limites.top) * canvas.height / limites.height
+    };
+  }
+
+  obterUrlFoto(foto: string): string {
+    if (/^(data:image\/|https?:\/\/)/i.test(foto)) {
+      return foto;
+    }
+
+    const baseUrl = environment.apiBaseUrl.replace(/\/api\/?$/, '');
+    const caminho = foto.split('/').map(parte => encodeURIComponent(parte)).join('/');
+    return `${baseUrl}/storage/${caminho}`;
   }
 
   abrirObservacaoItem(item: any): void {
@@ -229,12 +444,16 @@ export class ChecklistWizardComponent implements OnInit {
     return itens.map(item => ({
       item_id: item.id,
       valor: item.valor || null,
-      foto: item.temFoto ? 'anexo.jpg' : null,
+      foto: item.foto || null,
       observacao: item.observacao || null
     }));
   }
 
   finalizarSaida(): void {
+    if (this.salvando || !this.validarPasso()) {
+      return;
+    }
+
     const payload = {
       modelo_id: Number(this.formulario.modelo),
       veiculo_id: Number(this.formulario.veiculo),
@@ -244,32 +463,62 @@ export class ChecklistWizardComponent implements OnInit {
       respostas: this.montarRespostas(this.itensChecklistSaida)
     };
 
+    this.salvando = true;
+    if (this.modoEdicao && this.checklistIdAtual !== null) {
+      this.checklistService.atualizar(this.checklistIdAtual, { ...payload, fase: 'saida' }).subscribe({
+        next: () => {
+          this.toastService.sucesso('Abertura atualizada com sucesso.', 'Sucesso');
+          this.router.navigate(['/checklists']);
+        },
+        error: (erro) => {
+          this.salvando = false;
+          this.toastService.erro(erro?.error?.message || 'Não foi possível atualizar a abertura.', 'Erro');
+        }
+      });
+      return;
+    }
+
     this.checklistService.criar(payload).subscribe({
       next: () => {
         this.toastService.sucesso('Checklist iniciado com sucesso.', 'Sucesso');
         this.router.navigate(['/checklists']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o checklist.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível salvar o checklist.', 'Erro');
+      }
     });
   }
 
   finalizarRetorno(): void {
-    if (this.checklistIdAtual === null) {
+    if (this.salvando || this.checklistIdAtual === null || !this.validarPasso()) {
       return;
     }
 
     const payload = {
       km_retorno: Number(this.formulario.kmRetorno),
       observacao_retorno: this.formulario.observacaoRetorno || null,
-      respostas: this.montarRespostas(this.itensChecklistRetorno)
+      respostas: this.montarRespostas(this.itensChecklistRetorno),
+      assinatura_motorista: this.assinaturaMotorista || null
     };
 
-    this.checklistService.finalizarRetorno(this.checklistIdAtual, payload).subscribe({
+    const salvamento = this.retornoConcluido
+      ? this.checklistService.atualizar(this.checklistIdAtual, { ...payload, fase: 'retorno' })
+      : this.checklistService.finalizarRetorno(this.checklistIdAtual, payload);
+
+    this.salvando = true;
+    salvamento.subscribe({
       next: () => {
-        this.toastService.sucesso('Checklist finalizado com sucesso.', 'Sucesso');
+        this.toastService.sucesso(
+          this.retornoConcluido ? 'Fechamento atualizado com sucesso.' : 'Checklist finalizado com sucesso.',
+          'Sucesso'
+        );
         this.router.navigate(['/checklists']);
       },
-      error: (erro) => this.toastService.erro(erro?.error?.message || 'Não foi possível finalizar o checklist.', 'Erro')
+      error: (erro) => {
+        this.salvando = false;
+        this.toastService.erro(erro?.error?.message || 'Não foi possível finalizar o checklist.', 'Erro');
+      }
     });
   }
 

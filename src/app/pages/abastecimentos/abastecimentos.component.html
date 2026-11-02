@@ -7,12 +7,17 @@
       [subtitle]="subtitle"
       [columns]="columns"
       [data]="data"
+      [filtragemNoServidor]="true"
+      [opcoesFiltrosRemotas]="opcoesFiltrosRemotas"
       [carregando]="carregando"
+      [paginaAtual]="paginaAtual"
+      [temProximaPagina]="temProximaPagina"
       [primaryBtnLabel]="primaryBtnLabel"
       (primaryBtnClick)="onPrimaryAction()"
       (filterApplied)="onFilterApplied($event)"
       (editClick)="onEditClick($event)"
-      (deleteClick)="onDeleteClick($event)">
+      (deleteClick)="onDeleteClick($event)"
+      (paginaAlterada)="mudarPagina($event)">
     </app-shared-grid>
   </main>
 </div>

@@ -11,15 +11,16 @@
   .text-laranja { color: #ffa456 !important; }
 }
 
-.filter-section {
+.filtro-section {
   background-color: var(--bs-tertiary-bg) !important;
   border: 1px solid var(--bs-border-color) !important;
   border-radius: 12px;
 }
 
-.filter-field-box {
+.filtro-field-box {
   background-color: var(--bs-tertiary-bg) !important;
   border: 1px solid var(--bs-border-color) !important;
+  min-width: 0;
 
   .small-close {
     font-size: 0.65rem;
@@ -31,6 +32,37 @@
   cursor: pointer;
   &:hover {
     background-color: var(--bs-tertiary-bg);
+  }
+}
+
+.filtro-opcoes-menu {
+  max-height: 200px;
+  overflow-y: auto;
+  max-width: min(100%, 22rem);
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+.filtro-multi-select-trigger {
+  min-height: 31px;
+  overflow: hidden;
+}
+
+.filtro-field-box .form-control,
+.filtro-field-box .form-select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 575.98px) {
+  .filtro-section .card-body {
+    padding-right: 0.75rem !important;
+    padding-left: 0.75rem !important;
+  }
+
+  .filtro-field-box {
+    padding: 0.65rem !important;
   }
 }
 
