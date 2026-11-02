@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -19,7 +20,7 @@ interface ItemMenu {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
@@ -71,6 +72,9 @@ export class SidebarComponent implements OnInit {
     { icon: 'bi-gear', label: 'Configurações', route: '/configuracoes' }
   ];
 
+  buscaMenu = '';
+  itensFiltrados: ItemMenu[] = this.itensMenu;
+
   constructor(private router: Router) {}
 
   @HostListener('window:keydown', ['$event'])
@@ -108,6 +112,29 @@ export class SidebarComponent implements OnInit {
     }
   }
 
+  filtrarMenu(): void {
+    const busca = this.normalizarTexto(this.buscaMenu.trim());
+    if (!busca) {
+      this.itensFiltrados = this.itensMenu;
+      return;
+    }
+
+    this.itensFiltrados = this.itensMenu
+      .filter(item => this.contemBusca(item.label, busca) || item.children?.some(filho => this.contemBusca(filho.label, busca)))
+      .map(item => {
+        if (!item.children || this.contemBusca(item.label, busca)) return item;
+        return { ...item, children: item.children.filter(filho => this.contemBusca(filho.label, busca)) };
+      });
+  }
+
+  private contemBusca(texto: string, busca: string): boolean {
+    return this.normalizarTexto(texto).includes(busca);
+  }
+
+  private normalizarTexto(texto: string): string {
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+  }
+
   toggleGrupo(label: string): void {
     this.grupoExpandido = this.grupoExpandido === label ? null : label;
   }
@@ -117,7 +144,7 @@ export class SidebarComponent implements OnInit {
   }
 
   navegarParaGrupo(item: ItemMenu): void {
-    if (this.recolhida && item.children?.length) {
+    if (this.recolhida && !this.abertoMobile && item.children?.length) {
       this.router.navigate([item.children[0].route]);
       this.fecharMobile();
     } else {

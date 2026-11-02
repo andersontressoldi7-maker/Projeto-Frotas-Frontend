@@ -28,7 +28,7 @@
     width: 70px;
     padding: 15px 8px !important;
 
-    .logo-text, .menu-label, .nav-text {
+    .logo-text, .menu-label, .nav-text, .menu-busca, .menu-sem-resultados {
       display: none;
     }
 
@@ -52,6 +52,32 @@
   .text-xs {
     font-size: 0.75rem;
     letter-spacing: 0.5px;
+  }
+
+  .menu-busca {
+    position: relative;
+
+    i {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      color: var(--bs-secondary-color);
+      pointer-events: none;
+    }
+
+    input {
+      padding-left: 36px;
+      background: var(--bs-tertiary-bg);
+      color: var(--bs-body-color);
+      border-color: var(--bs-border-color);
+      font-size: .85rem;
+    }
+  }
+
+  .menu-sem-resultados {
+    color: var(--bs-secondary-color);
+    font-size: .85rem;
   }
 
   .nav-link {
@@ -144,9 +170,11 @@
       width: 260px !important;
       padding: 1rem !important;
 
-      .logo-text, .menu-label, .nav-text {
+      .logo-text, .menu-label, .nav-text, .menu-sem-resultados {
         display: inline-block;
       }
+
+      .menu-busca { display: block; }
 
       .nav-link {
         justify-content: flex-start;
